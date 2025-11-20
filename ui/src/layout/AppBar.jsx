@@ -121,7 +121,7 @@ const CustomUserMenu = ({ onClick, ...rest }) => {
 
   return (
     <>
-      <AddSongsButton />
+      {permissions === 'admin' && <AddSongsButton />}
       {config.devActivityPanel &&
         permissions === 'admin' &&
         config.enableNowPlaying && <NowPlayingPanel />}
