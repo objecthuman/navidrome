@@ -15,6 +15,7 @@ import { AboutDialog } from '../dialogs'
 import PersonalMenu from './PersonalMenu'
 import ActivityPanel from './ActivityPanel'
 import NowPlayingPanel from './NowPlayingPanel'
+import AddSongsButton from './AddSongsButton'
 import UserMenu from './UserMenu'
 import config from '../config'
 
@@ -120,6 +121,7 @@ const CustomUserMenu = ({ onClick, ...rest }) => {
 
   return (
     <>
+      <AddSongsButton />
       {config.devActivityPanel &&
         permissions === 'admin' &&
         config.enableNowPlaying && <NowPlayingPanel />}

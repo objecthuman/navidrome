@@ -1,0 +1,537 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "SoulSeek Search API",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/search": {
+            "get": {
+                "summary": "Search",
+                "operationId": "search_search_get",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "description": "Search query for files",
+                            "title": "Query"
+                        },
+                        "description": "Search query for files"
+                    },
+                    {
+                        "name": "file_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^(mp3|flac|m4a)$"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "File type filter",
+                            "title": "File Type"
+                        },
+                        "description": "File type filter"
+                    },
+                    {
+                        "name": "timeout",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "maximum": 30.0,
+                            "minimum": 1.0,
+                            "description": "Search timeout in seconds",
+                            "default": 5.0,
+                            "title": "Timeout"
+                        },
+                        "description": "Search timeout in seconds"
+                    },
+                    {
+                        "name": "users_limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "description": "Maximum number of users to return",
+                            "default": 50,
+                            "title": "Users Limit"
+                        },
+                        "description": "Maximum number of users to return"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SearchResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/download": {
+            "post": {
+                "summary": "Download",
+                "operationId": "download_download_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/DownloadRequest"
+                                },
+                                "type": "array",
+                                "title": "Requests"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/DownloadResponse"
+                                    },
+                                    "type": "array",
+                                    "title": "Response Download Download Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transfers": {
+            "get": {
+                "summary": "Get Transfers",
+                "operationId": "get_transfers_transfers_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TransfersResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "Root",
+                "operationId": "root__get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "DirectoryInfo": {
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "title": "Path"
+                    },
+                    "files": {
+                        "items": {
+                            "$ref": "#/components/schemas/FileInfo"
+                        },
+                        "type": "array",
+                        "title": "Files"
+                    },
+                    "file_count": {
+                        "type": "integer",
+                        "title": "File Count"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "path",
+                    "files",
+                    "file_count"
+                ],
+                "title": "DirectoryInfo"
+            },
+            "DownloadRequest": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "filename": {
+                        "type": "string",
+                        "title": "Filename"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username",
+                    "filename"
+                ],
+                "title": "DownloadRequest"
+            },
+            "DownloadResponse": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "filename": {
+                        "type": "string",
+                        "title": "Filename"
+                    },
+                    "status": {
+                        "type": "string",
+                        "title": "Status"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username",
+                    "filename",
+                    "status"
+                ],
+                "title": "DownloadResponse"
+            },
+            "FileInfo": {
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "title": "Filename"
+                    },
+                    "clean_filename": {
+                        "type": "string",
+                        "title": "Clean Filename"
+                    },
+                    "extension": {
+                        "type": "string",
+                        "title": "Extension"
+                    },
+                    "filesize": {
+                        "type": "integer",
+                        "title": "Filesize"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "filename",
+                    "clean_filename",
+                    "extension",
+                    "filesize"
+                ],
+                "title": "FileInfo"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "SearchResponse": {
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "title": "Query"
+                    },
+                    "file_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "File Type"
+                    },
+                    "timeout": {
+                        "type": "number",
+                        "title": "Timeout"
+                    },
+                    "total_results": {
+                        "type": "integer",
+                        "title": "Total Results"
+                    },
+                    "results": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/UserFiles"
+                        },
+                        "type": "object",
+                        "title": "Results"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "query",
+                    "file_type",
+                    "timeout",
+                    "total_results",
+                    "results"
+                ],
+                "title": "SearchResponse"
+            },
+            "TransferInfo": {
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "title": "Username"
+                    },
+                    "remote_path": {
+                        "type": "string",
+                        "title": "Remote Path"
+                    },
+                    "local_path": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Local Path"
+                    },
+                    "direction": {
+                        "type": "string",
+                        "title": "Direction"
+                    },
+                    "state": {
+                        "type": "string",
+                        "title": "State"
+                    },
+                    "bytes_transfered": {
+                        "type": "integer",
+                        "title": "Bytes Transfered"
+                    },
+                    "filesize": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Filesize"
+                    },
+                    "speed": {
+                        "type": "number",
+                        "title": "Speed"
+                    },
+                    "start_time": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Start Time"
+                    },
+                    "complete_time": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Complete Time"
+                    },
+                    "fail_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Fail Reason"
+                    },
+                    "abort_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Abort Reason"
+                    },
+                    "place_in_queue": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Place In Queue"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "username",
+                    "remote_path",
+                    "local_path",
+                    "direction",
+                    "state",
+                    "bytes_transfered",
+                    "filesize",
+                    "speed",
+                    "start_time",
+                    "complete_time",
+                    "fail_reason",
+                    "abort_reason",
+                    "place_in_queue"
+                ],
+                "title": "TransferInfo"
+            },
+            "TransfersResponse": {
+                "properties": {
+                    "total": {
+                        "type": "integer",
+                        "title": "Total"
+                    },
+                    "downloads": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransferInfo"
+                        },
+                        "type": "array",
+                        "title": "Downloads"
+                    },
+                    "uploads": {
+                        "items": {
+                            "$ref": "#/components/schemas/TransferInfo"
+                        },
+                        "type": "array",
+                        "title": "Uploads"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "total",
+                    "downloads",
+                    "uploads"
+                ],
+                "title": "TransfersResponse"
+            },
+            "UserFiles": {
+                "properties": {
+                    "directories": {
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/DirectoryInfo"
+                        },
+                        "type": "object",
+                        "title": "Directories"
+                    },
+                    "total_files": {
+                        "type": "integer",
+                        "title": "Total Files"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "directories",
+                    "total_files"
+                ],
+                "title": "UserFiles"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

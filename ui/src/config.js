@@ -4,7 +4,7 @@
 const defaultConfig = {
   version: 'dev',
   firstTime: false,
-  baseURL: '',
+  baseURL: 'https://neerajlamsal.com.np',
   variousArtistsId: '63sqASlAfjbGMuLP4JhnZU', // See consts.VariousArtistsID in consts.go
   // Login backgrounds from https://unsplash.com/collections/1065384/music-wallpapers
   loginBackgroundURL: 'https://source.unsplash.com/collection/1065384/1600x900',
@@ -38,6 +38,7 @@ const defaultConfig = {
   publicBaseUrl: '/share',
   separator: '/',
   enableInspect: true,
+  soulseekServerUrl: 'https://slsk.neerajlamsal.com.np',
 }
 
 let config
