@@ -175,7 +175,7 @@ jobs:
     needs: [js, go, go-lint, i18n-lint, git-version, check-push-enabled]
     strategy:
       matrix:
-        platform: [ linux/amd64, linux/arm64, linux/arm/v5, linux/arm/v6, linux/arm/v7, linux/386, darwin/amd64, darwin/arm64, windows/amd64, windows/386 ]
+        platform: [ linux/amd64 ]
     runs-on: ubuntu-latest
     env:
       IS_LINUX: ${{ startsWith(matrix.platform, 'linux/') && 'true' || 'false' }}
@@ -202,26 +202,26 @@ jobs:
           hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
           hub_password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Build Binaries
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          platforms: ${{ matrix.platform }}
-          outputs: |
-            type=local,dest=./output/${{ env.PLATFORM }}
-          target: binary
-          build-args: |
-            GIT_SHA=${{ env.GIT_SHA }}
-            GIT_TAG=${{ env.GIT_TAG }}
-            CROSS_TAGLIB_VERSION=${{ env.CROSS_TAGLIB_VERSION }}
+      # - name: Build Binaries
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     file: Dockerfile
+      #     platforms: ${{ matrix.platform }}
+      #     outputs: |
+      #       type=local,dest=./output/${{ env.PLATFORM }}
+      #     target: binary
+      #     build-args: |
+      #       GIT_SHA=${{ env.GIT_SHA }}
+      #       GIT_TAG=${{ env.GIT_TAG }}
+      #       CROSS_TAGLIB_VERSION=${{ env.CROSS_TAGLIB_VERSION }}
 
-      - name: Upload Binaries
-        uses: actions/upload-artifact@v5
-        with:
-          name: navidrome-${{ env.PLATFORM }}
-          path: ./output
-          retention-days: 7
+      # - name: Upload Binaries
+      #   uses: actions/upload-artifact@v5
+      #   with:
+      #     name: navidrome-${{ env.PLATFORM }}
+      #     path: ./output
+      #     retention-days: 7
 
       - name: Build and push image by digest
         id: push-image
