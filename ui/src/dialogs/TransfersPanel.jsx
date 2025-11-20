@@ -22,22 +22,23 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
+    width: '100%',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 3),
   },
   transfersList: {
     flex: 1,
     overflow: 'auto',
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
-    maxHeight: '500px',
+    borderRadius: theme.shape.borderRadius * 2,
+    maxHeight: '70vh',
   },
   transferItem: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
   transferHeader: {
@@ -55,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
   },
   emptyMessage: {
-    padding: theme.spacing(4),
+    padding: theme.spacing(6),
     textAlign: 'center',
     color: theme.palette.text.secondary,
   },
@@ -63,14 +64,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: theme.spacing(4),
+    padding: theme.spacing(6),
   },
   statusChip: {
     marginLeft: theme.spacing(1),
   },
 }))
 
-const TransfersPanel = ({ onBack, onClose }) => {
+const TransfersPanel = ({ onBack }) => {
   const classes = useStyles()
   const translate = useTranslate()
   const notify = useNotify()
@@ -135,8 +136,8 @@ const TransfersPanel = ({ onBack, onClose }) => {
     }
 
     return (
-      <Box marginBottom={2}>
-        <Typography variant="h6" gutterBottom>
+      <Box marginBottom={4}>
+        <Typography variant="h5" gutterBottom>
           {title}
         </Typography>
         {transferList.map((transfer, index) => {
@@ -146,7 +147,12 @@ const TransfersPanel = ({ onBack, onClose }) => {
               : 0
 
           return (
-            <Paper key={index} className={classes.transferItem}>
+            <Paper
+              key={index}
+              className={classes.transferItem}
+              elevation={3}
+              square={false}
+            >
               <div className={classes.transferHeader}>
                 <div className={classes.transferInfo}>
                   <Typography variant="body1" component="div">
@@ -160,6 +166,9 @@ const TransfersPanel = ({ onBack, onClose }) => {
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {translate('menu.username')}: {transfer.username}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Filename: {(typeof transfer.remote_path === 'string' ? transfer.remote_path.replace("shared\\", '') : '')}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {translate('menu.fileSize')}: {formatFileSize(transfer.filesize)}
@@ -246,7 +255,6 @@ const TransfersPanel = ({ onBack, onClose }) => {
 
 TransfersPanel.propTypes = {
   onBack: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
 }
 
 export default TransfersPanel

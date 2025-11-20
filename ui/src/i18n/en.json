@@ -541,6 +541,7 @@
     "selectedFilesCount": "Select Files (%{count} selected)",
     "selectAll": "Select All",
     "unselectAll": "Clear Selection",
+    "selectDirectory": "Select Directory",
     "download": "Download",
     "downloadSelected": "Download Selected",
     "downloading": "Downloading...",

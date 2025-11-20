@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { IconButton, Tooltip, makeStyles } from '@material-ui/core'
 import { useTranslate } from 'react-admin'
 import { MdAddCircleOutline } from 'react-icons/md'
-import AddSongsDialog from '../dialogs/AddSongsDialog'
+import { useHistory } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -13,30 +13,19 @@ const useStyles = makeStyles((theme) => ({
 const AddSongsButton = () => {
   const classes = useStyles()
   const translate = useTranslate()
-  const [open, setOpen] = useState(false)
-
-  const handleOpen = () => {
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-  }
+  const history = useHistory()
 
   return (
-    <>
-      <Tooltip title={translate('menu.addSongsToServer')}>
-        <IconButton
-          className={classes.button}
-          onClick={handleOpen}
-          aria-label={translate('menu.addSongsToServer')}
-          size="small"
-        >
-          <MdAddCircleOutline size={20} />
-        </IconButton>
-      </Tooltip>
-      <AddSongsDialog open={open} onClose={handleClose} />
-    </>
+    <Tooltip title={translate('menu.addSongsToServer')}>
+      <IconButton
+        className={classes.button}
+        onClick={() => history.push('/add-songs')}
+        aria-label={translate('menu.addSongsToServer')}
+        size="small"
+      >
+        <MdAddCircleOutline size={20} />
+      </IconButton>
+    </Tooltip>
   )
 }
 
