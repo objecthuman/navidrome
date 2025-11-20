@@ -84,10 +84,7 @@ const TransfersPanel = ({ onBack }) => {
       const response = await soulseekApi.getTransfers()
       setTransfers(response.json)
     } catch (error) {
-      notify(
-        error.message || 'Failed to fetch transfers',
-        'error',
-      )
+      notify(error.message || 'Failed to fetch transfers', 'error')
     } finally {
       setLoading(false)
     }
@@ -168,10 +165,14 @@ const TransfersPanel = ({ onBack }) => {
                     {translate('menu.username')}: {transfer.username}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Filename: {(typeof transfer.remote_path === 'string' ? transfer.remote_path.replace("shared\\", '') : '')}
+                    Filename:{' '}
+                    {typeof transfer.remote_path === 'string'
+                      ? transfer.remote_path.replace('shared\\', '')
+                      : ''}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    {translate('menu.fileSize')}: {formatFileSize(transfer.filesize)}
+                    {translate('menu.fileSize')}:{' '}
+                    {formatFileSize(transfer.filesize)}
                   </Typography>
                   {transfer.speed > 0 && (
                     <Typography variant="body2" color="textSecondary">
@@ -194,12 +195,20 @@ const TransfersPanel = ({ onBack }) => {
                 />
               )}
               {transfer.fail_reason && (
-                <Typography variant="body2" color="error" style={{ marginTop: 8 }}>
+                <Typography
+                  variant="body2"
+                  color="error"
+                  style={{ marginTop: 8 }}
+                >
                   Error: {transfer.fail_reason}
                 </Typography>
               )}
               {transfer.abort_reason && (
-                <Typography variant="body2" color="textSecondary" style={{ marginTop: 8 }}>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  style={{ marginTop: 8 }}
+                >
                   Aborted: {transfer.abort_reason}
                 </Typography>
               )}
@@ -258,4 +267,3 @@ TransfersPanel.propTypes = {
 }
 
 export default TransfersPanel
-

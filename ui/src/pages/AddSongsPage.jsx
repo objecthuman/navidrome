@@ -319,10 +319,7 @@ const AddSongsPage = () => {
 
       setResults(response.json)
     } catch (error) {
-      notify(
-        error.message || translate('menu.downloadError'),
-        'error',
-      )
+      notify(error.message || translate('menu.downloadError'), 'error')
     } finally {
       setSearching(false)
     }
@@ -347,10 +344,7 @@ const AddSongsPage = () => {
       setSelectedFiles(new Set())
       setShowTransfers(true)
     } catch (error) {
-      notify(
-        error.message || translate('menu.downloadError'),
-        'error',
-      )
+      notify(error.message || translate('menu.downloadError'), 'error')
     } finally {
       setDownloading(false)
     }
@@ -371,9 +365,7 @@ const AddSongsPage = () => {
     if (!results || !results.results) {
       return (
         <div className={classes.emptyMessage}>
-          <Typography variant="body2">
-            {translate('menu.noResults')}
-          </Typography>
+          <Typography variant="body2">{translate('menu.noResults')}</Typography>
         </div>
       )
     }
@@ -383,9 +375,7 @@ const AddSongsPage = () => {
     if (userEntries.length === 0) {
       return (
         <div className={classes.emptyMessage}>
-          <Typography variant="body2">
-            {translate('menu.noResults')}
-          </Typography>
+          <Typography variant="body2">{translate('menu.noResults')}</Typography>
         </div>
       )
     }
@@ -440,16 +430,11 @@ const AddSongsPage = () => {
                             toggleDirectorySelection(username, dirInfo)
                           }}
                           checked={directorySelection.allSelected}
-                          indeterminate={
-                            directorySelection.partiallySelected
-                          }
+                          indeterminate={directorySelection.partiallySelected}
                           inputProps={{
-                            'aria-label': translate(
-                              'menu.selectDirectory',
-                              {
-                                _: 'Select Directory',
-                              },
-                            ),
+                            'aria-label': translate('menu.selectDirectory', {
+                              _: 'Select Directory',
+                            }),
                           }}
                         />
                       </ListItemSecondaryAction>
@@ -558,9 +543,7 @@ const AddSongsPage = () => {
                     onChange={(e) => setFileType(e.target.value)}
                     label={translate('menu.fileType')}
                   >
-                    <MenuItem value="">
-                      {translate('menu.allTypes')}
-                    </MenuItem>
+                    <MenuItem value="">{translate('menu.allTypes')}</MenuItem>
                     <MenuItem value="mp3">MP3</MenuItem>
                     <MenuItem value="flac">FLAC</MenuItem>
                     <MenuItem value="m4a">M4A</MenuItem>
@@ -630,10 +613,7 @@ const AddSongsPage = () => {
                     >
                       {translate('menu.unselectAll', { _: 'Clear Selection' })}
                     </Button>
-                    <Button
-                      size="small"
-                      onClick={() => setShowTransfers(true)}
-                    >
+                    <Button size="small" onClick={() => setShowTransfers(true)}>
                       {translate('menu.transfers')}
                     </Button>
                     <Button
@@ -663,4 +643,3 @@ const AddSongsPage = () => {
 }
 
 export default AddSongsPage
-
