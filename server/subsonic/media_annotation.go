@@ -200,7 +200,6 @@ func (api *Router) scrobblerSubmit(ctx context.Context, ids []string, times []ti
 }
 
 func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, position int) error {
-	// fmt.Println("Scrobbling Now Playing", "id", trackId, "position", position)
 	log.Info(ctx, "Scrobbling Now Playing", "id", trackId, "position", position)
 	mf, err := api.ds.MediaFile(ctx).Get(trackId)
 	if err != nil {
@@ -212,7 +211,11 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 
 	player, _ := request.PlayerFrom(ctx)
 	username, _ := request.UsernameFrom(ctx)
-	user, _ := request.UserFrom(ctx)
+	user, ok := request.UserFrom(ctx)
+	if !ok {
+		log.Warn(ctx, "No user in context for scrobbling Now Playing", "id", trackId)
+	}
+	// log.Info(ctx, "User for scrobbling", "userID", user.ID, "username", username, user)
 	client, _ := request.ClientFrom(ctx)
 	clientId, ok := request.ClientUniqueIdFrom(ctx)
 	if !ok {
@@ -224,8 +227,46 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 
 	go func() {
 		bgCtx := context.Background()
+		bgCtx = request.WithUser(bgCtx, user)
+
+		pqRepo := api.ds.PlayQueue(bgCtx)
+
+		existingQueue, err := pqRepo.RetrieveWithMediaFiles(user.ID)
+
+		if existingQueue == nil || err == model.ErrNotFound {
+			existingQueue = &model.PlayQueue{
+				UserID:    user.ID,
+				Current:   0,
+				Position:  0,
+				ChangedBy: "",
+				Items:     model.MediaFiles{},
+			}
+			existingQueue.Items = append(existingQueue.Items, *mf)
+		}
+
+		if err != nil && err != model.ErrNotFound {
+			log.Error(bgCtx, "Failed to retrieve play queue", "userId", user.ID, "error", err)
+			return
+		}
+
+		for i, item := range existingQueue.Items {
+			if item.ID == trackId {
+				existingQueue.Current = i
+				break
+			}
+		}
+
+		log.Info(bgCtx, "Play queue current item index", "userId", user.ID, "currentIndex", existingQueue.Current, "totalItems", len(existingQueue.Items), "position", position)
+
+		if len(existingQueue.Items) != 0 {
+			if existingQueue.Current != len(existingQueue.Items)-1 {
+				log.Info(bgCtx, "Play queue current item is not the last one, skipping similar songs addition", "userId", user.ID)
+				return
+			}
+		}
 
 		similarSongs, err := api.recommender.GetSimilarSongs(bgCtx, mf, 20)
+
 		if err != nil {
 			log.Error(bgCtx, "Failed to get similar songs", "trackId", trackId, "error", err)
 			return
@@ -236,24 +277,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 			return
 		}
 
-		pqRepo := api.ds.PlayQueue(bgCtx)
-		existingQueue, err := pqRepo.Retrieve(user.ID)
-		if err != nil && err != model.ErrNotFound {
-			log.Error(bgCtx, "Failed to retrieve play queue", "userId", user.ID, "error", err)
-			return
-		}
-
-		if existingQueue == nil || err == model.ErrNotFound {
-			existingQueue = &model.PlayQueue{
-				UserID:    user.ID,
-				Current:   0,
-				Position:  0,
-				ChangedBy: "similar-songs",
-				Items:     model.MediaFiles{},
-			}
-		}
-
-		existingQueue.Items = similarSongs
+		existingQueue.Items = append(existingQueue.Items, similarSongs...)
 		existingQueue.ChangedBy = "similar-songs-auto"
 
 		if err := pqRepo.Store(existingQueue, "items"); err != nil {
