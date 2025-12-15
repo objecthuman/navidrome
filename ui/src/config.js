@@ -4,7 +4,7 @@
 const defaultConfig = {
   version: 'dev',
   firstTime: false,
-  baseURL: 'https://neerajlamsal.com.np',
+  baseURL: 'http://localhost:4533',
   variousArtistsId: '63sqASlAfjbGMuLP4JhnZU', // See consts.VariousArtistsID in consts.go
   // Login backgrounds from https://unsplash.com/collections/1065384/music-wallpapers
   loginBackgroundURL: 'https://source.unsplash.com/collection/1065384/1600x900',

@@ -53,6 +53,7 @@ func (s *scannerExternal) scan(ctx context.Context, fullScan bool, targets []mod
 	} else {
 		log.Debug(ctx, "Spawning external scanner process", "fullScan", fullScan, "path", exe)
 	}
+	log.Info("staring process commdnis g", "cmd", exe, "args", args)
 
 	// Add full scan flag if needed
 	if fullScan {

@@ -18,6 +18,7 @@ import (
 	"github.com/navidrome/navidrome/core/ffmpeg"
 	"github.com/navidrome/navidrome/core/metrics"
 	"github.com/navidrome/navidrome/core/playback"
+	"github.com/navidrome/navidrome/core/recommender"
 	"github.com/navidrome/navidrome/core/scrobbler"
 	"github.com/navidrome/navidrome/db"
 	"github.com/navidrome/navidrome/model"
@@ -98,7 +99,8 @@ func CreateSubsonicAPIRouter(ctx context.Context) *subsonic.Router {
 	modelScanner := scanner.New(ctx, dataStore, cacheWarmer, broker, playlists, metricsMetrics)
 	playTracker := scrobbler.GetPlayTracker(dataStore, broker, manager)
 	playbackServer := playback.GetInstance(dataStore)
-	router := subsonic.New(dataStore, artworkArtwork, mediaStreamer, archiver, players, provider, modelScanner, broker, playlists, playTracker, share, playbackServer, metricsMetrics)
+	recommenderRecommender := recommender.New(dataStore)
+	router := subsonic.New(dataStore, artworkArtwork, mediaStreamer, archiver, players, provider, modelScanner, broker, playlists, playTracker, share, playbackServer, metricsMetrics, recommenderRecommender)
 	return router
 }
 
@@ -202,7 +204,7 @@ func getPluginManager() plugins.Manager {
 
 // wire_injectors.go:
 
-var allProviders = wire.NewSet(core.Set, artwork.Set, server.New, subsonic.New, nativeapi.New, public.New, persistence.New, lastfm.NewRouter, listenbrainz.NewRouter, events.GetBroker, scanner.New, scanner.GetWatcher, plugins.GetManager, metrics.GetPrometheusInstance, db.Db, wire.Bind(new(agents.PluginLoader), new(plugins.Manager)), wire.Bind(new(scrobbler.PluginLoader), new(plugins.Manager)), wire.Bind(new(metrics.PluginLoader), new(plugins.Manager)), wire.Bind(new(core.Watcher), new(scanner.Watcher)))
+var allProviders = wire.NewSet(core.Set, artwork.Set, server.New, subsonic.New, nativeapi.New, public.New, persistence.New, lastfm.NewRouter, listenbrainz.NewRouter, events.GetBroker, scanner.New, scanner.GetWatcher, plugins.GetManager, metrics.GetPrometheusInstance, db.Db, recommender.New, wire.Bind(new(agents.PluginLoader), new(plugins.Manager)), wire.Bind(new(scrobbler.PluginLoader), new(plugins.Manager)), wire.Bind(new(metrics.PluginLoader), new(plugins.Manager)), wire.Bind(new(core.Watcher), new(scanner.Watcher)))
 
 func GetPluginManager(ctx context.Context) plugins.Manager {
 	manager := getPluginManager()

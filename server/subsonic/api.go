@@ -15,6 +15,7 @@ import (
 	"github.com/navidrome/navidrome/core/external"
 	"github.com/navidrome/navidrome/core/metrics"
 	"github.com/navidrome/navidrome/core/playback"
+	"github.com/navidrome/navidrome/core/recommender"
 	"github.com/navidrome/navidrome/core/scrobbler"
 	"github.com/navidrome/navidrome/log"
 	"github.com/navidrome/navidrome/model"
@@ -31,40 +32,42 @@ type handlerRaw = func(http.ResponseWriter, *http.Request) (*responses.Subsonic,
 
 type Router struct {
 	http.Handler
-	ds        model.DataStore
-	artwork   artwork.Artwork
-	streamer  core.MediaStreamer
-	archiver  core.Archiver
-	players   core.Players
-	provider  external.Provider
-	playlists core.Playlists
-	scanner   model.Scanner
-	broker    events.Broker
-	scrobbler scrobbler.PlayTracker
-	share     core.Share
-	playback  playback.PlaybackServer
-	metrics   metrics.Metrics
+	ds          model.DataStore
+	artwork     artwork.Artwork
+	streamer    core.MediaStreamer
+	archiver    core.Archiver
+	players     core.Players
+	provider    external.Provider
+	playlists   core.Playlists
+	scanner     model.Scanner
+	broker      events.Broker
+	scrobbler   scrobbler.PlayTracker
+	share       core.Share
+	playback    playback.PlaybackServer
+	metrics     metrics.Metrics
+	recommender recommender.Recommender
 }
 
 func New(ds model.DataStore, artwork artwork.Artwork, streamer core.MediaStreamer, archiver core.Archiver,
 	players core.Players, provider external.Provider, scanner model.Scanner, broker events.Broker,
 	playlists core.Playlists, scrobbler scrobbler.PlayTracker, share core.Share, playback playback.PlaybackServer,
-	metrics metrics.Metrics,
+	metrics metrics.Metrics, rec recommender.Recommender,
 ) *Router {
 	r := &Router{
-		ds:        ds,
-		artwork:   artwork,
-		streamer:  streamer,
-		archiver:  archiver,
-		players:   players,
-		provider:  provider,
-		playlists: playlists,
-		scanner:   scanner,
-		broker:    broker,
-		scrobbler: scrobbler,
-		share:     share,
-		playback:  playback,
-		metrics:   metrics,
+		ds:          ds,
+		artwork:     artwork,
+		streamer:    streamer,
+		archiver:    archiver,
+		players:     players,
+		provider:    provider,
+		playlists:   playlists,
+		scanner:     scanner,
+		broker:      broker,
+		scrobbler:   scrobbler,
+		share:       share,
+		playback:    playback,
+		metrics:     metrics,
+		recommender: rec,
 	}
 	r.Handler = r.routes()
 	return r

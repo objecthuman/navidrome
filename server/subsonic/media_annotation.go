@@ -200,6 +200,8 @@ func (api *Router) scrobblerSubmit(ctx context.Context, ids []string, times []ti
 }
 
 func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, position int) error {
+	// fmt.Println("Scrobbling Now Playing", "id", trackId, "position", position)
+	log.Info(ctx, "Scrobbling Now Playing", "id", trackId, "position", position)
 	mf, err := api.ds.MediaFile(ctx).Get(trackId)
 	if err != nil {
 		return err
@@ -210,6 +212,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 
 	player, _ := request.PlayerFrom(ctx)
 	username, _ := request.UsernameFrom(ctx)
+	user, _ := request.UserFrom(ctx)
 	client, _ := request.ClientFrom(ctx)
 	clientId, ok := request.ClientUniqueIdFrom(ctx)
 	if !ok {
@@ -218,5 +221,53 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 
 	log.Info(ctx, "Now Playing", "title", mf.Title, "artist", mf.Artist, "user", username, "player", player.Name, "position", position)
 	err = api.scrobbler.NowPlaying(ctx, clientId, client, trackId, position)
+
+	go func() {
+		bgCtx := context.Background()
+
+		similarSongs, err := api.recommender.GetSimilarSongs(bgCtx, mf, 20)
+		if err != nil {
+			log.Error(bgCtx, "Failed to get similar songs", "trackId", trackId, "error", err)
+			return
+		}
+
+		if len(similarSongs) == 0 {
+			log.Warn(bgCtx, "No similar songs found", "trackId", trackId)
+			return
+		}
+
+		pqRepo := api.ds.PlayQueue(bgCtx)
+		existingQueue, err := pqRepo.Retrieve(user.ID)
+		if err != nil && err != model.ErrNotFound {
+			log.Error(bgCtx, "Failed to retrieve play queue", "userId", user.ID, "error", err)
+			return
+		}
+
+		if existingQueue == nil || err == model.ErrNotFound {
+			existingQueue = &model.PlayQueue{
+				UserID:    user.ID,
+				Current:   0,
+				Position:  0,
+				ChangedBy: "similar-songs",
+				Items:     model.MediaFiles{},
+			}
+		}
+
+		existingQueue.Items = similarSongs
+		existingQueue.ChangedBy = "similar-songs-auto"
+
+		if err := pqRepo.Store(existingQueue, "items"); err != nil {
+			log.Error(bgCtx, "Failed to update play queue", "userId", user.ID, "error", err)
+			return
+		}
+
+		log.Info(bgCtx, "Added similar songs to queue", "userId", user.ID, "count", len(similarSongs), "trackTitle", mf.Title)
+
+		if api.broker != nil {
+			event := &events.RefreshResource{}
+			api.broker.SendMessage(bgCtx, event.With("playqueue", user.ID))
+		}
+	}()
+
 	return err
 }

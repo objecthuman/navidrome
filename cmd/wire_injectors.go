@@ -13,6 +13,7 @@ import (
 	"github.com/navidrome/navidrome/core/artwork"
 	"github.com/navidrome/navidrome/core/metrics"
 	"github.com/navidrome/navidrome/core/playback"
+	"github.com/navidrome/navidrome/core/recommender"
 	"github.com/navidrome/navidrome/core/scrobbler"
 	"github.com/navidrome/navidrome/db"
 	"github.com/navidrome/navidrome/model"
@@ -42,6 +43,7 @@ var allProviders = wire.NewSet(
 	plugins.GetManager,
 	metrics.GetPrometheusInstance,
 	db.Db,
+	recommender.New,
 	wire.Bind(new(agents.PluginLoader), new(plugins.Manager)),
 	wire.Bind(new(scrobbler.PluginLoader), new(plugins.Manager)),
 	wire.Bind(new(metrics.PluginLoader), new(plugins.Manager)),

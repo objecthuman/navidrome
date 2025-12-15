@@ -17,6 +17,7 @@ import config from '../config'
 import useStyle from './styles'
 import AudioTitle from './AudioTitle'
 import {
+  addTracks,
   clearQueue,
   currentPlaying,
   setPlayMode,
@@ -30,6 +31,7 @@ import locale from './locale'
 import { keyMap } from '../hotkeys'
 import keyHandlers from './keyHandlers'
 import { calculateGain } from '../utils/calculateReplayGain'
+import { useRefreshOnEvents } from '../common/useRefreshOnEvents'
 
 const Player = () => {
   const theme = useCurrentTheme()
@@ -62,6 +64,39 @@ const Player = () => {
   const gainInfo = useSelector((state) => state.replayGain)
   const [context, setContext] = useState(null)
   const [gainNode, setGainNode] = useState(null)
+
+  // Listen for playqueue refresh events and add similar songs
+  const loadQueueUpdate = useCallback(async () => {
+    try {
+      const response = await fetch(`${config.baseURL}/api/queue`, {
+        credentials: 'include',
+        headers: {
+          'X-ND-Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error(`Queue fetch failed: ${response.status}`)
+      }
+      const data = await response.json()
+      if (data && data.items && data.items.length > 0) {
+        // Convert items array to object with IDs as keys
+        const songsById = data.items.reduce((acc, item) => {
+          acc[item.id] = item
+          return acc
+        }, {})
+        // Add the new songs to the player queue
+        dispatch(addTracks(songsById, Object.keys(songsById)))
+        console.log('Added similar songs to player:', data.items.length)
+      }
+    } catch (error) {
+      console.warn('Failed to load queue update:', error)
+    }
+  }, [dispatch])
+
+  useRefreshOnEvents({
+    events: ['playqueue'],
+    onRefresh: loadQueueUpdate
+  })
 
   useEffect(() => {
     if (
