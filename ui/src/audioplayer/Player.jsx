@@ -95,8 +95,15 @@ const Player = () => {
 
   useRefreshOnEvents({
     events: ['playqueue'],
-    onRefresh: loadQueueUpdate
+    onRefresh: loadQueueUpdate,
   })
+
+  // Load queue on initial mount
+  useEffect(() => {
+    if (authenticated) {
+      loadQueueUpdate()
+    }
+  }, [authenticated, loadQueueUpdate])
 
   useEffect(() => {
     if (
@@ -308,10 +315,19 @@ const Player = () => {
 
   const onBeforeDestroy = useCallback(() => {
     return new Promise((resolve, reject) => {
-      dispatch(clearQueue())
-      reject()
+      dataProvider
+        .clearQueue()
+        .then(() => {
+          dispatch(clearQueue())
+          reject()
+        })
+        .catch((error) => {
+          console.error('Failed to clear queue on server:', error)
+          dispatch(clearQueue())
+          reject()
+        })
     })
-  }, [dispatch])
+  }, [dispatch, dataProvider])
 
   if (!visible) {
     document.title = 'Navidrome'

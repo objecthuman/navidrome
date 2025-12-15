@@ -44,6 +44,10 @@ const createAdminStore = ({
   if (persistedState?.player?.savedPlayIndex) {
     persistedState.player.playIndex = persistedState.player.savedPlayIndex
   }
+  // Don't restore queue from localStorage - it will be loaded from the API
+  if (persistedState?.player) {
+    persistedState.player.queue = []
+  }
   const store = createStore(
     resettableAppReducer,
     persistedState,
@@ -51,6 +55,7 @@ const createAdminStore = ({
       applyMiddleware(sagaMiddleware, routerMiddleware(history)),
     ),
   )
+  let queue = []
 
   store.subscribe(
     throttle(() => {
@@ -59,7 +64,6 @@ const createAdminStore = ({
         theme: state.theme,
         library: state.library,
         player: (({ queue, volume, savedPlayIndex }) => ({
-          queue,
           volume,
           savedPlayIndex,
         }))(state.player),
