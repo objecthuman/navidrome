@@ -2,10 +2,9 @@ package recommender
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
-	"strings"
 
+	"github.com/navidrome/navidrome/conf"
+	"github.com/navidrome/navidrome/log"
 	"github.com/navidrome/navidrome/model"
 )
 
@@ -21,23 +20,14 @@ type recommender struct {
 func New(ds model.DataStore) Recommender {
 	return &recommender{
 		ds:     ds,
-		client: NewClient("http://192.168.1.32:8001"),
+		client: NewClient(conf.Server.RecommendationServerBaseURL),
 	}
 }
 
 func (r *recommender) GetSimilarSongs(ctx context.Context, mf *model.MediaFile, topK int) (model.MediaFiles, error) {
-	// Convert Linux path to Windows path
-	// mf.Path is like: "complete/hunterbiden5000/Whatever, Dad - 100% Take Home!"
-	// We need: "C:\programming\music-recommendation\music\complete\hunterbiden5000\Whatever, Dad - 100% Take Home!"
+	log.Info(ctx, "Getting similar songs for:", "path", mf.Path)
 
-	windowsBasePath := `C:\programming\music-recommendation\music`
-	windowsPath := filepath.Join(windowsBasePath, mf.Path)
-	// Convert forward slashes to backslashes for Windows
-	windowsPath = strings.ReplaceAll(windowsPath, "/", "\\")
-
-	fmt.Println("Getting similar songs for:", windowsPath)
-
-	similarPaths, err := r.client.FindSimilar(ctx, windowsPath, topK)
+	similarPaths, err := r.client.FindSimilar(ctx, mf.Path, topK)
 	if err != nil {
 		return nil, err
 	}
@@ -46,20 +36,8 @@ func (r *recommender) GetSimilarSongs(ctx context.Context, mf *model.MediaFile, 
 		return model.MediaFiles{}, nil
 	}
 
-	// Convert Windows paths back to Linux paths for database lookup
-	linuxPaths := make([]string, len(similarPaths))
-	for i, winPath := range similarPaths {
-		// Remove the Windows base path prefix
-		linuxPath := strings.TrimPrefix(winPath, windowsBasePath)
-		linuxPath = strings.TrimPrefix(linuxPath, "\\")
-		// Convert backslashes to forward slashes
-		linuxPath = strings.ReplaceAll(linuxPath, "\\", "/")
-		linuxPaths[i] = linuxPath
-		fmt.Println("Converted path:", winPath, "->", linuxPath)
-	}
-
 	mfRepo := r.ds.MediaFile(ctx)
-	songs, err := mfRepo.FindByPaths(linuxPaths)
+	songs, err := mfRepo.FindByPaths(similarPaths)
 	if err != nil {
 		return nil, err
 	}
