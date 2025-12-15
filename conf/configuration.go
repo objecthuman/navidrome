@@ -104,6 +104,7 @@ type configOptions struct {
 	ListenBrainz                    listenBrainzOptions `json:",omitzero"`
 	Tags                            map[string]TagConf  `json:",omitempty"`
 	Agents                          string
+	RecommendationServerBaseURL     string
 
 	// DevFlags. These are used to enable/disable debugging and incomplete features
 	DevLogLevels                     map[string]string `json:",omitempty"`
@@ -328,6 +329,14 @@ func Load(noConfigDump bool) {
 		Server.BaseScheme = u.Scheme
 	}
 
+	if Server.RecommendationServerBaseURL != "" {
+		_, err := url.Parse(Server.RecommendationServerBaseURL)
+		if err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "FATAL: Invalid RecommendationServerBaseURL:", err)
+			os.Exit(1)
+		}
+	}
+
 	// Print current configuration if log level is Debug
 	if log.IsGreaterOrEqualTo(log.LevelDebug) && !noConfigDump {
 		prettyConf := pretty.Sprintf("Loaded configuration from '%s': %# v", Server.ConfigFile, Server)
@@ -348,7 +357,6 @@ func Load(noConfigDump bool) {
 	logDeprecatedOptions("Scanner.GenreSeparators")
 	logDeprecatedOptions("Scanner.GroupAlbumReleases")
 	logDeprecatedOptions("DevEnableBufferedScrobble") // Deprecated: Buffered scrobbling is now always enabled and this option is ignored
-
 	// Call init hooks
 	for _, hook := range hooks {
 		hook()
@@ -581,6 +589,7 @@ func setViperDefaults() {
 	viper.SetDefault("plugins.folder", "")
 	viper.SetDefault("plugins.enabled", false)
 	viper.SetDefault("plugins.cachesize", "100MB")
+	viper.SetDefault("recommendationserverbaseurl", "")
 
 	// DevFlags. These are used to enable/disable debugging and incomplete features
 	viper.SetDefault("devlogsourceline", false)
