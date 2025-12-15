@@ -191,8 +191,16 @@ const Player = () => {
   }, [playerState, defaultOptions, isMobilePlayer])
 
   const onAudioListsChange = useCallback(
-    (_, audioLists, audioInfo) => dispatch(syncQueue(audioInfo, audioLists)),
-    [dispatch],
+    (_, audioLists, audioInfo) => {
+      // If queue was cleared (empty audioLists), clear it on the backend too
+      if (audioLists.length === 0 && playerState.queue.length > 0) {
+        dataProvider.clearQueue().catch((error) => {
+          console.error('Failed to clear queue on server:', error)
+        })
+      }
+      dispatch(syncQueue(audioInfo, audioLists))
+    },
+    [dispatch, dataProvider, playerState.queue.length],
   )
 
   const nextSong = useCallback(() => {
@@ -315,19 +323,10 @@ const Player = () => {
 
   const onBeforeDestroy = useCallback(() => {
     return new Promise((resolve, reject) => {
-      dataProvider
-        .clearQueue()
-        .then(() => {
-          dispatch(clearQueue())
-          reject()
-        })
-        .catch((error) => {
-          console.error('Failed to clear queue on server:', error)
-          dispatch(clearQueue())
-          reject()
-        })
+      dispatch(clearQueue())
+      reject()
     })
-  }, [dispatch, dataProvider])
+  }, [dispatch])
 
   if (!visible) {
     document.title = 'Navidrome'

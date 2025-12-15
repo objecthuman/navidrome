@@ -55,6 +55,7 @@ const createAdminStore = ({
       applyMiddleware(sagaMiddleware, routerMiddleware(history)),
     ),
   )
+  // TODO: fix this hack and remove queue from persisted state
   let queue = []
 
   store.subscribe(
