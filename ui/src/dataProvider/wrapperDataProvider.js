@@ -220,6 +220,11 @@ const wrapperDataProvider = {
       data: json,
     }))
   },
+  clearQueue: () => {
+    return httpClient(`${REST_URL}/queue`, {
+      method: 'DELETE',
+    }).then(() => ({ data: {} }))
+  },
 }
 
 export default wrapperDataProvider
