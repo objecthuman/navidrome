@@ -50,7 +50,6 @@ func NewClient(baseURL string) *Client {
 
 func (c *Client) FindSimilar(ctx context.Context, filePath string, topK int) ([]string, error) {
 	url := fmt.Sprintf("%s/v1/music/similar", c.baseURL)
-	fmt.Println(url)
 
 	reqBody := similarRequest{
 		FilePath: filePath,
