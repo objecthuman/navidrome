@@ -215,7 +215,6 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 	if !ok {
 		log.Warn(ctx, "No user in context for scrobbling Now Playing", "id", trackId)
 	}
-	// log.Info(ctx, "User for scrobbling", "userID", user.ID, "username", username, user)
 	client, _ := request.ClientFrom(ctx)
 	clientId, ok := request.ClientUniqueIdFrom(ctx)
 	if !ok {
@@ -256,7 +255,12 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 			}
 		}
 
-		log.Info(bgCtx, "Play queue current item index", "userId", user.ID, "currentIndex", existingQueue.Current, "totalItems", len(existingQueue.Items), "position", position)
+		if err := pqRepo.Store(existingQueue, "current"); err != nil {
+			log.Error(bgCtx, "Failed to update play queue", "userId", user.ID, "error", err)
+			return
+		} else {
+			log.Info(bgCtx, "Updated play queue current item", "userId", user.ID, "current", existingQueue.Current)
+		}
 
 		if len(existingQueue.Items) != 0 {
 			if existingQueue.Current != len(existingQueue.Items)-1 {
@@ -280,7 +284,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 		existingQueue.Items = append(existingQueue.Items, similarSongs...)
 		existingQueue.ChangedBy = "similar-songs-auto"
 
-		if err := pqRepo.Store(existingQueue, "items"); err != nil {
+		if err := pqRepo.Store(existingQueue, "items", "current"); err != nil {
 			log.Error(bgCtx, "Failed to update play queue", "userId", user.ID, "error", err)
 			return
 		}

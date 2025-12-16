@@ -41,12 +41,11 @@ const createAdminStore = ({
     compose
 
   const persistedState = loadState()
-  if (persistedState?.player?.savedPlayIndex) {
-    persistedState.player.playIndex = persistedState.player.savedPlayIndex
-  }
-  // Don't restore queue from localStorage - it will be loaded from the API
+  // Don't restore queue or playIndex from localStorage - they will be loaded from the API
   if (persistedState?.player) {
     persistedState.player.queue = []
+    delete persistedState.player.playIndex
+    delete persistedState.player.savedPlayIndex
   }
   const store = createStore(
     resettableAppReducer,
