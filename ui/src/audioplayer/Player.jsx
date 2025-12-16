@@ -90,7 +90,8 @@ const Player = () => {
         dispatch(setPlayIndex(playIndex))
       }
     } catch (error) {
-      console.warn('Failed to load queue update:', error)
+      // eslint-disable-next-line no-console
+      console.error('Failed to load queue update:', error)
     }
   }, [dispatch])
 
@@ -196,7 +197,8 @@ const Player = () => {
       // If queue was cleared (empty audioLists), clear it on the backend too
       if (audioLists.length === 0 && playerState.queue.length > 0) {
         dataProvider.clearQueue().catch((error) => {
-          console.error('Failed to clear queue on server:', error)
+          // eslint-disable-next-line no-console
+          console.log('Failed to clear queue on server:', error)
         })
       }
       dispatch(syncQueue(audioInfo, audioLists))
