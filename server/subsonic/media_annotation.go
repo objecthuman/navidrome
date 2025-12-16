@@ -2,6 +2,7 @@ package subsonic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -238,7 +239,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 
 		existingQueue, err := pqRepo.RetrieveWithMediaFiles(user.ID)
 
-		if existingQueue == nil || err == model.ErrNotFound {
+		if existingQueue == nil || errors.Is(err, model.ErrNotFound) {
 			existingQueue = &model.PlayQueue{
 				UserID:    user.ID,
 				Current:   0,
@@ -249,7 +250,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 			existingQueue.Items = append(existingQueue.Items, *mf)
 		}
 
-		if err != nil && err != model.ErrNotFound {
+		if err != nil && !errors.Is(err, model.ErrNotFound) {
 			log.Error(bgCtx, "Failed to retrieve play queue", "userId", user.ID, "error", err)
 			return
 		}
