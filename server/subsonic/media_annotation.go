@@ -248,11 +248,20 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 			return
 		}
 
+		found := false
 		for i, item := range existingQueue.Items {
 			if item.ID == trackId {
 				existingQueue.Current = i
+				found = true
 				break
 			}
+		}
+
+		// If the song is not in the queue, create a new queue with just this song
+		if !found {
+			log.Info(bgCtx, "Current song not in queue, creating new queue", "trackId", trackId)
+			existingQueue.Items = model.MediaFiles{*mf}
+			existingQueue.Current = 0
 		}
 
 		if err := pqRepo.Store(existingQueue, "current"); err != nil {
