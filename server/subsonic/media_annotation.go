@@ -224,6 +224,12 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 	log.Info(ctx, "Now Playing", "title", mf.Title, "artist", mf.Artist, "user", username, "player", player.Name, "position", position)
 	err = api.scrobbler.NowPlaying(ctx, clientId, client, trackId, position)
 
+	// Check if recommender is available before launching goroutine
+	if api.recommender == nil {
+		log.Debug(ctx, "Recommender not available, skipping queue update")
+		return err
+	}
+
 	go func() {
 		bgCtx := context.Background()
 		bgCtx = request.WithUser(bgCtx, user)
