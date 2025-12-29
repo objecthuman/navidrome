@@ -38,7 +38,6 @@ const useStyles = makeStyles({
   },
 })
 
-
 const TypeField = () => {
   const record = useRecordContext()
   const classes = useStyles()

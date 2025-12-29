@@ -55,9 +55,9 @@ const SongItem = ({ song, onClick }) => {
     {
       id: song.id,
       album: song.album,
-      updatedAt: song.createdAt
+      updatedAt: song.createdAt,
     },
-    48
+    48,
   )
 
   return (
@@ -82,7 +82,7 @@ const AlbumItem = ({ album, onClick }) => {
     {
       id: album.albumId,
       albumArtist: album.artist,
-      updatedAt: album.createdAt
+      updatedAt: album.createdAt,
     },
     48,
   )
@@ -129,17 +129,15 @@ export const UnifiedSearchResults = () => {
   const dispatch = useDispatch()
   const { data } = useListContext()
 
-  console.log('UnifiedSearchResults - data:', data)
-
   // Convert data object to array
   const dataArray = data ? Object.values(data) : []
 
   // Group results by type and limit to top 5
   const songs = dataArray.filter((item) => item._type === 'song').slice(0, 5)
   const albums = dataArray.filter((item) => item._type === 'album').slice(0, 5)
-  const artists = dataArray.filter((item) => item._type === 'artist').slice(0, 5)
-
-  console.log('Grouped results:', { songs: songs.length, albums: albums.length, artists: artists.length })
+  const artists = dataArray
+    .filter((item) => item._type === 'artist')
+    .slice(0, 5)
 
   // Build sections in fixed order: Artists, Albums, Songs
   const sections = []
@@ -170,8 +168,7 @@ export const UnifiedSearchResults = () => {
             <Typography className={classes.sectionHeader}>
               {section.type === 'artists' && <PersonIcon />}
               {section.type === 'albums' && <AlbumIcon />}
-              {section.type === 'songs' && <MusicNoteIcon />}
-              {' '}
+              {section.type === 'songs' && <MusicNoteIcon />}{' '}
               {section.type.charAt(0).toUpperCase() + section.type.slice(1)}
             </Typography>
             <List>
@@ -201,7 +198,9 @@ export const UnifiedSearchResults = () => {
                 ))}
             </List>
           </Box>
-          {index < sections.length - 1 && <Divider className={classes.divider} />}
+          {index < sections.length - 1 && (
+            <Divider className={classes.divider} />
+          )}
         </Fragment>
       ))}
     </Box>

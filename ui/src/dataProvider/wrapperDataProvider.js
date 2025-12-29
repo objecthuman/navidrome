@@ -219,7 +219,8 @@ const wrapperDataProvider = {
       try {
         // Fetch 50 results to have a good pool for filtering
         const response = await subsonic.search3(searchQuery, 50, 50, 50)
-        const searchResult = response?.json?.['subsonic-response']?.searchResult3
+        const searchResult =
+          response?.json?.['subsonic-response']?.searchResult3
 
         if (searchResult) {
           const queryLower = searchQuery.toLowerCase().trim()
@@ -228,7 +229,7 @@ const wrapperDataProvider = {
           // Filter songs: only keep songs where the title actually contains the search term
           if (searchResult.song && searchResult.song.length > 0) {
             const relevantSongs = searchResult.song.filter((song) =>
-              song.title?.toLowerCase().includes(queryLower)
+              song.title?.toLowerCase().includes(queryLower),
             )
             if (relevantSongs.length > 0) {
               data = [...data, ...convertSearch3ToSongs(relevantSongs)]
@@ -251,7 +252,6 @@ const wrapperDataProvider = {
           }
         }
       } catch (error) {
-        console.error('Search3 failed, falling back to regular search:', error)
         // Fall through to regular dataProvider call
       }
     }

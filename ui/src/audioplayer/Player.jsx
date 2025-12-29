@@ -69,42 +69,44 @@ const Player = () => {
   const hasLoadedInitialQueue = useRef(false)
 
   // Listen for playqueue refresh events and add similar songs
-  const loadQueueUpdate = useCallback(async (autoPlay = true) => {
-    try {
-      // Only prevent auto-play on the very first queue load (initial page load)
-      // After that, allow auto-play even if autoPlay=false to not interfere with user actions
-      shouldPreventAutoPlay.current = !autoPlay && !hasLoadedInitialQueue.current
-      hasLoadedInitialQueue.current = true
-      const response = await fetch(`${config.baseURL}/api/queue`, {
-        credentials: 'include',
-        headers: {
-          'X-ND-Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      if (!response.ok) {
-        throw new Error(`Queue fetch failed: ${response.status}`)
-      }
-      let data = await response.json()
-      if (data && data.items && data.items.length > 0) {
-        const songsById = data.items.reduce((acc, item) => {
-          acc[item.id] = item
-          return acc
-        }, {})
-        dispatch(addTracks(songsById, Object.keys(songsById)))
+  const loadQueueUpdate = useCallback(
+    async (autoPlay = true) => {
+      try {
+        // Only prevent auto-play on the very first queue load (initial page load)
+        // After that, allow auto-play even if autoPlay=false to not interfere with user actions
+        shouldPreventAutoPlay.current =
+          !autoPlay && !hasLoadedInitialQueue.current
+        hasLoadedInitialQueue.current = true
+        const response = await fetch(`${config.baseURL}/api/queue`, {
+          credentials: 'include',
+          headers: {
+            'X-ND-Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+        if (!response.ok) {
+          throw new Error(`Queue fetch failed: ${response.status}`)
+        }
+        let data = await response.json()
+        if (data && data.items && data.items.length > 0) {
+          const songsById = data.items.reduce((acc, item) => {
+            acc[item.id] = item
+            return acc
+          }, {})
+          dispatch(addTracks(songsById, Object.keys(songsById)))
 
-        const playIndex = data.current !== undefined ? data.current : 0
-        dispatch(setPlayIndex(playIndex))
-        console.log('Loaded queue - autoPlay:', autoPlay, 'playIndex:', playIndex)
-      } else {
-        // Queue is empty - reset the flag so future plays aren't prevented
-        console.log('Queue is empty, resetting shouldPreventAutoPlay')
-        shouldPreventAutoPlay.current = false
+          const playIndex = data.current !== undefined ? data.current : 0
+          dispatch(setPlayIndex(playIndex))
+        } else {
+          // Queue is empty - reset the flag so future plays aren't prevented
+          shouldPreventAutoPlay.current = false
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load queue update:', error)
       }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load queue update:', error)
-    }
-  }, [dispatch])
+    },
+    [dispatch],
+  )
 
   useRefreshOnEvents({
     events: ['playqueue'],
@@ -208,10 +210,7 @@ const Player = () => {
     (_, audioLists, audioInfo) => {
       // If queue was cleared (empty audioLists), clear it on the backend too
       if (audioLists.length === 0 && playerState.queue.length > 0) {
-        dataProvider.clearQueue().catch((error) => {
-          // eslint-disable-next-line no-console
-          console.log('Failed to clear queue on server:', error)
-        })
+        dataProvider.clearQueue().catch((error) => {})
       }
       dispatch(syncQueue(audioInfo, audioLists))
     },
@@ -267,9 +266,7 @@ const Player = () => {
   const onAudioPlay = useCallback(
     (info) => {
       // Prevent auto-play on initial page load
-      console.log('onAudioPlay fired - shouldPreventAutoPlay:', shouldPreventAutoPlay.current, 'hasLoadedInitialQueue:', hasLoadedInitialQueue.current)
       if (shouldPreventAutoPlay.current && audioInstance) {
-        console.log('Preventing auto-play on initial load')
         audioInstance.pause()
         shouldPreventAutoPlay.current = false
         return
@@ -343,10 +340,7 @@ const Player = () => {
       setScrobbled(false)
       setStartTime(null)
       dispatch(currentPlaying(info))
-      dataProvider
-        .getOne('keepalive', { id: info.trackId })
-        // eslint-disable-next-line no-console
-        .catch((e) => console.log('Keepalive error:', e))
+      dataProvider.getOne('keepalive', { id: info.trackId })
     },
     [dispatch, dataProvider],
   )

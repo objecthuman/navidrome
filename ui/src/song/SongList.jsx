@@ -149,11 +149,6 @@ const SongListView = () => {
   const isUnifiedSearch =
     filterValues?.title && dataValues.length > 0 && dataValues[0]?._type
 
-  console.log('SongListView - filterValues:', filterValues)
-  console.log('SongListView - data:', data)
-  console.log('SongListView - dataValues:', dataValues)
-  console.log('SongListView - isUnifiedSearch:', isUnifiedSearch)
-
   const toggleableFields = useMemo(() => {
     return {
       album: isDesktop && <AlbumLinkField source="album" sortByOrder={'ASC'} />,
@@ -254,8 +249,6 @@ const SongListView = () => {
 const SongList = (props) => {
   const isXsmall = useMediaQuery((theme) => theme.breakpoints.down('xs'))
   useResourceRefresh('song')
-
-  console.log('=== SongList rendering ===')
 
   return (
     <>
