@@ -37,16 +37,17 @@ const url = (command, id, options) => {
 
 const ping = () => httpClient(url('ping'))
 
-const scrobble = (id, time, submission = true, position = null) =>
+const scrobble = (id, time, submission = true, position = null, pageType = null) =>
   httpClient(
     url('scrobble', id, {
       ...(submission && time && { time }),
       submission,
       ...(!submission && position !== null && { position }),
+      ...(pageType && { pageType }),
     }),
   )
 
-const nowPlaying = (id, position = null) => scrobble(id, null, false, position)
+const nowPlaying = (id, position = null, pageType = null) => scrobble(id, null, false, position, pageType)
 
 const star = (id) => httpClient(url('star', id))
 

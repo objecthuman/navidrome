@@ -271,13 +271,6 @@ const Player = () => {
       if (shouldPreventAutoPlay.current && audioInstance) {
         console.log('Preventing auto-play on initial load')
         audioInstance.pause()
-
-
-
-
-
-
-
         shouldPreventAutoPlay.current = false
         return
       }
@@ -297,7 +290,19 @@ const Player = () => {
         document.title = `${song.title} - ${song.artist} - Navidrome`
         if (!info.isRadio) {
           const pos = startTime === null ? null : Math.floor(info.currentTime)
-          subsonic.nowPlaying(info.trackId, pos)
+
+          // Detect page type from URL hash
+          let pageType = null
+          const hash = window.location.hash
+          if (hash.includes('/album/') && hash.includes('/show')) {
+            pageType = 'album'
+          } else if (hash.includes('/artist/') && hash.includes('/show')) {
+            pageType = 'artist'
+          } else if (hash.includes('/playlist/') && hash.includes('/show')) {
+            pageType = 'playlist'
+          }
+
+          subsonic.nowPlaying(info.trackId, pos, pageType)
         }
         setPreload(false)
         if (config.gaTrackingId) {
