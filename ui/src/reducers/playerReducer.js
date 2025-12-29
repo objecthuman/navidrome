@@ -196,7 +196,7 @@ const reduceSetPlayIndex = (state, { data: { playIndex } }) => {
   return {
     ...state,
     playIndex,
-    clear: true,
+    clear: true, // Default to true if not specified
   }
 }
 

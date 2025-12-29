@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMediaQuery } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core/styles'
@@ -65,10 +65,16 @@ const Player = () => {
   const gainInfo = useSelector((state) => state.replayGain)
   const [context, setContext] = useState(null)
   const [gainNode, setGainNode] = useState(null)
+  const shouldPreventAutoPlay = useRef(false)
+  const hasLoadedInitialQueue = useRef(false)
 
   // Listen for playqueue refresh events and add similar songs
-  const loadQueueUpdate = useCallback(async () => {
+  const loadQueueUpdate = useCallback(async (autoPlay = true) => {
     try {
+      // Only prevent auto-play on the very first queue load (initial page load)
+      // After that, allow auto-play even if autoPlay=false to not interfere with user actions
+      shouldPreventAutoPlay.current = !autoPlay && !hasLoadedInitialQueue.current
+      hasLoadedInitialQueue.current = true
       const response = await fetch(`${config.baseURL}/api/queue`, {
         credentials: 'include',
         headers: {
@@ -78,7 +84,7 @@ const Player = () => {
       if (!response.ok) {
         throw new Error(`Queue fetch failed: ${response.status}`)
       }
-      const data = await response.json()
+      let data = await response.json()
       if (data && data.items && data.items.length > 0) {
         const songsById = data.items.reduce((acc, item) => {
           acc[item.id] = item
@@ -88,6 +94,11 @@ const Player = () => {
 
         const playIndex = data.current !== undefined ? data.current : 0
         dispatch(setPlayIndex(playIndex))
+        console.log('Loaded queue - autoPlay:', autoPlay, 'playIndex:', playIndex)
+      } else {
+        // Queue is empty - reset the flag so future plays aren't prevented
+        console.log('Queue is empty, resetting shouldPreventAutoPlay')
+        shouldPreventAutoPlay.current = false
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -100,10 +111,10 @@ const Player = () => {
     onRefresh: loadQueueUpdate,
   })
 
-  // Load queue on initial mount
+  // Load queue on initial mount (without auto-play)
   useEffect(() => {
     if (authenticated) {
-      loadQueueUpdate()
+      loadQueueUpdate(false) // Don't auto-play on page load
     }
   }, [authenticated, loadQueueUpdate])
 
@@ -182,7 +193,8 @@ const Player = () => {
       ...defaultOptions,
       audioLists: playerState.queue.map((item) => item),
       playIndex: playerState.playIndex,
-      autoPlay: playerState.clear || playerState.playIndex === 0,
+      autoPlay: playerState.clear,
+      autoPlayInitLoadPlayList: playerState.clear,
       clearPriorAudioLists: playerState.clear,
       extendsContent: (
         <PlayerToolbar id={current.trackId} isRadio={current.isRadio} />
@@ -254,6 +266,22 @@ const Player = () => {
 
   const onAudioPlay = useCallback(
     (info) => {
+      // Prevent auto-play on initial page load
+      console.log('onAudioPlay fired - shouldPreventAutoPlay:', shouldPreventAutoPlay.current, 'hasLoadedInitialQueue:', hasLoadedInitialQueue.current)
+      if (shouldPreventAutoPlay.current && audioInstance) {
+        console.log('Preventing auto-play on initial load')
+        audioInstance.pause()
+
+
+
+
+
+
+
+        shouldPreventAutoPlay.current = false
+        return
+      }
+
       // Do this to start the context; on chrome-based browsers, the context
       // will start paused since it is created prior to user interaction
       if (context && context.state !== 'running') {
@@ -288,7 +316,7 @@ const Player = () => {
         }
       }
     },
-    [context, dispatch, showNotifications, startTime],
+    [audioInstance, context, dispatch, showNotifications, startTime],
   )
 
   const onAudioPlayTrackChange = useCallback(() => {
