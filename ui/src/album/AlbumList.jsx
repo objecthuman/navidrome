@@ -14,6 +14,7 @@ import {
   useRefresh,
   useTranslate,
   useVersion,
+  useListContext,
 } from 'react-admin'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import { withWidth } from '@material-ui/core'
@@ -24,6 +25,7 @@ import {
   useAlbumsPerPage,
   useResourceRefresh,
   useSetToggleableFields,
+  UnifiedSearchResults,
 } from '../common'
 import AlbumListActions from './AlbumListActions'
 import AlbumTableView from './AlbumTableView'
@@ -176,9 +178,29 @@ const AlbumListTitle = ({ albumListType }) => {
 
 const randomStartingSeed = Math.random().toString()
 
+const AlbumListView = ({ albumListType, ...props }) => {
+  const albumView = useSelector((state) => state.albumView)
+  const { filterValues, data } = useListContext()
+
+  // Check if we're showing unified search results
+  // data is an object keyed by IDs, not an array
+  const dataValues = data ? Object.values(data) : []
+  const isUnifiedSearch =
+    filterValues?.name && dataValues.length > 0 && dataValues[0]?._type
+
+  if (isUnifiedSearch) {
+    return <UnifiedSearchResults />
+  }
+
+  return albumView.grid ? (
+    <AlbumGridView albumListType={albumListType} {...props} />
+  ) : (
+    <AlbumTableView {...props} />
+  )
+}
+
 const AlbumList = (props) => {
   const { width } = props
-  const albumView = useSelector((state) => state.albumView)
   const [perPage, perPageOptions] = useAlbumsPerPage(width)
   const location = useLocation()
   const version = useVersion()
@@ -237,11 +259,7 @@ const AlbumList = (props) => {
         pagination={<Pagination rowsPerPageOptions={perPageOptions} />}
         title={<AlbumListTitle albumListType={albumListType} />}
       >
-        {albumView.grid ? (
-          <AlbumGridView albumListType={albumListType} {...props} />
-        ) : (
-          <AlbumTableView {...props} />
-        )}
+        <AlbumListView albumListType={albumListType} {...props} />
       </List>
       <ExpandInfoDialog content={<AlbumInfo />} />
     </>

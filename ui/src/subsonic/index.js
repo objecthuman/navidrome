@@ -107,6 +107,20 @@ const getTopSongs = (artist, count = 50) => {
   return httpClient(url('getTopSongs', null, { artist, count }))
 }
 
+const search3 = (query, artistCount = 10, albumCount = 20, songCount = 50) => {
+  return httpClient(
+    url('search3.view', null, {
+      query,
+      artistCount,
+      artistOffset: 0,
+      albumCount,
+      albumOffset: 0,
+      songCount,
+      songOffset: 0,
+    }),
+  )
+}
+
 const streamUrl = (id, options) => {
   return baseUrl(
     url('stream', id, {
@@ -135,4 +149,5 @@ export default {
   getArtistInfo,
   getTopSongs,
   getSimilarSongs2,
+  search3,
 }

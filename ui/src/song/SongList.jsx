@@ -10,6 +10,7 @@ import {
   useTranslate,
   NullableBooleanInput,
   usePermissions,
+  useListContext,
 } from 'react-admin'
 import { useMediaQuery } from '@material-ui/core'
 import FavoriteIcon from '@material-ui/icons/Favorite'
@@ -27,6 +28,7 @@ import {
   useResourceRefresh,
   ArtistLinkField,
   PathField,
+  UnifiedSearchResults,
 } from '../common'
 import { useDispatch } from 'react-redux'
 import { makeStyles } from '@material-ui/core/styles'
@@ -130,16 +132,27 @@ const SongFilter = (props) => {
   )
 }
 
-const SongList = (props) => {
+const SongListView = () => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const isXsmall = useMediaQuery((theme) => theme.breakpoints.down('xs'))
   const isDesktop = useMediaQuery((theme) => theme.breakpoints.up('md'))
-  useResourceRefresh('song')
+  const { filterValues, data } = useListContext()
 
   const handleRowClick = (id, basePath, record) => {
     dispatch(setTrack(record))
   }
+
+  // Check if we're showing unified search results
+  // data is an object keyed by IDs, not an array
+  const dataValues = data ? Object.values(data) : []
+  const isUnifiedSearch =
+    filterValues?.title && dataValues.length > 0 && dataValues[0]?._type
+
+  console.log('SongListView - filterValues:', filterValues)
+  console.log('SongListView - data:', data)
+  console.log('SongListView - dataValues:', dataValues)
+  console.log('SongListView - isUnifiedSearch:', isUnifiedSearch)
 
   const toggleableFields = useMemo(() => {
     return {
@@ -204,6 +217,46 @@ const SongList = (props) => {
     ],
   })
 
+  if (isXsmall) {
+    return <SongSimpleList />
+  }
+
+  if (isUnifiedSearch) {
+    return <UnifiedSearchResults />
+  }
+
+  return (
+    <SongDatagrid
+      rowClick={handleRowClick}
+      contextAlwaysVisible={!isDesktop}
+      classes={{ row: classes.row }}
+    >
+      <SongTitleField source="title" showTrackNumbers={false} />
+      {columns}
+      <SongContextMenu
+        source={'starred_at'}
+        sortByOrder={'DESC'}
+        sortable={config.enableFavourites}
+        className={classes.contextMenu}
+        label={
+          config.enableFavourites && (
+            <FavoriteBorderIcon
+              fontSize={'small'}
+              className={classes.contextHeader}
+            />
+          )
+        }
+      />
+    </SongDatagrid>
+  )
+}
+
+const SongList = (props) => {
+  const isXsmall = useMediaQuery((theme) => theme.breakpoints.down('xs'))
+  useResourceRefresh('song')
+
+  console.log('=== SongList rendering ===')
+
   return (
     <>
       <List
@@ -215,32 +268,7 @@ const SongList = (props) => {
         filters={<SongFilter />}
         perPage={isXsmall ? 50 : 15}
       >
-        {isXsmall ? (
-          <SongSimpleList />
-        ) : (
-          <SongDatagrid
-            rowClick={handleRowClick}
-            contextAlwaysVisible={!isDesktop}
-            classes={{ row: classes.row }}
-          >
-            <SongTitleField source="title" showTrackNumbers={false} />
-            {columns}
-            <SongContextMenu
-              source={'starred_at'}
-              sortByOrder={'DESC'}
-              sortable={config.enableFavourites}
-              className={classes.contextMenu}
-              label={
-                config.enableFavourites && (
-                  <FavoriteBorderIcon
-                    fontSize={'small'}
-                    className={classes.contextHeader}
-                  />
-                )
-              }
-            />
-          </SongDatagrid>
-        )}
+        <SongListView />
       </List>
       <ExpandInfoDialog content={<SongInfo />} />
     </>

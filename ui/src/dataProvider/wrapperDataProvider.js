@@ -1,6 +1,7 @@
 import jsonServerProvider from 'ra-data-json-server'
 import httpClient from './httpClient'
 import { REST_URL } from '../consts'
+import subsonic from '../subsonic'
 
 const dataProvider = jsonServerProvider(REST_URL, httpClient)
 
@@ -145,10 +146,116 @@ const updateUser = async (params) => {
   return userResponse
 }
 
+// Helper to convert Subsonic search3 results to react-admin format
+// Use original IDs but add type prefix for uniqueness across different entity types
+const convertSearch3ToAlbums = (albums) => {
+  return albums.map((album) => ({
+    id: `al-${album.id}`, // Prefix to avoid ID collision with songs
+    _type: 'album',
+    name: album.name,
+    artist: album.artist,
+    artistId: album.artistId,
+    albumArtist: album.artist,
+    coverArt: album.coverArt,
+    songCount: album.songCount,
+    duration: album.duration,
+    playCount: album.playCount,
+    year: album.year,
+    genre: album.genre,
+    starred: album.starred,
+    createdAt: album.created,
+    // Store original album ID for navigation
+    albumId: album.id,
+  }))
+}
+
+const convertSearch3ToSongs = (songs) => {
+  return songs.map((song) => ({
+    id: song.id, // Keep original ID for songs (most important for playback)
+    _type: 'song',
+    title: song.title,
+    album: song.album,
+    albumId: song.albumId,
+    artist: song.artist,
+    artistId: song.artistId,
+    trackNumber: song.track,
+    year: song.year,
+    genre: song.genre,
+    size: song.size,
+    duration: song.duration,
+    bitRate: song.bitRate,
+    playCount: song.playCount,
+    starred: song.starred,
+    path: song.path,
+    createdAt: song.created,
+  }))
+}
+
+const convertSearch3ToArtists = (artists) => {
+  return artists.map((artist) => ({
+    id: `ar-${artist.id}`, // Prefix to avoid ID collision with songs
+    _type: 'artist',
+    name: artist.name,
+    albumCount: artist.albumCount,
+    coverArt: artist.coverArt,
+    starred: artist.starred,
+    // Store original artist ID for navigation
+    artistId: artist.id,
+  }))
+}
+
 const wrapperDataProvider = {
   ...dataProvider,
-  getList: (resource, params) => {
+  getList: async (resource, params) => {
     const [r, p] = mapResource(resource, params)
+
+    // Check if this is a search query for albums or songs
+    const isAlbumSearch = resource === 'album' && p.filter && p.filter.name
+    const isSongSearch = resource === 'song' && p.filter && p.filter.title
+
+    if (isAlbumSearch || isSongSearch) {
+      const searchQuery = isAlbumSearch ? p.filter.name : p.filter.title
+
+      try {
+        // Fetch 50 results to have a good pool for filtering
+        const response = await subsonic.search3(searchQuery, 50, 50, 50)
+        const searchResult = response?.json?.['subsonic-response']?.searchResult3
+
+        if (searchResult) {
+          const queryLower = searchQuery.toLowerCase().trim()
+          let data = []
+
+          // Filter songs: only keep songs where the title actually contains the search term
+          if (searchResult.song && searchResult.song.length > 0) {
+            const relevantSongs = searchResult.song.filter((song) =>
+              song.title?.toLowerCase().includes(queryLower)
+            )
+            if (relevantSongs.length > 0) {
+              data = [...data, ...convertSearch3ToSongs(relevantSongs)]
+            }
+          }
+
+          // Add all albums (they're already relevant from the API)
+          if (searchResult.album && searchResult.album.length > 0) {
+            data = [...data, ...convertSearch3ToAlbums(searchResult.album)]
+          }
+
+          // Add all artists (they're already relevant from the API)
+          if (searchResult.artist && searchResult.artist.length > 0) {
+            data = [...data, ...convertSearch3ToArtists(searchResult.artist)]
+          }
+
+          return {
+            data,
+            total: data.length,
+          }
+        }
+      } catch (error) {
+        console.error('Search3 failed, falling back to regular search:', error)
+        // Fall through to regular dataProvider call
+      }
+    }
+
     return dataProvider.getList(r, p)
   },
   getOne: (resource, params) => {
