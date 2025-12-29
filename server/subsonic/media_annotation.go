@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/navidrome/navidrome/core/scrobbler"
 	"github.com/navidrome/navidrome/log"
 	"github.com/navidrome/navidrome/model"
@@ -167,6 +168,7 @@ func (api *Router) Scrobble(r *http.Request) (*responses.Subsonic, error) {
 	}
 	submission := p.BoolOr("submission", true)
 	position := p.IntOr("position", 0)
+	pageType, _ := p.String("pageType")
 	ctx := r.Context()
 
 	if submission {
@@ -175,7 +177,7 @@ func (api *Router) Scrobble(r *http.Request) (*responses.Subsonic, error) {
 			log.Error(ctx, "Error registering scrobbles", "ids", ids, "times", times, err)
 		}
 	} else {
-		err := api.scrobblerNowPlaying(ctx, ids[0], position)
+		err := api.scrobblerNowPlaying(ctx, ids[0], position, pageType)
 		if err != nil {
 			log.Error(ctx, "Error setting NowPlaying", "id", ids[0], err)
 		}
@@ -200,8 +202,8 @@ func (api *Router) scrobblerSubmit(ctx context.Context, ids []string, times []ti
 	return api.scrobbler.Submit(ctx, submissions)
 }
 
-func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, position int) error {
-	log.Info(ctx, "Scrobbling Now Playing", "id", trackId, "position", position)
+func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, position int, pageType string) error {
+	log.Info(ctx, "Scrobbling Now Playing", "id", trackId, "position", position, "pageType", pageType)
 	mf, err := api.ds.MediaFile(ctx).Get(trackId)
 	if err != nil {
 		return err
@@ -222,7 +224,7 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 		clientId = player.ID
 	}
 
-	log.Info(ctx, "Now Playing", "title", mf.Title, "artist", mf.Artist, "user", username, "player", player.Name, "position", position)
+	log.Info(ctx, "Now Playing", "title", mf.Title, "artist", mf.Artist, "user", username, "player", player.Name, "position", position, "pageType", pageType)
 	err = api.scrobbler.NowPlaying(ctx, clientId, client, trackId, position)
 
 	// Check if recommender is available before launching goroutine
@@ -264,18 +266,59 @@ func (api *Router) scrobblerNowPlaying(ctx context.Context, trackId string, posi
 			}
 		}
 
-		// If the song is not in the queue, create a new queue with just this song
+		// If the song is not in the queue, create a new queue
 		if !found {
 			log.Info(bgCtx, "Current song not in queue, creating new queue", "trackId", trackId)
 			existingQueue.Items = model.MediaFiles{*mf}
 			existingQueue.Current = 0
+		} else {
+			if pageType == "album" {
+				log.Info(bgCtx, "Creating queue from album", "trackId", trackId, "albumId", mf.AlbumID)
+				albumSongs, err := api.ds.MediaFile(bgCtx).GetAll(model.QueryOptions{
+					Filters: squirrel.Eq{"album_id": mf.AlbumID},
+					Sort:    "disc_number, track_number, title",
+					Order:   "asc",
+				})
+				if err != nil {
+					log.Error(bgCtx, "Failed to get album songs", "albumId", mf.AlbumID, "error", err)
+					existingQueue.Items = model.MediaFiles{*mf}
+					existingQueue.Current = 0
+				} else if len(albumSongs) > 0 {
+					existingQueue.Items = albumSongs
+					// Find the current song's position in the album
+					existingQueue.Current = 0
+					for i, song := range albumSongs {
+						if song.ID == trackId {
+							existingQueue.Current = i
+							break
+						}
+					}
+					log.Info(bgCtx, "Created queue from album", "albumId", mf.AlbumID, "songCount", len(albumSongs), "current", existingQueue.Current)
+				} else {
+					existingQueue.Items = model.MediaFiles{*mf}
+					existingQueue.Current = 0
+				}
+			}
 		}
-
 		if err := pqRepo.Store(existingQueue, "current"); err != nil {
 			log.Error(bgCtx, "Failed to update play queue", "userId", user.ID, "error", err)
 			return
 		} else {
 			log.Info(bgCtx, "Updated play queue current item", "userId", user.ID, "current", existingQueue.Current)
+		}
+
+		if pageType == "album" {
+			log.Info(bgCtx, "Album page type detected, sending event and skipping recommendations", "userId", user.ID)
+			existingQueue.ChangedBy = "similar-songs-auto"
+			if err := pqRepo.Store(existingQueue, "items", "current"); err != nil {
+				log.Error(bgCtx, "Failed to update play queue", "userId", user.ID, "error", err)
+				return
+			}
+			if api.broker != nil {
+				event := &events.RefreshResource{}
+				api.broker.SendMessage(bgCtx, event.With("playqueue", user.ID))
+			}
+			return
 		}
 
 		if len(existingQueue.Items) != 0 {
