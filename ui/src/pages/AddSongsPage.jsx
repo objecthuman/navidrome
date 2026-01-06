@@ -381,26 +381,29 @@ const AddSongsPage = () => {
   }, [selectedFiles, notify, translate])
 
   // Album search functionality
-  const handleAlbumSearch = useCallback(async (searchQuery) => {
-    if (!searchQuery || searchQuery.trim().length < 2) {
-      setAlbumSearchResults([])
-      return
-    }
+  const handleAlbumSearch = useCallback(
+    async (searchQuery) => {
+      if (!searchQuery || searchQuery.trim().length < 2) {
+        setAlbumSearchResults([])
+        return
+      }
 
-    setAlbumSearching(true)
-    try {
-      const response = await httpClient(
-        `/api/album?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
-        { method: 'GET' }
-      )
-      setAlbumSearchResults(response.json || [])
-    } catch (error) {
-      notify('Failed to search albums', 'error')
-      setAlbumSearchResults([])
-    } finally {
-      setAlbumSearching(false)
-    }
-  }, [notify])
+      setAlbumSearching(true)
+      try {
+        const response = await httpClient(
+          `/api/album?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
+          { method: 'GET' },
+        )
+        setAlbumSearchResults(response.json || [])
+      } catch (error) {
+        notify('Failed to search albums', 'error')
+        setAlbumSearchResults([])
+      } finally {
+        setAlbumSearching(false)
+      }
+    },
+    [notify],
+  )
 
   // Debounced album search
   useEffect(() => {
@@ -411,26 +414,29 @@ const AddSongsPage = () => {
   }, [albumSearchQuery, handleAlbumSearch])
 
   // Artist search functionality
-  const handleArtistSearch = useCallback(async (searchQuery) => {
-    if (!searchQuery || searchQuery.trim().length < 2) {
-      setArtistSearchResults([])
-      return
-    }
+  const handleArtistSearch = useCallback(
+    async (searchQuery) => {
+      if (!searchQuery || searchQuery.trim().length < 2) {
+        setArtistSearchResults([])
+        return
+      }
 
-    setArtistSearching(true)
-    try {
-      const response = await httpClient(
-        `/api/artist?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
-        { method: 'GET' }
-      )
-      setArtistSearchResults(response.json || [])
-    } catch (error) {
-      notify('Failed to search artists', 'error')
-      setArtistSearchResults([])
-    } finally {
-      setArtistSearching(false)
-    }
-  }, [notify])
+      setArtistSearching(true)
+      try {
+        const response = await httpClient(
+          `/api/artist?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
+          { method: 'GET' },
+        )
+        setArtistSearchResults(response.json || [])
+      } catch (error) {
+        notify('Failed to search artists', 'error')
+        setArtistSearchResults([])
+      } finally {
+        setArtistSearching(false)
+      }
+    },
+    [notify],
+  )
 
   // Debounced artist search
   useEffect(() => {
@@ -461,7 +467,9 @@ const AddSongsPage = () => {
     }
 
     // Use selected artist name or the manually entered artist name
-    const artistName = selectedArtist ? selectedArtist.name : youtubeArtist.trim()
+    const artistName = selectedArtist
+      ? selectedArtist.name
+      : youtubeArtist.trim()
 
     if (!artistName) {
       notify('Please enter or select an artist', 'warning')
@@ -501,7 +509,17 @@ const AddSongsPage = () => {
     } finally {
       setYoutubeDownloading(false)
     }
-  }, [youtubeUrl, youtubeThumbnailUrl, youtubeAlbum, youtubeArtist, selectedAlbum, selectedArtist, youtubeAudioOnly, youtubeFormat, notify])
+  }, [
+    youtubeUrl,
+    youtubeThumbnailUrl,
+    youtubeAlbum,
+    youtubeArtist,
+    selectedAlbum,
+    selectedArtist,
+    youtubeAudioOnly,
+    youtubeFormat,
+    notify,
+  ])
 
   const renderResults = () => {
     if (searching) {
@@ -690,115 +708,122 @@ const AddSongsPage = () => {
             {activeTab === 0 && (
               <div className={classes.tabPanel}>
                 <Paper className={classes.searchForm}>
-              <TextField
-                label={translate('menu.searchQuery')}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !searching) {
-                    handleSearch()
-                  }
-                }}
-                fullWidth
-                variant="outlined"
-                disabled={searching}
-              />
-              <div className={classes.formRow}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel>{translate('menu.fileType')}</InputLabel>
-                  <Select
-                    value={fileType}
-                    onChange={(e) => setFileType(e.target.value)}
-                    label={translate('menu.fileType')}
+                  <TextField
+                    label={translate('menu.searchQuery')}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !searching) {
+                        handleSearch()
+                      }
+                    }}
+                    fullWidth
+                    variant="outlined"
+                    disabled={searching}
+                  />
+                  <div className={classes.formRow}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>{translate('menu.fileType')}</InputLabel>
+                      <Select
+                        value={fileType}
+                        onChange={(e) => setFileType(e.target.value)}
+                        label={translate('menu.fileType')}
+                      >
+                        <MenuItem value="">
+                          {translate('menu.allTypes')}
+                        </MenuItem>
+                        <MenuItem value="mp3">MP3</MenuItem>
+                        <MenuItem value="flac">FLAC</MenuItem>
+                        <MenuItem value="m4a">M4A</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      label={translate('menu.searchTimeout')}
+                      type="number"
+                      value={timeout}
+                      onChange={(e) =>
+                        setTimeout(
+                          Math.max(1, Math.min(30, Number(e.target.value))),
+                        )
+                      }
+                      inputProps={{ min: 1, max: 30 }}
+                      variant="outlined"
+                      fullWidth
+                    />
+                    <TextField
+                      label={translate('menu.usersLimit')}
+                      type="number"
+                      value={usersLimit}
+                      onChange={(e) =>
+                        setUsersLimit(
+                          Math.max(1, Math.min(100, Number(e.target.value))),
+                        )
+                      }
+                      inputProps={{ min: 1, max: 100 }}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </div>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSearch}
+                    disabled={searching || !query.trim()}
+                    fullWidth
                   >
-                    <MenuItem value="">{translate('menu.allTypes')}</MenuItem>
-                    <MenuItem value="mp3">MP3</MenuItem>
-                    <MenuItem value="flac">FLAC</MenuItem>
-                    <MenuItem value="m4a">M4A</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  label={translate('menu.searchTimeout')}
-                  type="number"
-                  value={timeout}
-                  onChange={(e) =>
-                    setTimeout(
-                      Math.max(1, Math.min(30, Number(e.target.value))),
-                    )
-                  }
-                  inputProps={{ min: 1, max: 30 }}
-                  variant="outlined"
-                  fullWidth
-                />
-                <TextField
-                  label={translate('menu.usersLimit')}
-                  type="number"
-                  value={usersLimit}
-                  onChange={(e) =>
-                    setUsersLimit(
-                      Math.max(1, Math.min(100, Number(e.target.value))),
-                    )
-                  }
-                  inputProps={{ min: 1, max: 100 }}
-                  variant="outlined"
-                  fullWidth
-                />
-              </div>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSearch}
-                disabled={searching || !query.trim()}
-                fullWidth
-              >
-                {searching
-                  ? translate('menu.searching')
-                  : translate('menu.search')}
-              </Button>
-            </Paper>
+                    {searching
+                      ? translate('menu.searching')
+                      : translate('menu.search')}
+                  </Button>
+                </Paper>
 
-            {results && (
-              <Paper className={classes.resultsContainer}>
-                <div className={classes.resultsHeader}>
-                  <Typography variant="subtitle1">
-                    {translate('menu.selectedFilesCount', {
-                      count: selectedFiles.size,
-                      _: `Select Files (${selectedFiles.size} selected)`,
-                    })}
-                  </Typography>
-                  <Box className={classes.headerActions}>
-                    <Button
-                      size="small"
-                      onClick={handleSelectAll}
-                      disabled={totalFilesAvailable === 0}
-                    >
-                      {translate('menu.selectAll', { _: 'Select All' })}
-                    </Button>
-                    <Button
-                      size="small"
-                      onClick={handleDeselectAll}
-                      disabled={selectedFiles.size === 0}
-                    >
-                      {translate('menu.unselectAll', { _: 'Clear Selection' })}
-                    </Button>
-                    <Button size="small" onClick={() => setShowTransfers(true)}>
-                      {translate('menu.transfers')}
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleDownload}
-                      disabled={downloading || selectedFiles.size === 0}
-                    >
-                      {downloading
-                        ? translate('menu.downloading')
-                        : translate('menu.downloadSelected')}
-                    </Button>
-                  </Box>
-                </div>
-                {renderResults()}
-              </Paper>
-            )}
+                {results && (
+                  <Paper className={classes.resultsContainer}>
+                    <div className={classes.resultsHeader}>
+                      <Typography variant="subtitle1">
+                        {translate('menu.selectedFilesCount', {
+                          count: selectedFiles.size,
+                          _: `Select Files (${selectedFiles.size} selected)`,
+                        })}
+                      </Typography>
+                      <Box className={classes.headerActions}>
+                        <Button
+                          size="small"
+                          onClick={handleSelectAll}
+                          disabled={totalFilesAvailable === 0}
+                        >
+                          {translate('menu.selectAll', { _: 'Select All' })}
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={handleDeselectAll}
+                          disabled={selectedFiles.size === 0}
+                        >
+                          {translate('menu.unselectAll', {
+                            _: 'Clear Selection',
+                          })}
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => setShowTransfers(true)}
+                        >
+                          {translate('menu.transfers')}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={handleDownload}
+                          disabled={downloading || selectedFiles.size === 0}
+                        >
+                          {downloading
+                            ? translate('menu.downloading')
+                            : translate('menu.downloadSelected')}
+                        </Button>
+                      </Box>
+                    </div>
+                    {renderResults()}
+                  </Paper>
+                )}
               </div>
             )}
 
@@ -808,7 +833,11 @@ const AddSongsPage = () => {
                   <Typography variant="h6" gutterBottom>
                     YouTube Download
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    gutterBottom
+                  >
                     Download music from YouTube and add it to your library
                   </Typography>
 
@@ -837,7 +866,11 @@ const AddSongsPage = () => {
                   <Typography variant="subtitle2" gutterBottom>
                     Album Selection
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    gutterBottom
+                  >
                     Search for an existing album or enter a new album name
                   </Typography>
 
@@ -866,7 +899,9 @@ const AddSongsPage = () => {
                   )}
 
                   {!albumSearching && albumSearchResults.length > 0 && (
-                    <List style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}>
+                    <List
+                      style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}
+                    >
                       {albumSearchResults.map((album) => (
                         <ListItem
                           key={album.id}
@@ -904,7 +939,11 @@ const AddSongsPage = () => {
                   <Typography variant="subtitle2" gutterBottom>
                     Artist Selection
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    gutterBottom
+                  >
                     Search for an existing artist or enter a new artist name
                   </Typography>
 
@@ -933,7 +972,9 @@ const AddSongsPage = () => {
                   )}
 
                   {!artistSearching && artistSearchResults.length > 0 && (
-                    <List style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}>
+                    <List
+                      style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}
+                    >
                       {artistSearchResults.map((artist) => (
                         <ListItem
                           key={artist.id}
@@ -1007,7 +1048,9 @@ const AddSongsPage = () => {
                     }
                     fullWidth
                   >
-                    {youtubeDownloading ? 'Downloading...' : 'Download from YouTube'}
+                    {youtubeDownloading
+                      ? 'Downloading...'
+                      : 'Download from YouTube'}
                   </Button>
                 </Paper>
               </div>

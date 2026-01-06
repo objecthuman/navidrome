@@ -71,7 +71,14 @@ const soulseekApi = {
    * @returns {Promise} Download response
    */
   youtubeDownload: (params) => {
-    const { url, thumbnail_url, album, artist, audio_only = true, format } = params
+    const {
+      url,
+      thumbnail_url,
+      album,
+      artist,
+      audio_only = true,
+      format,
+    } = params
     const apiUrl = `${SOULSEEK_BASE_URL}/youtube/download`
     return fetchUtils.fetchJson(apiUrl, {
       method: 'POST',
