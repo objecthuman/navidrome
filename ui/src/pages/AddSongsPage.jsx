@@ -17,6 +17,8 @@ import {
   MenuItem,
   Paper,
   Select,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@material-ui/core'
@@ -29,6 +31,8 @@ import { useHistory } from 'react-router-dom'
 import { useNotify, useTranslate } from 'react-admin'
 import TransfersPanel from '../dialogs/TransfersPanel'
 import soulseekApi from '../utils/soulseekApi'
+import httpClient from '../dataProvider/httpClient'
+import config from '../config'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,6 +48,14 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: 'wrap',
     gap: theme.spacing(2),
     marginBottom: theme.spacing(4),
+  },
+  tabsContainer: {
+    marginBottom: theme.spacing(3),
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius * 2,
+  },
+  tabPanel: {
+    padding: theme.spacing(3, 0),
   },
   pageActions: {
     display: 'flex',
@@ -158,6 +170,7 @@ const AddSongsPage = () => {
   const notify = useNotify()
   const history = useHistory()
 
+  const [activeTab, setActiveTab] = useState(0)
   const [query, setQuery] = useState('')
   const [fileType, setFileType] = useState('')
   const [timeout, setTimeout] = useState(5)
@@ -168,6 +181,23 @@ const AddSongsPage = () => {
   const [downloading, setDownloading] = useState(false)
   const [showTransfers, setShowTransfers] = useState(false)
   const [expandedDirectories, setExpandedDirectories] = useState(new Set())
+
+  // YouTube download states
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [youtubeThumbnailUrl, setYoutubeThumbnailUrl] = useState('')
+  const [youtubeAlbum, setYoutubeAlbum] = useState('')
+  const [youtubeArtist, setYoutubeArtist] = useState('')
+  const [youtubeAudioOnly, setYoutubeAudioOnly] = useState(true)
+  const [youtubeFormat, setYoutubeFormat] = useState('mp3')
+  const [youtubeDownloading, setYoutubeDownloading] = useState(false)
+  const [albumSearchQuery, setAlbumSearchQuery] = useState('')
+  const [albumSearchResults, setAlbumSearchResults] = useState([])
+  const [albumSearching, setAlbumSearching] = useState(false)
+  const [selectedAlbum, setSelectedAlbum] = useState(null)
+  const [artistSearchQuery, setArtistSearchQuery] = useState('')
+  const [artistSearchResults, setArtistSearchResults] = useState([])
+  const [artistSearching, setArtistSearching] = useState(false)
+  const [selectedArtist, setSelectedArtist] = useState(null)
 
   const navigateBack = useCallback(() => {
     if (history.length > 1) {
@@ -350,6 +380,129 @@ const AddSongsPage = () => {
     }
   }, [selectedFiles, notify, translate])
 
+  // Album search functionality
+  const handleAlbumSearch = useCallback(async (searchQuery) => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setAlbumSearchResults([])
+      return
+    }
+
+    setAlbumSearching(true)
+    try {
+      const response = await httpClient(
+        `/api/album?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
+        { method: 'GET' }
+      )
+      setAlbumSearchResults(response.json || [])
+    } catch (error) {
+      notify('Failed to search albums', 'error')
+      setAlbumSearchResults([])
+    } finally {
+      setAlbumSearching(false)
+    }
+  }, [notify])
+
+  // Debounced album search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleAlbumSearch(albumSearchQuery)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [albumSearchQuery, handleAlbumSearch])
+
+  // Artist search functionality
+  const handleArtistSearch = useCallback(async (searchQuery) => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setArtistSearchResults([])
+      return
+    }
+
+    setArtistSearching(true)
+    try {
+      const response = await httpClient(
+        `/api/artist?_end=10&_order=ASC&_sort=name&_start=0&name=${encodeURIComponent(searchQuery)}`,
+        { method: 'GET' }
+      )
+      setArtistSearchResults(response.json || [])
+    } catch (error) {
+      notify('Failed to search artists', 'error')
+      setArtistSearchResults([])
+    } finally {
+      setArtistSearching(false)
+    }
+  }, [notify])
+
+  // Debounced artist search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleArtistSearch(artistSearchQuery)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [artistSearchQuery, handleArtistSearch])
+
+  // Handle YouTube download
+  const handleYoutubeDownload = useCallback(async () => {
+    if (!youtubeUrl.trim()) {
+      notify('Please enter a YouTube URL', 'warning')
+      return
+    }
+
+    if (!youtubeThumbnailUrl.trim()) {
+      notify('Please enter a thumbnail URL', 'warning')
+      return
+    }
+
+    // Use selected album name or the manually entered album name
+    const albumName = selectedAlbum ? selectedAlbum.name : youtubeAlbum.trim()
+
+    if (!albumName) {
+      notify('Please enter or select an album', 'warning')
+      return
+    }
+
+    // Use selected artist name or the manually entered artist name
+    const artistName = selectedArtist ? selectedArtist.name : youtubeArtist.trim()
+
+    if (!artistName) {
+      notify('Please enter or select an artist', 'warning')
+      return
+    }
+
+    setYoutubeDownloading(true)
+
+    try {
+      const response = await soulseekApi.youtubeDownload({
+        url: youtubeUrl.trim(),
+        thumbnail_url: youtubeThumbnailUrl.trim(),
+        album: albumName,
+        artist: artistName,
+        audio_only: youtubeAudioOnly,
+        format: youtubeFormat,
+      })
+
+      // Check if the response indicates an error
+      const result = response.json
+      if (result.status === 'error') {
+        throw new Error(result.error || 'YouTube download failed')
+      }
+
+      notify('YouTube download started successfully', 'success')
+      // Reset form
+      setYoutubeUrl('')
+      setYoutubeThumbnailUrl('')
+      setYoutubeAlbum('')
+      setYoutubeArtist('')
+      setSelectedAlbum(null)
+      setSelectedArtist(null)
+      setAlbumSearchQuery('')
+      setArtistSearchQuery('')
+    } catch (error) {
+      notify(error.message || 'Failed to start YouTube download', 'error')
+    } finally {
+      setYoutubeDownloading(false)
+    }
+  }, [youtubeUrl, youtubeThumbnailUrl, youtubeAlbum, youtubeArtist, selectedAlbum, selectedArtist, youtubeAudioOnly, youtubeFormat, notify])
+
   const renderResults = () => {
     if (searching) {
       return (
@@ -521,7 +674,22 @@ const AddSongsPage = () => {
       <div className={classes.content}>
         {!showTransfers ? (
           <>
-            <Paper className={classes.searchForm}>
+            <Paper className={classes.tabsContainer}>
+              <Tabs
+                value={activeTab}
+                onChange={(e, newValue) => setActiveTab(newValue)}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="fullWidth"
+              >
+                <Tab label="Soulseek" />
+                <Tab label="YouTube" />
+              </Tabs>
+            </Paper>
+
+            {activeTab === 0 && (
+              <div className={classes.tabPanel}>
+                <Paper className={classes.searchForm}>
               <TextField
                 label={translate('menu.searchQuery')}
                 value={query}
@@ -630,6 +798,219 @@ const AddSongsPage = () => {
                 </div>
                 {renderResults()}
               </Paper>
+            )}
+              </div>
+            )}
+
+            {activeTab === 1 && (
+              <div className={classes.tabPanel}>
+                <Paper className={classes.searchForm}>
+                  <Typography variant="h6" gutterBottom>
+                    YouTube Download
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Download music from YouTube and add it to your library
+                  </Typography>
+
+                  <TextField
+                    label="YouTube URL"
+                    value={youtubeUrl}
+                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    disabled={youtubeDownloading}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+
+                  <TextField
+                    label="Thumbnail URL"
+                    value={youtubeThumbnailUrl}
+                    onChange={(e) => setYoutubeThumbnailUrl(e.target.value)}
+                    fullWidth
+                    variant="outlined"
+                    disabled={youtubeDownloading}
+                    placeholder="https://i.ytimg.com/vi/..."
+                  />
+
+                  <Divider style={{ margin: '16px 0' }} />
+
+                  <Typography variant="subtitle2" gutterBottom>
+                    Album Selection
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Search for an existing album or enter a new album name
+                  </Typography>
+
+                  <TextField
+                    label="Search or Enter Album Name"
+                    value={albumSearchQuery || youtubeAlbum}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setAlbumSearchQuery(value)
+                      setYoutubeAlbum(value)
+                      setSelectedAlbum(null)
+                    }}
+                    fullWidth
+                    variant="outlined"
+                    disabled={youtubeDownloading}
+                    placeholder="Type to search existing albums or enter new name"
+                  />
+
+                  {albumSearching && (
+                    <Box display="flex" alignItems="center" mt={1}>
+                      <CircularProgress size={20} />
+                      <Typography variant="body2" style={{ marginLeft: 8 }}>
+                        Searching albums...
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {!albumSearching && albumSearchResults.length > 0 && (
+                    <List style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}>
+                      {albumSearchResults.map((album) => (
+                        <ListItem
+                          key={album.id}
+                          button
+                          selected={selectedAlbum?.id === album.id}
+                          onClick={() => {
+                            setSelectedAlbum(album)
+                            setYoutubeAlbum(album.name)
+                            setAlbumSearchQuery(album.name)
+                            setAlbumSearchResults([])
+                          }}
+                        >
+                          <ListItemText
+                            primary={album.name}
+                            secondary={`${album.artist || 'Unknown Artist'} • ${album.songCount || 0} songs`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+
+                  {selectedAlbum && (
+                    <Box mt={2} p={2} bgcolor="action.hover" borderRadius={1}>
+                      <Typography variant="body2" color="primary">
+                        Selected Album: <strong>{selectedAlbum.name}</strong>
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        by {selectedAlbum.artist || 'Unknown Artist'}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Divider style={{ margin: '16px 0' }} />
+
+                  <Typography variant="subtitle2" gutterBottom>
+                    Artist Selection
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Search for an existing artist or enter a new artist name
+                  </Typography>
+
+                  <TextField
+                    label="Search or Enter Artist Name"
+                    value={artistSearchQuery || youtubeArtist}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setArtistSearchQuery(value)
+                      setYoutubeArtist(value)
+                      setSelectedArtist(null)
+                    }}
+                    fullWidth
+                    variant="outlined"
+                    disabled={youtubeDownloading}
+                    placeholder="Type to search existing artists or enter new name"
+                  />
+
+                  {artistSearching && (
+                    <Box display="flex" alignItems="center" mt={1}>
+                      <CircularProgress size={20} />
+                      <Typography variant="body2" style={{ marginLeft: 8 }}>
+                        Searching artists...
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {!artistSearching && artistSearchResults.length > 0 && (
+                    <List style={{ maxHeight: 200, overflow: 'auto', marginTop: 8 }}>
+                      {artistSearchResults.map((artist) => (
+                        <ListItem
+                          key={artist.id}
+                          button
+                          selected={selectedArtist?.id === artist.id}
+                          onClick={() => {
+                            setSelectedArtist(artist)
+                            setYoutubeArtist(artist.name)
+                            setArtistSearchQuery(artist.name)
+                            setArtistSearchResults([])
+                          }}
+                        >
+                          <ListItemText
+                            primary={artist.name}
+                            secondary={`${artist.albumCount || 0} albums`}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  )}
+
+                  {selectedArtist && (
+                    <Box mt={2} p={2} bgcolor="action.hover" borderRadius={1}>
+                      <Typography variant="body2" color="primary">
+                        Selected Artist: <strong>{selectedArtist.name}</strong>
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        {selectedArtist.albumCount || 0} albums
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Divider style={{ margin: '16px 0' }} />
+
+                  <div className={classes.formRow}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Format</InputLabel>
+                      <Select
+                        value={youtubeFormat}
+                        onChange={(e) => setYoutubeFormat(e.target.value)}
+                        label="Format"
+                        disabled={youtubeDownloading}
+                      >
+                        <MenuItem value="mp3">MP3</MenuItem>
+                        <MenuItem value="flac">FLAC</MenuItem>
+                        <MenuItem value="m4a">M4A</MenuItem>
+                        <MenuItem value="opus">OPUS</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <Box display="flex" alignItems="center" fullWidth>
+                      <Checkbox
+                        checked={youtubeAudioOnly}
+                        onChange={(e) => setYoutubeAudioOnly(e.target.checked)}
+                        disabled={youtubeDownloading}
+                      />
+                      <Typography variant="body2">Audio Only</Typography>
+                    </Box>
+                  </div>
+
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleYoutubeDownload}
+                    disabled={
+                      youtubeDownloading ||
+                      !youtubeUrl.trim() ||
+                      !youtubeThumbnailUrl.trim() ||
+                      (!selectedAlbum && !youtubeAlbum.trim()) ||
+                      (!selectedArtist && !youtubeArtist.trim())
+                    }
+                    fullWidth
+                  >
+                    {youtubeDownloading ? 'Downloading...' : 'Download from YouTube'}
+                  </Button>
+                </Paper>
+              </div>
             )}
           </>
         ) : (

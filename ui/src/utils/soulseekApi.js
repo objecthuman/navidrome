@@ -58,6 +58,37 @@ const soulseekApi = {
       headers: new Headers({ Accept: 'application/json' }),
     })
   },
+
+  /**
+   * Download from YouTube
+   * @param {Object} params - Download parameters
+   * @param {string} params.url - YouTube URL
+   * @param {string} params.thumbnail_url - Thumbnail URL
+   * @param {string} params.album - Album name
+   * @param {string} params.artist - Artist name
+   * @param {boolean} [params.audio_only=true] - Audio only flag
+   * @param {string|null} [params.format] - Output format
+   * @returns {Promise} Download response
+   */
+  youtubeDownload: (params) => {
+    const { url, thumbnail_url, album, artist, audio_only = true, format } = params
+    const apiUrl = `${SOULSEEK_BASE_URL}/youtube/download`
+    return fetchUtils.fetchJson(apiUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        url,
+        thumbnail_url,
+        album,
+        artist,
+        audio_only,
+        format,
+      }),
+      headers: new Headers({
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }),
+    })
+  },
 }
 
 export default soulseekApi
