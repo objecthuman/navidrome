@@ -68,6 +68,7 @@ export function DesktopMusicPlayer({
 
   // Find current song from queue if not provided
   const displayedSong = currentSong || queue.find(item => item.id === currentSongId)
+  const hasCurrentSong = displayedSong && displayedSong.id !== ''
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -157,7 +158,8 @@ export function DesktopMusicPlayer({
               {/* Play Button */}
               <button
                 onClick={onTogglePlay}
-                className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer"
+                disabled={!hasCurrentSong}
+                className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label={isPlaying ? 'Pause' : 'Play'}
                 title={isPlaying ? 'Pause' : 'Play'}
               >

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MobileMusicPlayer } from './MobileMusicPlayer'
 import { DesktopMusicPlayer } from './DesktopMusicPlayer'
 import { navidromeService } from '../services/navidrome'
 import { subsonicService } from '../services/subsonic'
+import { audioPlayer } from '../services/audioPlayer'
 import type { NavidromeQueueItem } from '../services/navidrome'
 
 interface MusicPlayerProps {
@@ -26,21 +27,29 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
   const [isMuted, setIsMuted] = useState(false)
   const [volume, setVolume] = useState(75)
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(333) // Sample duration in seconds
+  const [duration, setDuration] = useState(0)
   const [isShuffle, setIsShuffle] = useState(false)
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off')
   const [isLiked, setIsLiked] = useState(false)
 
   const [currentSong, setCurrentSong] = useState<Song>({
-    id: 'demo',
-    title: 'Euta Manchheko Maya',
-    artist: 'Narayan Gopal',
-    album: 'Geeti Yatra',
-    coverArt: 'demo-cover',
-    duration: 333,
+    id: '',
+    title: '',
+    artist: '',
+    album: '',
+    coverArt: '',
+    duration: 0,
   })
 
   const [queue, setQueue] = useState<NavidromeQueueItem[]>([])
+
+  // Set up progress update callback
+  useEffect(() => {
+    audioPlayer.onProgressUpdate = (currentTime: number, duration: number) => {
+      setCurrentTime(currentTime)
+      setDuration(duration)
+    }
+  }, [])
 
   // Fetch the current queue on mount
   useEffect(() => {
@@ -91,30 +100,51 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     fetchQueue()
   }, [onQueueUpdate])
 
-  const handleProgressChange = (value: number) => {
+  const handleProgressChange = useCallback((value: number) => {
     setCurrentTime(value)
-  }
+    audioPlayer.seek(value)
+  }, [])
 
-  const handleVolumeChange = (value: number) => {
+  const handleVolumeChange = useCallback((value: number) => {
     setVolume(value)
-  }
+    audioPlayer.setVolume(value)
+  }, [])
 
-  const handlePlaySong = (songId: string) => {
+  const handlePlaySong = useCallback((songId: string) => {
     console.log('Play song:', songId)
-    setCurrentSong((prev) => ({ ...prev, id: songId }))
-    // TODO: Implement actual song playback logic
-  }
 
-  const togglePlay = () => {
-    const newPlayingState = !isPlaying
-    setIsPlaying(newPlayingState)
-    // Update parent about playing state change
-    if (queue.length > 0) {
-      onQueueUpdate(queue, currentSong.id, newPlayingState)
+    // Find the song in queue
+    const song = queue.find(item => item.id === songId)
+    if (song) {
+      setCurrentSong({
+        id: song.id,
+        title: song.title,
+        artist: song.artist,
+        album: song.album,
+        coverArt: song.albumId,
+        duration: song.duration,
+      })
     }
-  }
 
-  const toggleMute = () => setIsMuted(!isMuted)
+    audioPlayer.play(songId)
+    setIsPlaying(true)
+    onQueueUpdate(queue, songId, true)
+  }, [queue, onQueueUpdate])
+
+  const togglePlay = useCallback(() => {
+    if (!currentSong.id) return
+
+    audioPlayer.togglePlay(currentSong.id)
+    const newPlayingState = !audioPlayer.getIsPlaying()
+    setIsPlaying(newPlayingState)
+    onQueueUpdate(queue, currentSong.id, newPlayingState)
+  }, [currentSong.id, queue, onQueueUpdate])
+
+  const toggleMute = useCallback(() => {
+    const newMutedState = audioPlayer.toggleMute()
+    setIsMuted(newMutedState)
+  }, [])
+
   const toggleShuffle = () => setIsShuffle(!isShuffle)
   const toggleLike = () => setIsLiked(!isLiked)
   const cycleRepeat = () => {
