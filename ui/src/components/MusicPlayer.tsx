@@ -25,7 +25,7 @@ interface Song {
 export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueueUpdate }: MusicPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
-  const [volume, setVolume] = useState(75)
+  const [volume, setVolume] = useState(() => audioPlayer.getVolume())
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isShuffle, setIsShuffle] = useState(false)

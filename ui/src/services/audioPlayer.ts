@@ -6,9 +6,34 @@ class AudioPlayerService {
   private isPlaying: boolean = false
   private currentTime: number = 0
   private duration: number = 0
-  private volume: number = 0.75
+  private volume: number = 75
   private isMuted: boolean = false
   private progressUpdateInterval: number | null = null
+  private readonly VOLUME_STORAGE_KEY = 'navidrome_volume'
+
+  constructor() {
+    // Load volume from localStorage on initialization
+    this.loadVolume()
+  }
+
+  private loadVolume() {
+    try {
+      const savedVolume = localStorage.getItem(this.VOLUME_STORAGE_KEY)
+      if (savedVolume !== null) {
+        this.volume = parseFloat(savedVolume)
+      }
+    } catch (error) {
+      console.error('Failed to load volume from localStorage:', error)
+    }
+  }
+
+  private saveVolume() {
+    try {
+      localStorage.setItem(this.VOLUME_STORAGE_KEY, this.volume.toString())
+    } catch (error) {
+      console.error('Failed to save volume to localStorage:', error)
+    }
+  }
 
   play(songId: string) {
     // Stop any currently playing sound
@@ -86,6 +111,8 @@ class AudioPlayerService {
     // Convert from 0-100 to 0.0-1.0 for Howler
     const normalizedVolume = volume / 100
     this.volume = volume
+    this.saveVolume() // Save to localStorage
+
     if (this.howl && !this.isMuted) {
       this.howl.volume(normalizedVolume)
     }
