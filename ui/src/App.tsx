@@ -9,6 +9,8 @@ import { RecentlyPlayed } from './components/RecentlyPlayed'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { authService } from './services/auth'
+import { audioPlayer } from './services/audioPlayer'
+import { navidromeService } from './services/navidrome'
 import type { NavidromeQueueItem } from './services/navidrome'
 
 type Page = 'login' | 'signup' | 'home'
@@ -57,6 +59,46 @@ function App() {
     }
   }, [])
 
+  // Fetch queue on mount (when authenticated)
+  useEffect(() => {
+    const fetchQueue = async () => {
+      if (!authService.isAuthenticated()) return
+
+      try {
+        const queue = await navidromeService.getQueue()
+
+        // Get current song from queue
+        if (queue.items && queue.items.length > 0) {
+          // Use current index if available and valid, otherwise use first song
+          const currentIndex = queue.current !== undefined && queue.current >= 0 ? queue.current : 0
+          const currentItem = queue.items[currentIndex]
+
+          if (currentItem) {
+            setQueue(queue.items)
+            setCurrentSongId(currentItem.id)
+
+            // Preload the audio so seeking works immediately
+            audioPlayer.preload(currentItem.id)
+
+            // Set current position from queue (in seconds)
+            if (queue.position) {
+              // We could set initial position here, but let's start from 0
+            }
+          }
+        } else {
+          setQueue([])
+        }
+
+        console.log('Queue loaded:', queue)
+      } catch (error) {
+        console.error('Failed to fetch queue:', error)
+        setQueue([])
+      }
+    }
+
+    fetchQueue()
+  }, [])
+
   const toggleSidebar = () => {
     setIsSidebarCollapsed((prev) => !prev)
   }
@@ -82,11 +124,19 @@ function App() {
     setIsSidebarCollapsed((prev) => !prev)
   }, [])
 
-  const handlePlaySong = (songId: string) => {
-    console.log('Play song:', songId)
-    setCurrentSongId(songId)
-    // TODO: Implement actual song playback logic
-  }
+  const handlePlaySong = useCallback((songId: string) => {
+    // Find the song in the queue
+    const song = queue.find(item => item.id === songId)
+
+    if (song) {
+      // Update current song state
+      setCurrentSongId(songId)
+      setIsPlaying(true)
+
+      // Play the song using audio player
+      audioPlayer.play(songId)
+    }
+  }, [queue])
 
   const handleQueueUpdate = useCallback((newQueue: NavidromeQueueItem[], newCurrentSongId: string, newIsPlaying: boolean) => {
     setQueue(newQueue)
@@ -181,6 +231,9 @@ function App() {
         isQueueOpen={isQueueOpen}
         onToggleQueue={handleToggleQueue}
         onQueueUpdate={handleQueueUpdate}
+        queue={queue}
+        currentSongId={currentSongId}
+        isPlaying={isPlaying}
       />
     </div>
   )

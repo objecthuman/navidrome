@@ -1,4 +1,4 @@
-import { X, Play } from 'lucide-react'
+import { X, Play, Pause } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { NavidromeQueueItem } from '../services/navidrome'
 
@@ -80,19 +80,32 @@ export function QueueSidebar({
               >
                 {/* Song Number / Playing Indicator */}
                 <div className="flex-shrink-0 w-8 text-center">
-                  {song.id === currentSongId && isPlaying ? (
-                    <div className="flex items-center justify-center gap-0.5">
-                      <span className="w-0.5 h-3 bg-violet-500 animate-pulse" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-0.5 h-4 bg-violet-500 animate-pulse" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-0.5 h-3 bg-violet-500 animate-pulse" style={{ animationDelay: '300ms' }}></span>
-                    </div>
-                  ) : (
-                    <span className={`text-sm font-medium ${
-                      song.id === currentSongId ? 'text-violet-400' : 'text-zinc-500'
-                    }`}>
-                      {index + 1}
-                    </span>
-                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (song.id === currentSongId && isPlaying) {
+                        // Pause the current song
+                        window.dispatchEvent(new CustomEvent('toggle-play'))
+                      } else {
+                        // Play this song
+                        onPlaySong(song.id)
+                      }
+                    }}
+                    className="flex items-center justify-center w-full h-full hover:bg-zinc-700/50 rounded-lg transition-colors cursor-pointer"
+                    aria-label={song.id === currentSongId && isPlaying ? 'Pause' : 'Play'}
+                    title={song.id === currentSongId && isPlaying ? 'Pause' : 'Play'}
+                  >
+                    {song.id === currentSongId && isPlaying ? (
+                      <div className="flex items-center gap-0.5 h-4">
+                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-1" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-2" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-3" style={{ animationDelay: '300ms' }}></span>
+                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-2" style={{ animationDelay: '450ms' }}></span>
+                      </div>
+                    ) : (
+                      <Play className="w-4 h-4 text-zinc-500 hover:text-violet-400 transition-colors" />
+                    )}
+                  </button>
                 </div>
 
                 {/* Cover Art */}
@@ -107,13 +120,23 @@ export function QueueSidebar({
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        onPlaySong(song.id)
+                        if (song.id === currentSongId && isPlaying) {
+                          // Pause the current song
+                          window.dispatchEvent(new CustomEvent('toggle-play'))
+                        } else {
+                          // Play this song
+                          onPlaySong(song.id)
+                        }
                       }}
                       className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300 cursor-pointer"
-                      aria-label="Play song"
-                      title="Play song"
+                      aria-label={song.id === currentSongId && isPlaying ? 'Pause song' : 'Play song'}
+                      title={song.id === currentSongId && isPlaying ? 'Pause song' : 'Play song'}
                     >
-                      <Play className="w-4 h-4 text-white fill-white" />
+                      {song.id === currentSongId && isPlaying ? (
+                        <Pause className="w-4 h-4 text-white" />
+                      ) : (
+                        <Play className="w-4 h-4 text-white fill-white" />
+                      )}
                     </button>
                   </div>
                 </div>

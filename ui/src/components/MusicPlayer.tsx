@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { MobileMusicPlayer } from './MobileMusicPlayer'
 import { DesktopMusicPlayer } from './DesktopMusicPlayer'
-import { navidromeService } from '../services/navidrome'
 import { subsonicService } from '../services/subsonic'
 import { audioPlayer } from '../services/audioPlayer'
 import type { NavidromeQueueItem } from '../services/navidrome'
@@ -11,6 +10,9 @@ interface MusicPlayerProps {
   isQueueOpen: boolean
   onToggleQueue: () => void
   onQueueUpdate: (queue: NavidromeQueueItem[], currentSongId: string, isPlaying: boolean) => void
+  queue: NavidromeQueueItem[]
+  currentSongId: string
+  isPlaying: boolean
 }
 
 interface Song {
@@ -22,8 +24,7 @@ interface Song {
   duration: number
 }
 
-export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueueUpdate }: MusicPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueueUpdate, queue, currentSongId: propCurrentSongId, isPlaying: propIsPlaying }: MusicPlayerProps) {
   const [isMuted, setIsMuted] = useState(false)
   const [volume, setVolume] = useState(() => audioPlayer.getVolume())
   const [currentTime, setCurrentTime] = useState(0)
@@ -40,8 +41,6 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     coverArt: '',
     duration: 0,
   })
-
-  const [queue, setQueue] = useState<NavidromeQueueItem[]>([])
 
   // Set up progress update callback
   useEffect(() => {
@@ -64,6 +63,7 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
           coverArt: song.albumId,
           duration: song.duration,
         })
+        setDuration(song.duration)
         onQueueUpdate(queue, songId, true)
       }
     })
@@ -71,66 +71,32 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
 
   // Update queue info in audio player when queue or shuffle/repeat changes
   useEffect(() => {
-    const currentSongIndex = queue.findIndex(item => item.id === currentSong.id)
+    const currentSongIndex = queue.findIndex(item => item.id === propCurrentSongId)
     audioPlayer.setQueue({
       items: queue,
       currentIndex: currentSongIndex >= 0 ? currentSongIndex : 0,
       shuffle: isShuffle,
       repeat: repeatMode,
     })
-  }, [queue, currentSong.id, isShuffle, repeatMode])
+  }, [queue, propCurrentSongId, isShuffle, repeatMode])
 
-  // Fetch the current queue on mount
+  // Update current song when prop changes
   useEffect(() => {
-    const fetchQueue = async () => {
-      try {
-        const queue = await navidromeService.getQueue()
-
-        // Get current song from queue
-        if (queue.items && queue.items.length > 0) {
-          // Use current index if available and valid, otherwise use first song
-          const currentIndex = queue.current !== undefined && queue.current >= 0 ? queue.current : 0
-          const currentItem = queue.items[currentIndex]
-
-          if (currentItem) {
-            setCurrentSong({
-              id: currentItem.id,
-              title: currentItem.title,
-              artist: currentItem.artist,
-              album: currentItem.album,
-              coverArt: currentItem.albumId, // Use albumId for cover art
-              duration: currentItem.duration,
-            })
-
-            setDuration(currentItem.duration)
-
-            // Preload the audio so seeking works immediately
-            audioPlayer.preload(currentItem.id)
-
-            // Set current position from queue (in seconds)
-            if (queue.position) {
-              setCurrentTime(queue.position / 1000) // Convert ms to seconds
-            }
-
-            // Set queue entries and notify parent
-            setQueue(queue.items)
-            onQueueUpdate(queue.items, currentItem.id, false)
-          }
-        } else {
-          // Queue is empty, just set empty queue
-          setQueue([])
-        }
-
-        console.log('Queue loaded:', queue)
-      } catch (error) {
-        console.error('Failed to fetch queue:', error)
-        // Keep using mock data if queue fetch fails
-        setQueue([])
+    if (propCurrentSongId) {
+      const song = queue.find(item => item.id === propCurrentSongId)
+      if (song && song.id !== currentSong.id) {
+        setCurrentSong({
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          coverArt: song.albumId,
+          duration: song.duration,
+        })
+        setDuration(song.duration)
       }
     }
-
-    fetchQueue()
-  }, [onQueueUpdate])
+  }, [propCurrentSongId, queue, currentSong.id])
 
   const handleProgressChange = useCallback((value: number) => {
     setCurrentTime(value)
@@ -143,34 +109,32 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
   }, [])
 
   const handlePlaySong = useCallback((songId: string) => {
-    console.log('Play song:', songId)
-
     // Find the song in queue
     const song = queue.find(item => item.id === songId)
     if (song) {
-      setCurrentSong({
-        id: song.id,
-        title: song.title,
-        artist: song.artist,
-        album: song.album,
-        coverArt: song.albumId,
-        duration: song.duration,
-      })
+      audioPlayer.play(songId)
     }
-
-    audioPlayer.play(songId)
-    setIsPlaying(true)
-    onQueueUpdate(queue, songId, true)
-  }, [queue, onQueueUpdate])
+  }, [queue])
 
   const togglePlay = useCallback(() => {
-    if (!currentSong.id) return
+    if (!propCurrentSongId) return
 
-    audioPlayer.togglePlay(currentSong.id)
+    audioPlayer.togglePlay(propCurrentSongId)
     const newPlayingState = !audioPlayer.getIsPlaying()
-    setIsPlaying(newPlayingState)
-    onQueueUpdate(queue, currentSong.id, newPlayingState)
-  }, [currentSong.id, queue, onQueueUpdate])
+    onQueueUpdate(queue, propCurrentSongId, newPlayingState)
+  }, [propCurrentSongId, queue, onQueueUpdate])
+
+  // Listen for toggle-play event from queue sidebar
+  useEffect(() => {
+    const handleTogglePlay = () => {
+      togglePlay()
+    }
+
+    window.addEventListener('toggle-play', handleTogglePlay)
+    return () => {
+      window.removeEventListener('toggle-play', handleTogglePlay)
+    }
+  }, [togglePlay])
 
   const toggleMute = useCallback(() => {
     const newMutedState = audioPlayer.toggleMute()
@@ -190,7 +154,7 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
       {/* Mobile Music Player */}
       <MobileMusicPlayer
         currentSong={currentSong}
-        isPlaying={isPlaying}
+        isPlaying={propIsPlaying}
         isLiked={isLiked}
         currentTime={currentTime}
         duration={duration}
@@ -204,7 +168,7 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
         className={className}
         currentTime={currentTime}
         duration={duration}
-        isPlaying={isPlaying}
+        isPlaying={propIsPlaying}
         isMuted={isMuted}
         isShuffle={isShuffle}
         repeatMode={repeatMode}

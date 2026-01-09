@@ -28,3 +28,43 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Equalizer animations for music player */
+@keyframes equalizer-1 {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 12px;
+  }
+}
+
+@keyframes equalizer-2 {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 8px;
+  }
+}
+
+@keyframes equalizer-3 {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+
+.animate-equalizer-1 {
+  animation: equalizer-1 600ms ease-in-out infinite;
+}
+
+.animate-equalizer-2 {
+  animation: equalizer-2 600ms ease-in-out infinite;
+}
+
+.animate-equalizer-3 {
+  animation: equalizer-3 600ms ease-in-out infinite;
+}

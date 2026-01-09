@@ -127,6 +127,9 @@ class AudioPlayerService {
 
     // Create Howl instance and play
     this.howl = this.createHowlInstance(songId, true)
+
+    // Notify that song is changing (for UI updates)
+    this.onSongChange?.(songId)
   }
 
   preload(songId: string) {
