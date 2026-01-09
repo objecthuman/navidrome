@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Play, Pause, Heart } from 'lucide-react'
 
 interface Song {
@@ -13,29 +13,100 @@ interface MobileMusicPlayerProps {
   currentSong: Song
   isPlaying: boolean
   isLiked: boolean
+  currentTime: number
+  duration: number
   onTogglePlay: () => void
   onToggleLike: () => void
   onExpand: () => void
+}
+
+// Extract dominant color from image
+const extractDominantColor = (imgElement: HTMLImageElement): string => {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return '139, 92, 246' // Default violet color
+
+  // Scale down for performance
+  const size = 50
+  canvas.width = size
+  canvas.height = size
+  ctx.drawImage(imgElement, 0, 0, size, size)
+
+  const imageData = ctx.getImageData(0, 0, size, size)
+  const data = imageData.data
+
+  let r = 0,
+    g = 0,
+    b = 0
+  let count = 0
+
+  for (let i = 0; i < data.length; i += 4) {
+    // Skip transparent pixels
+    if (data[i + 3] < 128) continue
+
+    r += data[i]
+    g += data[i + 1]
+    b += data[i + 2]
+    count++
+  }
+
+  if (count === 0) return '139, 92, 246'
+
+  r = Math.floor(r / count)
+  g = Math.floor(g / count)
+  b = Math.floor(b / count)
+
+  return `${r}, ${g}, ${b}`
 }
 
 export function MobileMusicPlayer({
   currentSong,
   isPlaying,
   isLiked,
+  currentTime,
+  duration,
   onTogglePlay,
   onToggleLike,
   onExpand,
 }: MobileMusicPlayerProps) {
+  const [dominantColor, setDominantColor] = useState('139, 92, 246') // Default violet
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const color = extractDominantColor(img)
+      setDominantColor(color)
+    }
+    img.onerror = () => {
+      setDominantColor('139, 92, 246') // Fallback to violet
+    }
+    img.src = `https://picsum.photos/seed/${currentSong.id}/300/300`
+  }, [currentSong.id])
+
+  const progressPercent = (currentTime / duration) * 100
+
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900/95 backdrop-blur-md border-t border-zinc-800 z-50">
-      <div className="flex items-center justify-between px-3 py-2 h-16">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 z-50">
+      {/* Background Progress Bar */}
+      <div
+        className="absolute bottom-0 left-0 top-0 transition-all duration-300 ease-out"
+        style={{
+          width: `${progressPercent}%`,
+          backgroundColor: `rgba(${dominantColor}, 0.3)`,
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative flex items-center justify-between px-3 py-2 h-16">
         {/* Left - Like Button & Play/Pause */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Like Button */}
           <button
             onClick={onToggleLike}
             className={`p-2 rounded-full transition-colors cursor-pointer ${
-              isLiked ? 'text-red-500' : 'text-zinc-400 hover:bg-zinc-800'
+              isLiked ? 'text-red-500' : 'text-zinc-400 hover:bg-zinc-800/50'
             }`}
             aria-label={isLiked ? 'Unlike' : 'Like'}
             title={isLiked ? 'Unlike' : 'Like'}
@@ -70,6 +141,7 @@ export function MobileMusicPlayer({
           onClick={onExpand}
         >
           <img
+            ref={imgRef}
             src={`https://picsum.photos/seed/${currentSong.id}/300/300`}
             alt={currentSong.album}
             className="w-full h-full object-cover"

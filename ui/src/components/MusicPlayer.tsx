@@ -23,7 +23,6 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
   const [duration] = useState(333) // Sample duration in seconds
   const [isShuffle, setIsShuffle] = useState(false)
   const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off')
-  const [isExpanded, setIsExpanded] = useState(false)
   const [isLiked, setIsLiked] = useState(false)
 
   // Mock current song
@@ -61,9 +60,11 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
         currentSong={currentSong}
         isPlaying={isPlaying}
         isLiked={isLiked}
+        currentTime={currentTime}
+        duration={duration}
         onTogglePlay={togglePlay}
         onToggleLike={toggleLike}
-        onExpand={() => setIsExpanded(true)}
+        onExpand={() => {}}
       />
 
       {/* Desktop Music Player */}
@@ -75,14 +76,14 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
         isMuted={isMuted}
         isShuffle={isShuffle}
         repeatMode={repeatMode}
-        isExpanded={isExpanded}
+        isLiked={isLiked}
         onTogglePlay={togglePlay}
         onToggleMute={toggleMute}
         onToggleShuffle={toggleShuffle}
+        onToggleLike={toggleLike}
         onCycleRepeat={cycleRepeat}
         onProgressChange={handleProgressChange}
         onVolumeChange={handleVolumeChange}
-        onCollapse={() => setIsExpanded(false)}
         volume={volume}
       />
     </>
