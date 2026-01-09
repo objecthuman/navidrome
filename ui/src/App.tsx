@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
-import { MobilePlayerBar } from './components/MobilePlayerBar'
+import { MusicPlayer } from './components/MusicPlayer'
 import { AlbumSlideshow } from './components/AlbumSlideshow'
 import { MostPlayed } from './components/MostPlayed'
 import { RecentlyPlayed } from './components/RecentlyPlayed'
@@ -120,7 +120,7 @@ function App() {
 
       {/* Main Content */}
       <main
-        className={`pt-20 px-4 md:px-6 pb-8 transition-all duration-300 ease-in-out
+        className={`pt-20 px-4 md:px-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out
           ${isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}
         `}
       >
@@ -136,7 +136,7 @@ function App() {
         </div>
       </main>
 
-      <MobilePlayerBar />
+      <MusicPlayer />
     </div>
   )
 }

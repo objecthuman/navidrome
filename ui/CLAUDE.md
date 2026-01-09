@@ -40,16 +40,21 @@ ui/
 ├── public/                 # Static assets
 ├── src/
 │   ├── components/        # Reusable UI components
-│   │   ├── Navbar.tsx     # Fixed navigation bar
-│   │   ├── Sidebar.tsx    # Collapsible sidebar navigation
-│   │   └── MobilePlayerBar.tsx  # Mobile-only player bar
+│   │   ├── Navbar.tsx           # Fixed navigation bar
+│   │   ├── Sidebar.tsx          # Collapsible sidebar navigation
+│   │   ├── MusicPlayer.tsx      # Fixed bottom music player
+│   │   ├── AlbumSlideshow.tsx   # Discover section with colored cards
+│   │   ├── MostPlayed.tsx       # Most played albums slideshow
+│   │   └── RecentlyPlayed.tsx    # Recently played albums slideshow
 │   ├── config/            # Configuration files
 │   │   └── api.ts         # API configuration (environment variables)
 │   ├── pages/             # Page-level components
 │   │   ├── LoginPage.tsx  # Login form
 │   │   └── SignupPage.tsx # Signup form
 │   ├── services/          # Business logic & API calls
-│   │   └── auth.ts        # Authentication service
+│   │   ├── auth.ts        # Authentication service
+│   │   ├── navidrome.ts   # Navidrome API service (/api/v1/*)
+│   │   └── subsonic.ts    # Subsonic API service (/rest/*)
 │   ├── App.tsx            # Main app component with routing
 │   ├── main.tsx           # Application entry point
 │   ├── index.css          # Global styles (Tailwind imports)
@@ -57,6 +62,7 @@ ui/
 ├── .env                   # Environment variables (gitignored)
 ├── .env.example           # Environment variable template
 ├── .gitignore             # Git ignore rules
+├── CLAUDE.md              # This documentation file
 ├── eslint.config.js       # ESLint configuration
 ├── package.json           # Dependencies and scripts
 ├── tsconfig.json          # TypeScript configuration
@@ -178,6 +184,57 @@ App (main container + routing)
 import config from './config/api'
 const apiUrl = config.apiURL
 ```
+
+---
+
+## API Usage Guide
+
+### API Systems
+
+Navidrome exposes two API systems with different authentication methods:
+
+**Navidrome API** (`/api/v1/*`)
+- Uses Bearer token (JWT) in HTTP headers
+- Navidrome-specific endpoints
+- Used for songs, search, and advanced features
+
+**Subsonic API** (`/rest/*`)
+- Uses salt/token authentication via query parameters
+- Subsonic-compatible endpoints
+- Used for albums, streaming, cover art, and library browsing
+
+---
+
+### Service Files
+
+#### `src/services/navidrome.ts`
+Contains API calls for Navidrome-specific endpoints (`/api/v1/*`).
+
+Use this file when working with:
+- Song data
+- Navidrome-specific features
+- Advanced search
+
+---
+
+#### `src/services/subsonic.ts`
+Contains API calls for Subsonic-compatible endpoints (`/rest/*`).
+
+Use this file when working with:
+- Albums (browsing, lists)
+- Audio streaming
+- Cover art images
+- Library browsing
+
+---
+
+#### `src/services/auth.ts`
+Contains authentication and session management logic.
+
+Use this file for:
+- User login/logout
+- Getting auth tokens
+- Managing user session
 
 ---
 
