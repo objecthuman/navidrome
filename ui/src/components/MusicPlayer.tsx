@@ -51,6 +51,35 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     }
   }, [])
 
+  // Set up song change callback
+  useEffect(() => {
+    audioPlayer.setOnSongChange((songId: string) => {
+      const song = queue.find(item => item.id === songId)
+      if (song) {
+        setCurrentSong({
+          id: song.id,
+          title: song.title,
+          artist: song.artist,
+          album: song.album,
+          coverArt: song.albumId,
+          duration: song.duration,
+        })
+        onQueueUpdate(queue, songId, true)
+      }
+    })
+  }, [queue, onQueueUpdate])
+
+  // Update queue info in audio player when queue or shuffle/repeat changes
+  useEffect(() => {
+    const currentSongIndex = queue.findIndex(item => item.id === currentSong.id)
+    audioPlayer.setQueue({
+      items: queue,
+      currentIndex: currentSongIndex >= 0 ? currentSongIndex : 0,
+      shuffle: isShuffle,
+      repeat: repeatMode,
+    })
+  }, [queue, currentSong.id, isShuffle, repeatMode])
+
   // Fetch the current queue on mount
   useEffect(() => {
     const fetchQueue = async () => {

@@ -1,5 +1,13 @@
 import { Howl } from 'howler'
 import { subsonicService } from './subsonic'
+import type { NavidromeQueueItem } from './navidrome'
+
+interface QueueInfo {
+  items: NavidromeQueueItem[]
+  currentIndex: number
+  shuffle: boolean
+  repeat: 'off' | 'all' | 'one'
+}
 
 class AudioPlayerService {
   private howl: Howl | null = null
@@ -12,6 +20,8 @@ class AudioPlayerService {
   private progressUpdateInterval: number | null = null
   private scrobbleSent: boolean = false
   private readonly VOLUME_STORAGE_KEY = 'navidrome_volume'
+  private queue: QueueInfo | null = null
+  private onSongChange?: (songId: string) => void
 
   constructor() {
     // Load volume from localStorage on initialization
@@ -74,6 +84,10 @@ class AudioPlayerService {
         if (this.currentSongId) {
           subsonicService.scrobble(this.currentSongId, true)
         }
+
+        // Handle auto-play next song
+        this.playNextSong()
+
         this.isPlaying = false
         this.stopProgressUpdate()
         this.currentTime = 0
@@ -129,6 +143,61 @@ class AudioPlayerService {
 
     // Create Howl instance without autoplay
     this.howl = this.createHowlInstance(songId, false)
+  }
+
+  setQueue(queue: QueueInfo) {
+    this.queue = queue
+  }
+
+  setOnSongChange(callback: (songId: string) => void) {
+    this.onSongChange = callback
+  }
+
+  private playNextSong() {
+    if (!this.queue || !this.currentSongId || this.queue.items.length === 0) {
+      return
+    }
+
+    const { items, shuffle, repeat } = this.queue
+
+    // Find current song index
+    const currentIndex = items.findIndex(item => item.id === this.currentSongId)
+    if (currentIndex === -1) {
+      return
+    }
+
+    let nextIndex = currentIndex
+
+    // Handle repeat modes
+    if (repeat === 'one') {
+      // Repeat current song
+      nextIndex = currentIndex
+    } else if (shuffle) {
+      // Random next song
+      nextIndex = Math.floor(Math.random() * items.length)
+    } else {
+      // Next song in queue
+      nextIndex = currentIndex + 1
+
+      // Check if we need to loop back to start
+      if (nextIndex >= items.length) {
+        if (repeat === 'all') {
+          nextIndex = 0 // Loop back to first song
+        } else {
+          return // No more songs to play
+        }
+      }
+    }
+
+    // Play the next song
+    const nextSong = items[nextIndex]
+    if (nextSong) {
+      // Small delay before playing next song
+      setTimeout(() => {
+        this.play(nextSong.id)
+        this.onSongChange?.(nextSong.id)
+      }, 500)
+    }
   }
 
   pause() {
