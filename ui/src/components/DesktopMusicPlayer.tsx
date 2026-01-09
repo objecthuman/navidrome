@@ -1,5 +1,6 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Volume1, Shuffle, Repeat, Repeat1, Mic, ListMusic, Heart } from 'lucide-react'
 import type { NavidromeQueueItem } from '../services/navidrome'
+import { subsonicService } from '../services/subsonic'
 
 interface DesktopMusicPlayerProps {
   className?: string
@@ -23,6 +24,13 @@ interface DesktopMusicPlayerProps {
   onPlaySong: (songId: string) => void
   onToggleQueue: () => void
   volume: number
+  currentSong?: {
+    id: string
+    title: string
+    artist: string
+    album: string
+    coverArt: string
+  }
 }
 
 interface Song {
@@ -55,16 +63,11 @@ export function DesktopMusicPlayer({
   onPlaySong,
   onToggleQueue,
   volume,
+  currentSong,
 }: DesktopMusicPlayerProps) {
 
-  // Mock current song (in real app, this would be passed as prop)
-  const currentSong: Song = {
-    id: 'demo',
-    title: 'Euta Manchheko Maya',
-    artist: 'Narayan Gopal',
-    album: 'Geeti Yatra',
-    coverArt: 'demo-cover',
-  }
+  // Find current song from queue if not provided
+  const displayedSong = currentSong || queue.find(item => item.id === currentSongId)
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -82,19 +85,25 @@ export function DesktopMusicPlayer({
           <div className="flex items-center gap-3 flex-shrink-0 z-10">
             {/* Cover Art */}
             <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 shadow-lg">
-              <img
-                src={`https://picsum.photos/seed/${currentSong.id}/300/300`}
-                alt={currentSong.album}
-                className="w-full h-full object-cover"
-              />
+              {displayedSong ? (
+                <img
+                  src={subsonicService.getCoverArtUrl(displayedSong.coverArt, 200)}
+                  alt={displayedSong.album}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-zinc-700 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-zinc-600"></div>
+                </div>
+              )}
             </div>
 
             {/* Song Info */}
             <div>
               <h4 className="font-semibold text-sm text-white truncate max-w-[150px] sm:max-w-[200px]">
-                {currentSong.title}
+                {displayedSong?.title || 'No song playing'}
               </h4>
-              <p className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px]">{currentSong.artist}</p>
+              <p className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px]">{displayedSong?.artist || ''}</p>
             </div>
 
             {/* Like Button */}

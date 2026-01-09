@@ -160,6 +160,13 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
         onPlaySong={handlePlaySong}
         onToggleQueue={onToggleQueue}
         volume={volume}
+        currentSong={{
+          id: currentSong.id,
+          title: currentSong.title,
+          artist: currentSong.artist,
+          album: currentSong.album,
+          coverArt: currentSong.coverArt,
+        }}
       />
     </>
   )
