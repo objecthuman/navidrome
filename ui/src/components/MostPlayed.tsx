@@ -5,7 +5,11 @@ import type { SubsonicAlbum } from '../services/subsonic'
 
 const ALBUMS_PER_PAGE = 20
 
-export function MostPlayed() {
+interface MostPlayedProps {
+  onAlbumClick?: (albumId: string) => void
+}
+
+export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -206,7 +210,9 @@ export function MostPlayed() {
                 border border-zinc-800/50 hover:border-violet-500/30
                 cursor-pointer"
               onClick={() => {
-                console.log('Album clicked:', album)
+                if (onAlbumClick) {
+                  onAlbumClick(album.id)
+                }
               }}
             >
               {/* Album Cover */}

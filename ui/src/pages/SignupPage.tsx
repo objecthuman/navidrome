@@ -1,25 +1,25 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { User, Lock } from 'lucide-react'
 
-interface SignupPageProps {
-  onSignup: (username: string, password: string) => void
-  onSwitchToLogin: () => void
-}
-
-export function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProps) {
+export function SignupPage() {
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match')
+      setError('Passwords do not match')
       return
     }
 
-    onSignup(username, password)
+    // TODO: Implement actual signup logic
+    console.log('Signup:', { username, password })
+    navigate({ to: '/home' })
   }
 
   return (
@@ -27,6 +27,12 @@ export function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProps) {
       <div className="w-full max-w-md">
         <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
           <h1 className="text-2xl font-bold text-center mb-8">Create Account</h1>
+
+          {error && (
+            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-sm text-red-400 text-center">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Field */}
@@ -101,7 +107,7 @@ export function SignupPage({ onSignup, onSwitchToLogin }: SignupPageProps) {
             <p className="text-sm text-zinc-400">
               Already have an account?{' '}
               <button
-                onClick={onSwitchToLogin}
+                onClick={() => navigate({ to: '/login' })}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
                 title="Sign in to your account"
               >

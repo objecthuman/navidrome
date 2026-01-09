@@ -38,6 +38,14 @@ export interface SubsonicPlayQueue {
   changedBy: string
 }
 
+export interface SubsonicAlbumInfo {
+  notes: string
+  lastFmUrl: string
+  smallImageUrl: string
+  mediumImageUrl: string
+  largeImageUrl: string
+}
+
 export interface SubsonicResponse<T> {
   'subsonic-response': {
     status: 'ok' | 'failed'
@@ -143,6 +151,22 @@ class SubsonicService {
     )
 
     return response.album
+  }
+
+  /**
+   * Get album information including notes and images
+   */
+  async getAlbumInfo(id: string): Promise<SubsonicAlbumInfo> {
+    const params = new URLSearchParams({
+      id,
+    })
+
+    const response = await this.request<{ albumInfo: SubsonicAlbumInfo }>(
+      'getAlbumInfo.view',
+      params
+    )
+
+    return response.albumInfo
   }
 
   /**

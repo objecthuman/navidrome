@@ -1,19 +1,25 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { User, Lock } from 'lucide-react'
+import { authService } from '../services/auth'
 
-interface LoginPageProps {
-  onLogin: (username: string, password: string) => void
-  onSwitchToSignup: () => void
-  errorMessage?: string | null
-}
-
-export function LoginPage({ onLogin, onSwitchToSignup, errorMessage }: LoginPageProps) {
+export function LoginPage() {
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onLogin(username, password)
+    setErrorMessage(null)
+
+    try {
+      await authService.login({ username, password })
+      navigate({ to: '/home' })
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Login failed')
+      console.error('Login error:', error)
+    }
   }
 
   return (
@@ -71,21 +77,19 @@ export function LoginPage({ onLogin, onSwitchToSignup, errorMessage }: LoginPage
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              title="Sign in to your account"
+              className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-medium py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 cursor-pointer"
             >
               Sign In
             </button>
           </form>
 
-          {/* Switch to Signup */}
+          {/* Signup Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-400">
               Don't have an account?{' '}
               <button
-                onClick={onSwitchToSignup}
+                onClick={() => navigate({ to: '/signup' })}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
-                title="Create a new account"
               >
                 Sign up
               </button>
