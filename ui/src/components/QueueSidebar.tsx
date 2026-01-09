@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { X, Play } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicQueueEntry } from '../services/subsonic'
 
@@ -30,7 +30,7 @@ export function QueueSidebar({
   return (
     <div
       className={`fixed top-20 bottom-20 right-0 w-80 bg-zinc-900/98 backdrop-blur-xl border-l border-zinc-800 z-40
-        transition-transform duration-300 ease-in-out translate-x-0`}
+        transition-transform duration-300 ease-in-out translate-x-0 flex flex-col`}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-zinc-800">
@@ -55,7 +55,7 @@ export function QueueSidebar({
       )}
 
       {/* Queue Items */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent overflow-x-hidden">
         {queue.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
@@ -96,12 +96,26 @@ export function QueueSidebar({
                 </div>
 
                 {/* Cover Art */}
-                <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0 shadow-lg">
+                <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0 shadow-lg relative">
                   <img
                     src={subsonicService.getCoverArtUrl(song.coverArt, 200)}
                     alt={song.album}
                     className="w-full h-full object-cover"
                   />
+                  {/* Play button overlay on hover */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onPlaySong(song.id)
+                      }}
+                      className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300 cursor-pointer"
+                      aria-label="Play song"
+                      title="Play song"
+                    >
+                      <Play className="w-4 h-4 text-white fill-white" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Song Info */}
