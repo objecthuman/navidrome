@@ -145,7 +145,7 @@ export function RecentlyPlayed() {
   }
 
   return (
-    <div className="w-full mb-8">
+    <div className="w-full mb-24">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold">Recently Played</h2>
         <div className="flex gap-2">
