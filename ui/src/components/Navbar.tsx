@@ -13,8 +13,9 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
         <div className="flex items-center">
           <button
             onClick={onToggleSidebar}
-            className="p-1 hover:bg-zinc-800 rounded transition-colors"
+            className="p-1 hover:bg-zinc-800 rounded transition-colors cursor-pointer"
             aria-label="Toggle sidebar"
+            title="Toggle sidebar"
           >
             {isSidebarCollapsed ? (
               <ChevronRight className="w-5 h-5 text-zinc-300" />
@@ -39,23 +40,26 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
         {/* Action Icons - Right */}
         <div className="flex items-center gap-1 md:gap-2">
           <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group"
+            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
             aria-label="Add music to server"
+            title="Add music to server"
           >
             <Plus className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
           </button>
 
           <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group"
+            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
             aria-label="Current activity"
+            title="Current activity"
           >
             <Activity className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-violet-500 rounded-full"></span>
           </button>
 
           <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group"
+            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
             aria-label="User profile"
+            title="User profile"
           >
             <User className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
           </button>

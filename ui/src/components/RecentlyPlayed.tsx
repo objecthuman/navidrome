@@ -151,15 +151,17 @@ export function RecentlyPlayed() {
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
-            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110"
+            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
             aria-label="Scroll left"
+            title="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110"
+            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
             aria-label="Scroll right"
+            title="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -221,8 +223,9 @@ export function RecentlyPlayed() {
                       transform scale-0 group-hover:scale-100
                       transition-all duration-500 ease-out
                       hover:scale-110 hover:shadow-violet-500/70
-                      group-active:scale-95"
+                      group-active:scale-95 cursor-pointer"
                     aria-label="Play album"
+                    title="Play album"
                   >
                     <Play className="w-6 h-6 text-white fill-white" />
                   </button>

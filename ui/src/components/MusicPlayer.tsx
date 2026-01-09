@@ -12,6 +12,8 @@ import {
   Maximize2,
   Minimize2,
   X,
+  Mic,
+  ListMusic,
 } from 'lucide-react'
 
 interface MusicPlayerProps {
@@ -214,71 +216,145 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
 
       {/* Collapsed View - Default */}
       {!isExpanded && (
-        <div className="flex items-center gap-4 px-4 py-3 h-20">
-          {/* Cover Art */}
-          <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 shadow-lg flex-shrink-0 cursor-pointer"
-               onClick={() => setIsExpanded(true)}>
-            <img
-              src={`https://picsum.photos/seed/${currentSong.id}/300/300`}
-              alt={currentSong.album}
-              className="w-full h-full object-cover"
-            />
+        <div className="relative flex items-center px-4 py-3 h-20">
+          {/* Left Side - Cover Art & Song Info */}
+          <div className="flex items-center gap-3 flex-shrink-0 z-10">
+            {/* Cover Art */}
+            <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 shadow-lg cursor-pointer"
+                 onClick={() => setIsExpanded(true)}>
+              <img
+                src={`https://picsum.photos/seed/${currentSong.id}/300/300`}
+                alt={currentSong.album}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Song Info */}
+            <div className="cursor-pointer" onClick={() => setIsExpanded(true)}>
+              <h4 className="font-semibold text-sm text-white truncate max-w-[150px] sm:max-w-[200px]">
+                {currentSong.title}
+              </h4>
+              <p className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px]">{currentSong.artist}</p>
+            </div>
           </div>
 
-          {/* Time Display */}
-          <div className="text-xs text-zinc-500 hidden sm:block">
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </div>
+          {/* Center - Controls & Progress (vertically stacked, absolutely centered) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
+            {/* Control Buttons Row */}
+            <div className="flex items-center gap-2">
+              {/* Shuffle Button */}
+              <button
+                onClick={toggleShuffle}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                  isShuffle ? 'bg-violet-500 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+                }`}
+                aria-label="Shuffle"
+                title="Shuffle"
+              >
+                <Shuffle className="w-4 h-4" />
+              </button>
 
-          {/* Song Info & Progress */}
-          <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setIsExpanded(true)}>
-            <h4 className="font-semibold text-sm text-white truncate">
-              {currentSong.title}
-            </h4>
-            <p className="text-xs text-zinc-400 truncate">{currentSong.artist}</p>
-            <div className="mt-2">
+              {/* Previous Button */}
+              <button
+                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+                aria-label="Previous track"
+                title="Previous track"
+              >
+                <SkipBack className="w-4 h-4" />
+              </button>
+
+              {/* Play Button */}
+              <button
+                onClick={togglePlay}
+                className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer"
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+                title={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? (
+                  <Pause className="w-4 h-4 text-white fill-white" />
+                ) : (
+                  <Play className="w-4 h-4 text-white fill-white" />
+                )}
+              </button>
+
+              {/* Next Button */}
+              <button
+                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+                aria-label="Next track"
+                title="Next track"
+              >
+                <SkipForward className="w-4 h-4" />
+              </button>
+
+              {/* Repeat Button */}
+              <button
+                onClick={cycleRepeat}
+                className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                  repeatMode !== 'off' ? 'bg-violet-500 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+                }`}
+                aria-label="Repeat"
+                title={`Repeat ${repeatMode === 'one' ? 'one' : repeatMode === 'all' ? 'all' : 'off'}`}
+              >
+                {repeatMode === 'one' ? (
+                  <Repeat1 className="w-4 h-4" />
+                ) : (
+                  <Repeat className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Progress Bar with Times */}
+            <div className="flex items-center gap-2 w-56 sm:w-150">
+              <span className="text-xs text-zinc-500">{formatTime(currentTime)}</span>
               <input
                 type="range"
                 min="0"
                 max={duration}
                 value={currentTime}
                 onChange={handleProgressChange}
-                className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer
+                className="flex-1 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
                   [&::-webkit-slider-thumb]:bg-violet-500
                   [&::-webkit-slider-thumb]:cursor-pointer
                   [&::-webkit-slider-thumb]:hover:bg-violet-400"
               />
+              <span className="text-xs text-zinc-500">{formatTime(duration)}</span>
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+          {/* Right Side - Lyrics, Queue, Volume */}
+          <div className="flex items-center gap-2 flex-shrink-0 ml-auto z-10">
+            {/* Lyrics Button */}
             <button
-              onClick={togglePlay}
-              className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95"
-              aria-label={isPlaying ? 'Pause' : 'Play'}
+              className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+              aria-label="Lyrics"
+              title="Lyrics"
             >
-              {isPlaying ? (
-                <Pause className="w-5 h-5 text-white fill-white" />
+              <Mic className="w-4 h-4" />
+            </button>
+
+            {/* Queue Button */}
+            <button
+              className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+              aria-label="Queue"
+              title="Queue"
+            >
+              <ListMusic className="w-4 h-4" />
+            </button>
+
+            {/* Volume Button */}
+            <button
+              onClick={toggleMute}
+              className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+              title={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted || volume === 0 ? (
+                <VolumeX className="w-4 h-4" />
               ) : (
-                <Play className="w-5 h-5 text-white fill-white" />
+                <Volume2 className="w-4 h-4" />
               )}
-            </button>
-            <button
-              onClick={() => setIsExpanded(true)}
-              className="p-2 hover:bg-zinc-800 rounded-full transition-colors sm:hidden"
-              aria-label="Expand player"
-            >
-              <Maximize2 className="w-5 h-5 text-zinc-400" />
-            </button>
-            <button
-              className="p-2 hover:bg-zinc-800 rounded-full transition-colors hidden sm:block"
-              onClick={() => setIsExpanded(true)}
-              aria-label="Expand player"
-            >
-              <Maximize2 className="w-5 h-5 text-zinc-400" />
             </button>
           </div>
         </div>

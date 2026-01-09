@@ -178,15 +178,17 @@ export function AlbumSlideshow() {
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors"
+            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors cursor-pointer"
             aria-label="Scroll left"
+            title="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors"
+            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors cursor-pointer"
             aria-label="Scroll right"
+            title="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -256,8 +258,9 @@ export function AlbumSlideshow() {
                 )}
               </div>
               <button
-                className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0"
+                className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0 cursor-pointer"
                 aria-label="Play album"
+                title="Play album"
               >
                 <Play className="w-5 h-5 text-white fill-white" />
               </button>

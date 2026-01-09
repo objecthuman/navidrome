@@ -71,7 +71,8 @@ export function LoginPage({ onLogin, onSwitchToSignup, errorMessage }: LoginPage
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              title="Sign in to your account"
             >
               Sign In
             </button>
@@ -83,7 +84,8 @@ export function LoginPage({ onLogin, onSwitchToSignup, errorMessage }: LoginPage
               Don't have an account?{' '}
               <button
                 onClick={onSwitchToSignup}
-                className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
+                title="Create a new account"
               >
                 Sign up
               </button>
