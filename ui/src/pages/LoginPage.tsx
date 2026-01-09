@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from 'react-router-dom'
 import { User, Lock } from 'lucide-react'
 import { authService } from '../services/auth'
 
@@ -15,7 +15,7 @@ export function LoginPage() {
 
     try {
       await authService.login({ username, password })
-      navigate({ to: '/home' })
+      navigate('/home')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Login failed')
       console.error('Login error:', error)
@@ -88,7 +88,7 @@ export function LoginPage() {
             <p className="text-sm text-zinc-400">
               Don't have an account?{' '}
               <button
-                onClick={() => navigate({ to: '/signup' })}
+                onClick={() => navigate('/signup')}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
               >
                 Sign up

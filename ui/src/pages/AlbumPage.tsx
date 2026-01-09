@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams } from '@tanstack/react-router'
-import { ArrowLeft, Play, Clock } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Play, Clock, Heart } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbumInfo, SubsonicAlbum } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
@@ -15,13 +15,14 @@ interface Song {
 }
 
 export function AlbumPage() {
-  const { albumId } = useParams({ from: '/album/$albumId' })
+  const { albumId } = useParams<{ albumId: string }>()
   const navigate = useNavigate()
   const { onPlaySong } = useApp()
   const [albumInfo, setAlbumInfo] = useState<SubsonicAlbumInfo | null>(null)
   const [album, setAlbum] = useState<SubsonicAlbum & { song: any[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const fetchAlbumData = async () => {
@@ -73,8 +74,20 @@ export function AlbumPage() {
   }, [album, onPlaySong])
 
   const handleBack = useCallback(() => {
-    navigate({ to: '/home' })
+    navigate('/home')
   }, [navigate])
+
+  const toggleLike = useCallback((songId: string) => {
+    setLikedSongs((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(songId)) {
+        newSet.delete(songId)
+      } else {
+        newSet.add(songId)
+      }
+      return newSet
+    })
+  }, [])
 
   if (isLoading) {
     return (
@@ -99,7 +112,7 @@ export function AlbumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="bg-zinc-950 text-white pb-24 md:pb-8">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800">
         <div className="flex items-center gap-4 px-4 md:px-6 py-4">
@@ -115,77 +128,60 @@ export function AlbumPage() {
         </div>
       </div>
 
-      {/* Album Header */}
-      <div className="relative">
-        {/* Hero Image with Gradient */}
-        <div className="relative h-64 md:h-80 lg:h-96 overflow-hidden">
-          {albumInfo?.largeImageUrl ? (
-            <img
-              src={albumInfo.largeImageUrl}
-              alt={album.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600" />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
-        </div>
-
-        {/* Album Info Card */}
-        <div className="relative px-4 md:px-6 -mt-32 md:-mt-40">
-          <div className="flex flex-col md:flex-row gap-6 items-end">
-            {/* Cover Art */}
-            <div className="flex-shrink-0 w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800">
-              {albumInfo?.mediumImageUrl ? (
-                <img
-                  src={albumInfo.mediumImageUrl}
-                  alt={album.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
-                  <span className="text-6xl font-bold text-white/30">{album.name.charAt(0)}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Album Details */}
-            <div className="flex-1 pb-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{album.name}</h2>
-                  <p className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3">
-                    {album.artist}
-                  </p>
-
-                  {/* Metadata */}
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-                    {album.year && <span>{album.year}</span>}
-                    {album.year && <span>•</span>}
-                    <span>{album.songCount} songs</span>
-                    <span>•</span>
-                    <span>{formatDuration(album.duration)}</span>
-                    {album.genre && (
-                      <>
-                        <span>•</span>
-                        <span className="px-2 py-0.5 bg-zinc-800 rounded-full text-zinc-400">
-                          {album.genre}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Play Button */}
-                <button
-                  onClick={handlePlayAll}
-                  className="flex-shrink-0 p-4 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl cursor-pointer"
-                  aria-label="Play album"
-                  title="Play album"
-                >
-                  <Play className="w-6 h-6 text-white fill-white" />
-                </button>
+      {/* Album Info */}
+      <div className="px-4 md:px-6 py-8">
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          {/* Cover Art */}
+          <div className="flex-shrink-0 w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800">
+            {albumInfo?.mediumImageUrl ? (
+              <img
+                src={albumInfo.mediumImageUrl}
+                alt={album.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
+                <span className="text-6xl font-bold text-white/30">{album.name.charAt(0)}</span>
               </div>
+            )}
+          </div>
+
+          {/* Album Details */}
+          <div className="flex-1 pb-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{album.name}</h2>
+                <p className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3">
+                  {album.artist}
+                </p>
+
+                {/* Metadata */}
+                <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+                  {album.year && <span>{album.year}</span>}
+                  {album.year && <span>•</span>}
+                  <span>{album.songCount} songs</span>
+                  <span>•</span>
+                  <span>{formatDuration(album.duration)}</span>
+                  {album.genre && (
+                    <>
+                      <span>•</span>
+                      <span className="px-2 py-0.5 bg-zinc-800 rounded-full text-zinc-400">
+                        {album.genre}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Play Button */}
+              <button
+                onClick={handlePlayAll}
+                className="flex-shrink-0 p-4 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl cursor-pointer"
+                aria-label="Play album"
+                title="Play album"
+              >
+                <Play className="w-6 h-6 text-white fill-white" />
+              </button>
             </div>
           </div>
         </div>
@@ -197,7 +193,9 @@ export function AlbumPage() {
           <h3 className="text-lg font-semibold mb-3">About this album</h3>
           <div
             className="prose prose-invert max-w-none text-zinc-400 text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: albumInfo.notes }}
+            dangerouslySetInnerHTML={{
+              __html: albumInfo.notes.replace(/<a href="https:\/\/www\.last\.fm[^"]*"[^>]*>Read more on Last\.fm[^<]*<\/a>/gi, ''),
+            }}
           />
           {albumInfo.lastFmUrl && (
             <a
@@ -245,6 +243,23 @@ export function AlbumPage() {
               {/* Duration */}
               <div className="flex items-center gap-4">
                 <span className="text-sm text-zinc-500">{formatTime(song.duration)}</span>
+
+                {/* Like Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleLike(song.id)
+                  }}
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+                    likedSongs.has(song.id)
+                      ? 'text-red-500 hover:bg-red-500/10'
+                      : 'text-zinc-400 hover:bg-zinc-800'
+                  }`}
+                  aria-label={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
+                  title={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
+                >
+                  <Heart className={`w-4 h-4 ${likedSongs.has(song.id) ? 'fill-current' : ''}`} />
+                </button>
               </div>
             </div>
           ))}

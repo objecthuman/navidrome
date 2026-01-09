@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate } from 'react-router-dom'
 import { User, Lock } from 'lucide-react'
 
 export function SignupPage() {
@@ -19,7 +19,7 @@ export function SignupPage() {
 
     // TODO: Implement actual signup logic
     console.log('Signup:', { username, password })
-    navigate({ to: '/home' })
+    navigate('/home')
   }
 
   return (
@@ -107,7 +107,7 @@ export function SignupPage() {
             <p className="text-sm text-zinc-400">
               Already have an account?{' '}
               <button
-                onClick={() => navigate({ to: '/login' })}
+                onClick={() => navigate('/login')}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
                 title="Sign in to your account"
               >

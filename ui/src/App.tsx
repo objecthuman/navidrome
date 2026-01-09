@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Outlet, useNavigate } from '@tanstack/react-router'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MusicPlayer } from './components/MusicPlayer'
@@ -14,6 +14,7 @@ const SIDEBAR_COLLAPSED_KEY = 'navidrome_sidebar_collapsed'
 
 function App() {
   const navigate = useNavigate()
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     // Always collapsed on mobile (768px and below)
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -82,7 +83,7 @@ function App() {
   }, [])
 
   const handleNavigateToAlbum = useCallback((albumId: string) => {
-    navigate({ to: '/album/$albumId', params: { albumId } })
+    navigate(`/album/${albumId}`)
   }, [navigate])
 
   const handlePlaySong = useCallback((songId: string) => {
