@@ -75,6 +75,9 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
 
             setDuration(currentItem.duration)
 
+            // Preload the audio so seeking works immediately
+            audioPlayer.preload(currentItem.id)
+
             // Set current position from queue (in seconds)
             if (queue.position) {
               setCurrentTime(queue.position / 1000) // Convert ms to seconds

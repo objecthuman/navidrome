@@ -197,7 +197,7 @@ export function DesktopMusicPlayer({
             </div>
 
             {/* Progress Bar with Times */}
-            <div className="flex items-center gap-2 w-56 sm:w-64">
+            <div className="flex items-center gap-2 w-56 sm:w-150">
               <span className="text-xs text-zinc-500">{formatTime(currentTime)}</span>
               <input
                 type="range"

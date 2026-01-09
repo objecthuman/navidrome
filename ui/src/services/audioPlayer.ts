@@ -3,12 +3,14 @@ import { subsonicService } from './subsonic'
 
 class AudioPlayerService {
   private howl: Howl | null = null
+  private currentSongId: string | null = null
   private isPlaying: boolean = false
   private currentTime: number = 0
   private duration: number = 0
   private volume: number = 75
   private isMuted: boolean = false
   private progressUpdateInterval: number | null = null
+  private scrobbleSent: boolean = false
   private readonly VOLUME_STORAGE_KEY = 'navidrome_volume'
 
   constructor() {
@@ -35,42 +37,58 @@ class AudioPlayerService {
     }
   }
 
-  play(songId: string) {
-    // Stop any currently playing sound
-    if (this.howl) {
-      this.howl.stop()
-      this.howl.unload()
-    }
+  private createHowlInstance(songId: string, autoplay: boolean = true): Howl {
+    // Store current song ID
+    this.currentSongId = songId
 
     // Get stream URL from Subsonic API
     const streamUrl = subsonicService.getStreamUrl(songId)
 
     // Create new Howl instance
-    this.howl = new Howl({
+    const howl = new Howl({
       src: [streamUrl],
       html5: true, // Force HTML5 Audio for better streaming support
       format: ['mp3'],
       volume: this.isMuted ? 0 : this.volume / 100, // Convert to 0.0-1.0 range
+      autoplay: autoplay,
       onplay: () => {
         this.isPlaying = true
         this.startProgressUpdate()
+
+        // Scrobble "now playing" after a short delay to ensure audio is actually playing
+        if (!this.scrobbleSent && this.currentSongId) {
+          setTimeout(() => {
+            if (this.isPlaying && this.currentSongId) {
+              subsonicService.scrobble(this.currentSongId, false)
+              this.scrobbleSent = true
+            }
+          }, 500) // Wait 500 ms to ensure audio is playing
+        }
       },
       onpause: () => {
         this.isPlaying = false
         this.stopProgressUpdate()
       },
       onend: () => {
+        // Submit final scrobble when song ends
+        if (this.currentSongId) {
+          subsonicService.scrobble(this.currentSongId, true)
+        }
         this.isPlaying = false
         this.stopProgressUpdate()
         this.currentTime = 0
+        this.scrobbleSent = false
       },
       onstop: () => {
         this.isPlaying = false
         this.stopProgressUpdate()
         this.currentTime = 0
+        this.scrobbleSent = false
       },
       onload: () => {
         this.duration = this.howl?.duration() || 0
+        // Notify that duration is loaded
+        this.onProgressUpdate?.(this.currentTime, this.duration)
       },
       onloaderror: (id, error) => {
         console.error('Error loading audio:', error)
@@ -80,8 +98,37 @@ class AudioPlayerService {
       },
     })
 
-    // Start playing
-    this.howl.play()
+    return howl
+  }
+
+  play(songId: string) {
+    // Stop any currently playing sound
+    if (this.howl) {
+      this.howl.stop()
+      this.howl.unload()
+    }
+
+    // Reset scrobble flag
+    this.scrobbleSent = false
+
+    // Create Howl instance and play
+    this.howl = this.createHowlInstance(songId, true)
+  }
+
+  preload(songId: string) {
+    // Only preload if it's a different song
+    if (this.currentSongId === songId && this.howl) {
+      return
+    }
+
+    // Stop any currently playing sound
+    if (this.howl) {
+      this.howl.stop()
+      this.howl.unload()
+    }
+
+    // Create Howl instance without autoplay
+    this.howl = this.createHowlInstance(songId, false)
   }
 
   pause() {
@@ -104,6 +151,8 @@ class AudioPlayerService {
     if (this.howl) {
       this.howl.seek(seconds)
       this.currentTime = seconds
+      // Immediately notify UI of the time change, even when paused
+      this.onProgressUpdate?.(this.currentTime, this.duration)
     }
   }
 

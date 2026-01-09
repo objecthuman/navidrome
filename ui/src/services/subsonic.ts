@@ -195,6 +195,21 @@ class SubsonicService {
 
     return response.playQueue
   }
+
+  /**
+   * Scrobble a song (now playing notification or submission)
+   * @param id - The song ID to scrobble
+   * @param submission - true if song was fully played, false for "now playing" notification
+   */
+  async scrobble(id: string, submission: boolean = false): Promise<void> {
+    const params = new URLSearchParams({
+      id,
+      submission: submission.toString(),
+    })
+
+    await this.request('scrobble.view', params)
+    console.log(`Scrobble ${submission ? 'submission' : 'now playing'} sent for song:`, id)
+  }
 }
 
 export const subsonicService = new SubsonicService()
