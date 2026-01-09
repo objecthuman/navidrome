@@ -53,7 +53,7 @@ ui/
 │   │   └── SignupPage.tsx # Signup form
 │   ├── services/          # Business logic & API calls
 │   │   ├── auth.ts        # Authentication service
-│   │   ├── navidrome.ts   # Navidrome API service (/api/v1/*)
+│   │   ├── navidrome.ts   # Navidrome API service (/api/*)
 │   │   └── subsonic.ts    # Subsonic API service (/rest/*)
 │   ├── App.tsx            # Main app component with routing
 │   ├── main.tsx           # Application entry point
@@ -193,7 +193,7 @@ const apiUrl = config.apiURL
 
 Navidrome exposes two API systems with different authentication methods:
 
-**Navidrome API** (`/api/v1/*`)
+**Navidrome API** (`/api/*`)
 - Uses Bearer token (JWT) in HTTP headers
 - Navidrome-specific endpoints
 - Used for songs, search, and advanced features
@@ -208,7 +208,7 @@ Navidrome exposes two API systems with different authentication methods:
 ### Service Files
 
 #### `src/services/navidrome.ts`
-Contains API calls for Navidrome-specific endpoints (`/api/v1/*`).
+Contains API calls for Navidrome-specific endpoints (`/api/*`).
 
 Use this file when working with:
 - Song data

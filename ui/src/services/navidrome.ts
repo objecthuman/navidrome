@@ -18,7 +18,30 @@ export interface NavidromeSong {
   size: number
 }
 
-const API_VERSION = 'v1'
+export interface NavidromeQueueItem {
+  id: string
+  bookmarkPosition: number
+  title: string
+  album: string
+  artist: string
+  albumId: string
+  artistId: string
+  hasCoverArt: boolean
+  trackNumber: number
+  year: number
+  duration: number
+  size: number
+}
+
+export interface NavidromeQueue {
+  id: string
+  userId: string
+  current: number
+  position: number
+  changedBy: string
+  items: NavidromeQueueItem[]
+}
+
 
 class NavidromeService {
   private getHeaders(): HeadersInit {
@@ -28,7 +51,7 @@ class NavidromeService {
     }
 
     return {
-      'Authorization': `Bearer ${user.token}`,
+      'x-nd-authorization': `Bearer ${user.token}`,
       'Content-Type': 'application/json',
     }
   }
@@ -46,7 +69,7 @@ class NavidromeService {
       album_id: albumId,
     })
 
-    const url = new URL(`${config.apiURL}/api/${API_VERSION}/song`)
+    const url = new URL(`${config.apiURL}/api/song`)
     url.search = params.toString()
 
     const response = await fetch(url.toString(), {
@@ -84,6 +107,24 @@ class NavidromeService {
     url.search = params.toString()
 
     return url.toString()
+  }
+
+  /**
+   * Get the current play queue from Navidrome API
+   */
+  async getQueue(): Promise<NavidromeQueue> {
+    const url = `${config.apiURL}/api/queue`
+
+    const response = await fetch(url, {
+      headers: this.getHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data: NavidromeQueue = await response.json()
+    return data
   }
 
   /**

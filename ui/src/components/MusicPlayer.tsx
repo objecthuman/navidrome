@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { MobileMusicPlayer } from './MobileMusicPlayer'
 import { DesktopMusicPlayer } from './DesktopMusicPlayer'
+import { navidromeService } from '../services/navidrome'
 import { subsonicService } from '../services/subsonic'
-import type { SubsonicQueueEntry } from '../services/subsonic'
+import type { NavidromeQueueItem } from '../services/navidrome'
 
 interface MusicPlayerProps {
   className?: string
   isQueueOpen: boolean
   onToggleQueue: () => void
-  onQueueUpdate: (queue: SubsonicQueueEntry[], currentSongId: string, isPlaying: boolean) => void
+  onQueueUpdate: (queue: NavidromeQueueItem[], currentSongId: string, isPlaying: boolean) => void
 }
 
 interface Song {
@@ -39,31 +40,31 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     duration: 333,
   })
 
-  const [queue, setQueue] = useState<SubsonicQueueEntry[]>([])
+  const [queue, setQueue] = useState<NavidromeQueueItem[]>([])
 
   // Fetch the current queue on mount
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const queue = await subsonicService.getPlayQueue()
+        const queue = await navidromeService.getQueue()
 
         // Get current song from queue
-        if (queue.entry && queue.entry.length > 0) {
+        if (queue.items && queue.items.length > 0) {
           // Use current index if available and valid, otherwise use first song
           const currentIndex = queue.current !== undefined && queue.current >= 0 ? queue.current : 0
-          const currentEntry = queue.entry[currentIndex]
+          const currentItem = queue.items[currentIndex]
 
-          if (currentEntry) {
+          if (currentItem) {
             setCurrentSong({
-              id: currentEntry.id,
-              title: currentEntry.title,
-              artist: currentEntry.artist,
-              album: currentEntry.album,
-              coverArt: currentEntry.coverArt,
-              duration: currentEntry.duration,
+              id: currentItem.id,
+              title: currentItem.title,
+              artist: currentItem.artist,
+              album: currentItem.album,
+              coverArt: currentItem.albumId, // Use albumId for cover art
+              duration: currentItem.duration,
             })
 
-            setDuration(currentEntry.duration)
+            setDuration(currentItem.duration)
 
             // Set current position from queue (in seconds)
             if (queue.position) {
@@ -71,8 +72,8 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
             }
 
             // Set queue entries and notify parent
-            setQueue(queue.entry)
-            onQueueUpdate(queue.entry, currentEntry.id, false)
+            setQueue(queue.items)
+            onQueueUpdate(queue.items, currentItem.id, false)
           }
         } else {
           // Queue is empty, just set empty queue

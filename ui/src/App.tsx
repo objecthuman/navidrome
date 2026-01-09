@@ -9,7 +9,7 @@ import { RecentlyPlayed } from './components/RecentlyPlayed'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { authService } from './services/auth'
-import type { SubsonicQueueEntry } from './services/subsonic'
+import type { NavidromeQueueItem } from './services/navidrome'
 
 type Page = 'login' | 'signup' | 'home'
 
@@ -29,7 +29,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [isQueueOpen, setIsQueueOpen] = useState(false)
-  const [queue, setQueue] = useState<SubsonicQueueEntry[]>([])
+  const [queue, setQueue] = useState<NavidromeQueueItem[]>([])
   const [currentSongId, setCurrentSongId] = useState<string>('')
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -88,7 +88,7 @@ function App() {
     // TODO: Implement actual song playback logic
   }
 
-  const handleQueueUpdate = useCallback((newQueue: typeof queue, newCurrentSongId: string, newIsPlaying: boolean) => {
+  const handleQueueUpdate = useCallback((newQueue: NavidromeQueueItem[], newCurrentSongId: string, newIsPlaying: boolean) => {
     setQueue(newQueue)
     setCurrentSongId(newCurrentSongId)
     setIsPlaying(newIsPlaying)

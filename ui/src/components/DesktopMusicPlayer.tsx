@@ -1,5 +1,5 @@
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Volume1, Shuffle, Repeat, Repeat1, Mic, ListMusic, Heart } from 'lucide-react'
-import type { SubsonicQueueEntry } from '../services/subsonic'
+import type { NavidromeQueueItem } from '../services/navidrome'
 
 interface DesktopMusicPlayerProps {
   className?: string
@@ -10,7 +10,7 @@ interface DesktopMusicPlayerProps {
   isShuffle: boolean
   repeatMode: 'off' | 'all' | 'one'
   isLiked: boolean
-  queue: SubsonicQueueEntry[]
+  queue: NavidromeQueueItem[]
   currentSongId?: string
   isQueueOpen: boolean
   onTogglePlay: () => void

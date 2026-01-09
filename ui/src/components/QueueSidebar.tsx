@@ -1,10 +1,10 @@
 import { X, Play } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
-import type { SubsonicQueueEntry } from '../services/subsonic'
+import type { NavidromeQueueItem } from '../services/navidrome'
 
 interface QueueSidebarProps {
   isOpen: boolean
-  queue: SubsonicQueueEntry[]
+  queue: NavidromeQueueItem[]
   currentSongId?: string
   isPlaying: boolean
   onClose: () => void
@@ -98,7 +98,7 @@ export function QueueSidebar({
                 {/* Cover Art */}
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 flex-shrink-0 shadow-lg relative">
                   <img
-                    src={subsonicService.getCoverArtUrl(song.coverArt, 200)}
+                    src={subsonicService.getCoverArtUrl(song.albumId, 200)}
                     alt={song.album}
                     className="w-full h-full object-cover"
                   />
