@@ -100,10 +100,20 @@ export function DesktopMusicPlayer({
 
             {/* Song Info */}
             <div>
-              <h4 className="font-semibold text-sm text-white truncate max-w-[150px] sm:max-w-[200px]">
+              <h4
+                className="font-semibold text-sm text-white truncate max-w-[150px] sm:max-w-[200px] hover:text-violet-400 transition-colors cursor-pointer"
+                onClick={() => displayedSong && console.log('Song clicked:', displayedSong)}
+                title="View song details"
+              >
                 {displayedSong?.title || 'No song playing'}
               </h4>
-              <p className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px]">{displayedSong?.artist || ''}</p>
+              <p
+                className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px] hover:text-violet-400 transition-colors cursor-pointer"
+                onClick={() => displayedSong && console.log('Artist clicked:', displayedSong.artist)}
+                title="View artist details"
+              >
+                {displayedSong?.artist || ''}
+              </p>
             </div>
 
             {/* Like Button */}
