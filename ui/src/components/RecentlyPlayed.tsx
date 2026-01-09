@@ -243,17 +243,24 @@ export function RecentlyPlayed() {
                 <p className="text-xs text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-300">
                   {album.artist}
                 </p>
-                {album.year && (
-                  <div className="flex items-center gap-1 mt-1">
+                {/* Always render metadata line for consistent card height */}
+                <div className="flex items-center gap-1 mt-1 min-h-[1.25rem]">
+                  {album.year ? (
+                    <>
+                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
+                        {album.year}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-zinc-600 group-hover:bg-violet-500 transition-colors duration-300"></span>
+                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
+                        {album.songCount ?? 0} tracks
+                      </span>
+                    </>
+                  ) : (
                     <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
-                      {album.year}
+                      {album.songCount ?? 0} tracks
                     </span>
-                    <span className="w-1 h-1 rounded-full bg-zinc-600 group-hover:bg-violet-500 transition-colors duration-300"></span>
-                    <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
-                      {album.songCount} tracks
-                    </span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {/* Subtle glow effect */}

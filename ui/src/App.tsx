@@ -11,11 +11,29 @@ import { authService } from './services/auth'
 
 type Page = 'login' | 'signup' | 'home'
 
+const SIDEBAR_COLLAPSED_KEY = 'navidrome_sidebar_collapsed'
+
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('login')
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Always collapsed on mobile (768px and below)
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return true
+    }
+    // Load sidebar state from localStorage for desktop
+    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
+    return saved ? JSON.parse(saved) : false
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [loginError, setLoginError] = useState<string | null>(null)
+
+  // Save sidebar state to localStorage whenever it changes (only on desktop)
+  useEffect(() => {
+    // Only save to localStorage on desktop (768px and above)
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(isSidebarCollapsed))
+    }
+  }, [isSidebarCollapsed])
 
   // Check authentication on load
   useEffect(() => {
