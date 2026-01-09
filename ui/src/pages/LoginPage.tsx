@@ -4,9 +4,10 @@ import { User, Lock } from 'lucide-react'
 interface LoginPageProps {
   onLogin: (username: string, password: string) => void
   onSwitchToSignup: () => void
+  errorMessage?: string | null
 }
 
-export function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps) {
+export function LoginPage({ onLogin, onSwitchToSignup, errorMessage }: LoginPageProps) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -20,6 +21,13 @@ export function LoginPage({ onLogin, onSwitchToSignup }: LoginPageProps) {
       <div className="w-full max-w-md">
         <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
           <h1 className="text-2xl font-bold text-center mb-8">Welcome Back</h1>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-sm text-red-400 text-center">{errorMessage}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Field */}

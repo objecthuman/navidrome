@@ -4,15 +4,25 @@ import { Sidebar } from './components/Sidebar'
 import { MobilePlayerBar } from './components/MobilePlayerBar'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
+import { authService } from './services/auth'
 
 type Page = 'login' | 'signup' | 'home'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('login')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
-  // Handle mobile sidebar close event
+  // Check authentication on load
   useEffect(() => {
+    const isAuthenticated = authService.isAuthenticated()
+    if (isAuthenticated) {
+      setCurrentPage('home')
+    }
+    setIsLoading(false)
+
+    // Handle mobile sidebar close event
     const handleCloseSidebar = () => setIsSidebarCollapsed(true)
     document.addEventListener('close-mobile-sidebar', handleCloseSidebar)
     return () => {
@@ -24,10 +34,15 @@ function App() {
     setIsSidebarCollapsed((prev) => !prev)
   }
 
-  const handleLogin = (username: string, password: string) => {
-    console.log('Login:', { username, password })
-    // TODO: Implement actual login logic
-    setCurrentPage('home')
+  const handleLogin = async (username: string, password: string) => {
+    setLoginError(null)
+    try {
+      await authService.login({ username, password })
+      setCurrentPage('home')
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Login failed')
+      console.error('Login error:', error)
+    }
   }
 
   const handleSignup = (username: string, password: string) => {
@@ -36,12 +51,25 @@ function App() {
     setCurrentPage('home')
   }
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <div className="text-zinc-400">Loading...</div>
+      </div>
+    )
+  }
+
   // Render Login Page
   if (currentPage === 'login') {
     return (
       <LoginPage
         onLogin={handleLogin}
-        onSwitchToSignup={() => setCurrentPage('signup')}
+        onSwitchToSignup={() => {
+          setCurrentPage('signup')
+          setLoginError(null)
+        }}
+        errorMessage={loginError}
       />
     )
   }
@@ -51,7 +79,10 @@ function App() {
     return (
       <SignupPage
         onSignup={handleSignup}
-        onSwitchToLogin={() => setCurrentPage('login')}
+        onSwitchToLogin={() => {
+          setCurrentPage('login')
+          setLoginError(null)
+        }}
       />
     )
   }
