@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MobilePlayerBar } from './components/MobilePlayerBar'
 import { AlbumSlideshow } from './components/AlbumSlideshow'
+import { RecentlyPlayed } from './components/RecentlyPlayed'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { authService } from './services/auth'
@@ -109,19 +110,7 @@ function App() {
           <AlbumSlideshow />
 
           {/* Recently Played */}
-          <h2 className="text-xl md:text-2xl font-bold mb-4">Recently Played</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-zinc-900 rounded-lg p-4 hover:bg-zinc-800 transition-colors cursor-pointer"
-              >
-                <div className="aspect-square bg-zinc-800 rounded-md mb-3"></div>
-                <h3 className="font-medium text-sm truncate">Album {i + 1}</h3>
-                <p className="text-xs text-zinc-400 truncate">Artist Name</p>
-              </div>
-            ))}
-          </div>
+          <RecentlyPlayed />
         </div>
       </main>
 
