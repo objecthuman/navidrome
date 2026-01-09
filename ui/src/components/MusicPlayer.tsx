@@ -136,6 +136,33 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     }
   }, [togglePlay])
 
+  // Keyboard shortcut for spacebar to play/pause
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only trigger if:
+      // 1. Space key is pressed
+      // 2. Not typing in an input field, textarea, or contenteditable element
+      // 3. There is a current song loaded
+      if (
+        event.code === 'Space' &&
+        !(
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement ||
+          (event.target instanceof HTMLElement && event.target.isContentEditable)
+        ) &&
+        propCurrentSongId
+      ) {
+        event.preventDefault() // Prevent page scrolling
+        togglePlay()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [togglePlay, propCurrentSongId])
+
   const toggleMute = useCallback(() => {
     const newMutedState = audioPlayer.toggleMute()
     setIsMuted(newMutedState)
