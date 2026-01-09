@@ -199,13 +199,18 @@ class SubsonicService {
   /**
    * Scrobble a song (now playing notification or submission)
    * @param id - The song ID to scrobble
-   * @param submission - true if song was fully played, false for "now playing" notification
+   * @param submission - true if song was fully played, false for "now playing" notification (defaults to true per API)
+   * @param time - Optional time (in milliseconds since 1 Jan 1970) at which the song was listened to
    */
-  async scrobble(id: string, submission: boolean = false): Promise<void> {
+  async scrobble(id: string, submission: boolean = true, time?: number): Promise<void> {
     const params = new URLSearchParams({
       id,
       submission: submission.toString(),
     })
+
+    if (time !== undefined) {
+      params.append('time', time.toString())
+    }
 
     await this.request('scrobble.view', params)
     console.log(`Scrobble ${submission ? 'submission' : 'now playing'} sent for song:`, id)
