@@ -203,6 +203,90 @@ class AudioPlayerService {
     }
   }
 
+  playNext() {
+    if (!this.queue || !this.currentSongId || this.queue.items.length === 0) {
+      return
+    }
+
+    const { items, shuffle, repeat } = this.queue
+
+    // Find current song index
+    const currentIndex = items.findIndex(item => item.id === this.currentSongId)
+    if (currentIndex === -1) {
+      return
+    }
+
+    let nextIndex = currentIndex
+
+    // Handle repeat modes
+    if (repeat === 'one') {
+      // Repeat current song
+      nextIndex = currentIndex
+    } else if (shuffle) {
+      // Random next song
+      nextIndex = Math.floor(Math.random() * items.length)
+    } else {
+      // Next song in queue
+      nextIndex = currentIndex + 1
+
+      // Check if we need to loop back to start
+      if (nextIndex >= items.length) {
+        if (repeat === 'all') {
+          nextIndex = 0 // Loop back to first song
+        } else {
+          return // No more songs to play
+        }
+      }
+    }
+
+    // Play the next song immediately (no delay for manual button press)
+    const nextSong = items[nextIndex]
+    if (nextSong) {
+      this.play(nextSong.id)
+      this.onSongChange?.(nextSong.id)
+    }
+  }
+
+  playPrevious() {
+    if (!this.queue || !this.currentSongId || this.queue.items.length === 0) {
+      return
+    }
+
+    const { items, shuffle, repeat } = this.queue
+
+    // Find current song index
+    const currentIndex = items.findIndex(item => item.id === this.currentSongId)
+    if (currentIndex === -1) {
+      return
+    }
+
+    let prevIndex = currentIndex
+
+    // If shuffle is on, play a random song
+    if (shuffle) {
+      prevIndex = Math.floor(Math.random() * items.length)
+    } else {
+      // Previous song in queue
+      prevIndex = currentIndex - 1
+
+      // Check if we need to loop back to end
+      if (prevIndex < 0) {
+        if (repeat === 'all') {
+          prevIndex = items.length - 1 // Loop back to last song
+        } else {
+          prevIndex = 0 // Stay at first song
+        }
+      }
+    }
+
+    // Play the previous song
+    const prevSong = items[prevIndex]
+    if (prevSong) {
+      this.play(prevSong.id)
+      this.onSongChange?.(prevSong.id)
+    }
+  }
+
   pause() {
     if (this.howl) {
       this.howl.pause()

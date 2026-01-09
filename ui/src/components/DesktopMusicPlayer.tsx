@@ -23,6 +23,8 @@ interface DesktopMusicPlayerProps {
   onVolumeChange: (value: number) => void
   onPlaySong: (songId: string) => void
   onToggleQueue: () => void
+  onNext: () => void
+  onPrevious: () => void
   volume: number
   currentSong?: {
     id: string
@@ -62,6 +64,8 @@ export function DesktopMusicPlayer({
   onVolumeChange,
   onPlaySong,
   onToggleQueue,
+  onNext,
+  onPrevious,
   volume,
   currentSong,
 }: DesktopMusicPlayerProps) {
@@ -148,7 +152,9 @@ export function DesktopMusicPlayer({
 
               {/* Previous Button */}
               <button
-                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+                onClick={onPrevious}
+                disabled={!hasCurrentSong}
+                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Previous track"
                 title="Previous track"
               >
@@ -172,7 +178,9 @@ export function DesktopMusicPlayer({
 
               {/* Next Button */}
               <button
-                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer"
+                onClick={onNext}
+                disabled={!hasCurrentSong}
+                className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Next track"
                 title="Next track"
               >
@@ -197,22 +205,22 @@ export function DesktopMusicPlayer({
             </div>
 
             {/* Progress Bar with Times */}
-            <div className="flex items-center gap-2 w-56 sm:w-150">
-              <span className="text-xs text-zinc-500">{formatTime(currentTime)}</span>
+            <div className="flex items-center gap-2 w-48 sm:w-64 md:w-80 lg:w-96 xl:w-[450px]">
+              <span className="text-xs text-zinc-500 flex-shrink-0">{formatTime(currentTime)}</span>
               <input
                 type="range"
                 min="0"
                 max={duration}
                 value={currentTime}
                 onChange={(e) => onProgressChange(parseFloat(e.target.value))}
-                className="flex-1 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer
+                className="flex-1 min-w-0 h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3
                   [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full
                   [&::-webkit-slider-thumb]:bg-violet-500
                   [&::-webkit-slider-thumb]:cursor-pointer
                   [&::-webkit-slider-thumb]:hover:bg-violet-400"
               />
-              <span className="text-xs text-zinc-500">{formatTime(duration)}</span>
+              <span className="text-xs text-zinc-500 flex-shrink-0">{formatTime(duration)}</span>
             </div>
           </div>
 

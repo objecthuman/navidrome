@@ -141,6 +141,14 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
     setIsMuted(newMutedState)
   }, [])
 
+  const handleNext = useCallback(() => {
+    audioPlayer.playNext()
+  }, [])
+
+  const handlePrevious = useCallback(() => {
+    audioPlayer.playPrevious()
+  }, [])
+
   const toggleShuffle = () => setIsShuffle(!isShuffle)
   const toggleLike = () => setIsLiked(!isLiked)
   const cycleRepeat = () => {
@@ -185,6 +193,8 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
         onVolumeChange={handleVolumeChange}
         onPlaySong={handlePlaySong}
         onToggleQueue={onToggleQueue}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
         volume={volume}
         currentSong={{
           id: currentSong.id,
