@@ -15,6 +15,29 @@ export interface SubsonicAlbum {
   isDir?: boolean
 }
 
+export interface SubsonicQueueEntry {
+  id: string
+  parent: string
+  title: string
+  album: string
+  artist: string
+  isDir: boolean
+  coverArt: string
+  created: string
+  duration: number
+  track: number
+  type: string
+}
+
+export interface SubsonicPlayQueue {
+  entry: SubsonicQueueEntry[]
+  current: number
+  position: number
+  username: string
+  changed: string
+  changedBy: string
+}
+
 export interface SubsonicResponse<T> {
   'subsonic-response': {
     status: 'ok' | 'failed'
@@ -160,6 +183,17 @@ class SubsonicService {
     }
 
     return url.toString()
+  }
+
+  /**
+   * Get the current play queue
+   */
+  async getPlayQueue(): Promise<SubsonicPlayQueue> {
+    const response = await this.request<{ playQueue: SubsonicPlayQueue }>(
+      'getPlayQueue.view'
+    )
+
+    return response.playQueue
   }
 }
 

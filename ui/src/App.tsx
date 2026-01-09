@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MusicPlayer } from './components/MusicPlayer'
+import { QueueSidebar } from './components/QueueSidebar'
 import { AlbumSlideshow } from './components/AlbumSlideshow'
 import { MostPlayed } from './components/MostPlayed'
 import { RecentlyPlayed } from './components/RecentlyPlayed'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { authService } from './services/auth'
+import type { SubsonicQueueEntry } from './services/subsonic'
 
 type Page = 'login' | 'signup' | 'home'
 
@@ -26,6 +28,10 @@ function App() {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [loginError, setLoginError] = useState<string | null>(null)
+  const [isQueueOpen, setIsQueueOpen] = useState(false)
+  const [queue, setQueue] = useState<SubsonicQueueEntry[]>([])
+  const [currentSongId, setCurrentSongId] = useState<string>('')
+  const [isPlaying, setIsPlaying] = useState(false)
 
   // Save sidebar state to localStorage whenever it changes (only on desktop)
   useEffect(() => {
@@ -70,6 +76,12 @@ function App() {
     console.log('Signup:', { username, password })
     // TODO: Implement actual signup logic
     setCurrentPage('home')
+  }
+
+  const handlePlaySong = (songId: string) => {
+    console.log('Play song:', songId)
+    setCurrentSongId(songId)
+    // TODO: Implement actual song playback logic
   }
 
   // Show loading state while checking authentication
@@ -118,10 +130,21 @@ function App() {
 
       <Sidebar isCollapsed={isSidebarCollapsed} />
 
+      {/* Queue Sidebar */}
+      <QueueSidebar
+        isOpen={isQueueOpen}
+        queue={queue}
+        currentSongId={currentSongId}
+        isPlaying={isPlaying}
+        onClose={() => setIsQueueOpen(false)}
+        onPlaySong={handlePlaySong}
+      />
+
       {/* Main Content */}
       <main
         className={`pt-20 px-4 md:px-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out
           ${isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}
+          ${isQueueOpen ? 'md:mr-80' : ''}
         `}
       >
         <div className="max-w-7xl mx-auto">
@@ -136,7 +159,15 @@ function App() {
         </div>
       </main>
 
-      <MusicPlayer />
+      <MusicPlayer
+        isQueueOpen={isQueueOpen}
+        onToggleQueue={() => setIsQueueOpen(!isQueueOpen)}
+        onQueueUpdate={(newQueue, newCurrentSongId, newIsPlaying) => {
+          setQueue(newQueue)
+          setCurrentSongId(newCurrentSongId)
+          setIsPlaying(newIsPlaying)
+        }}
+      />
     </div>
   )
 }
