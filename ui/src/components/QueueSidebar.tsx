@@ -1,4 +1,4 @@
-import { X, Play, Pause } from 'lucide-react'
+import { X, Play, Pause, Trash2 } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { NavidromeQueueItem } from '../services/navidrome'
 
@@ -9,6 +9,7 @@ interface QueueSidebarProps {
   isPlaying: boolean
   onClose: () => void
   onPlaySong: (songId: string) => void
+  onClearQueue: () => void
 }
 
 export function QueueSidebar({
@@ -18,6 +19,7 @@ export function QueueSidebar({
   isPlaying,
   onClose,
   onPlaySong,
+  onClearQueue,
 }: QueueSidebarProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -35,14 +37,26 @@ export function QueueSidebar({
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-zinc-800">
         <h2 className="text-xl font-bold text-white">Queue</h2>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
-          aria-label="Close queue"
-          title="Close queue"
-        >
-          <X className="w-5 h-5 text-zinc-400" />
-        </button>
+        <div className="flex items-center gap-2">
+          {queue.length > 0 && (
+            <button
+              onClick={onClearQueue}
+              className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+              aria-label="Clear queue"
+              title="Clear queue"
+            >
+              <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-400 transition-colors" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+            aria-label="Close queue"
+            title="Close queue"
+          >
+            <X className="w-5 h-5 text-zinc-400" />
+          </button>
+        </div>
       </div>
 
       {/* Queue Info */}

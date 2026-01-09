@@ -152,6 +152,20 @@ function App() {
     setIsQueueOpen(false)
   }, [])
 
+  const handleClearQueue = useCallback(async () => {
+    try {
+      await navidromeService.clearQueue()
+      // Clear local state
+      setQueue([])
+      setCurrentSongId('')
+      setIsPlaying(false)
+      // Stop the audio player
+      audioPlayer.stop()
+    } catch (error) {
+      console.error('Failed to clear queue:', error)
+    }
+  }, [])
+
   // Show loading state while checking authentication
   if (isLoading) {
     return (
@@ -206,6 +220,7 @@ function App() {
         isPlaying={isPlaying}
         onClose={handleCloseQueue}
         onPlaySong={handlePlaySong}
+        onClearQueue={handleClearQueue}
       />
 
       {/* Main Content */}

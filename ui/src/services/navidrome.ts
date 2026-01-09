@@ -128,6 +128,22 @@ class NavidromeService {
   }
 
   /**
+   * Clear the play queue using Navidrome API
+   */
+  async clearQueue(): Promise<void> {
+    const url = `${config.apiURL}/api/queue`
+
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+  }
+
+  /**
    * Get cover art URL (uses Subsonic endpoint)
    */
   getCoverArtUrl(coverArtId: string, size?: number): string {

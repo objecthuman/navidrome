@@ -95,6 +95,17 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
         })
         setDuration(song.duration)
       }
+    } else {
+      // Reset to empty state when no song is playing
+      setCurrentSong({
+        id: '',
+        title: '',
+        artist: '',
+        album: '',
+        coverArt: '',
+        duration: 0,
+      })
+      setDuration(0)
     }
   }, [propCurrentSongId, queue, currentSong.id])
 
