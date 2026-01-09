@@ -26,7 +26,13 @@ export function RecentlyPlayed() {
       if (data.length === 0) {
         setHasMore(false)
       } else {
-        setAlbums((prev) => [...prev, ...data])
+        setAlbums((prev) => {
+          // Create a Set of existing album IDs for quick lookup
+          const existingIds = new Set(prev.map((album) => album.id))
+          // Filter out duplicates
+          const uniqueNewAlbums = data.filter((album) => !existingIds.has(album.id))
+          return [...prev, ...uniqueNewAlbums]
+        })
         setOffset((prev) => prev + ALBUMS_PER_PAGE)
 
         if (data.length < ALBUMS_PER_PAGE) {

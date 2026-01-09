@@ -48,34 +48,42 @@ export function MusicPlayer({ className = '', isQueueOpen, onToggleQueue, onQueu
         const queue = await subsonicService.getPlayQueue()
 
         // Get current song from queue
-        if (queue.entry && queue.entry.length > 0 && queue.current !== undefined) {
-          const currentEntry = queue.entry[queue.current]
+        if (queue.entry && queue.entry.length > 0) {
+          // Use current index if available and valid, otherwise use first song
+          const currentIndex = queue.current !== undefined && queue.current >= 0 ? queue.current : 0
+          const currentEntry = queue.entry[currentIndex]
 
-          setCurrentSong({
-            id: currentEntry.id,
-            title: currentEntry.title,
-            artist: currentEntry.artist,
-            album: currentEntry.album,
-            coverArt: currentEntry.coverArt,
-            duration: currentEntry.duration,
-          })
+          if (currentEntry) {
+            setCurrentSong({
+              id: currentEntry.id,
+              title: currentEntry.title,
+              artist: currentEntry.artist,
+              album: currentEntry.album,
+              coverArt: currentEntry.coverArt,
+              duration: currentEntry.duration,
+            })
 
-          setDuration(currentEntry.duration)
+            setDuration(currentEntry.duration)
 
-          // Set current position from queue (in seconds)
-          if (queue.position) {
-            setCurrentTime(queue.position / 1000) // Convert ms to seconds
+            // Set current position from queue (in seconds)
+            if (queue.position) {
+              setCurrentTime(queue.position / 1000) // Convert ms to seconds
+            }
+
+            // Set queue entries and notify parent
+            setQueue(queue.entry)
+            onQueueUpdate(queue.entry, currentEntry.id, false)
           }
-
-          // Set queue entries and notify parent
-          setQueue(queue.entry)
-          onQueueUpdate(queue.entry, currentEntry.id, false)
+        } else {
+          // Queue is empty, just set empty queue
+          setQueue([])
         }
 
         console.log('Queue loaded:', queue)
       } catch (error) {
         console.error('Failed to fetch queue:', error)
         // Keep using mock data if queue fetch fails
+        setQueue([])
       }
     }
 

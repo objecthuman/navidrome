@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MusicPlayer } from './components/MusicPlayer'
@@ -78,11 +78,29 @@ function App() {
     setCurrentPage('home')
   }
 
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarCollapsed((prev) => !prev)
+  }, [])
+
   const handlePlaySong = (songId: string) => {
     console.log('Play song:', songId)
     setCurrentSongId(songId)
     // TODO: Implement actual song playback logic
   }
+
+  const handleQueueUpdate = useCallback((newQueue: typeof queue, newCurrentSongId: string, newIsPlaying: boolean) => {
+    setQueue(newQueue)
+    setCurrentSongId(newCurrentSongId)
+    setIsPlaying(newIsPlaying)
+  }, [])
+
+  const handleToggleQueue = useCallback(() => {
+    setIsQueueOpen((prev) => !prev)
+  }, [])
+
+  const handleCloseQueue = useCallback(() => {
+    setIsQueueOpen(false)
+  }, [])
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -125,7 +143,7 @@ function App() {
     <div className="min-h-screen bg-zinc-950 text-white">
       <Navbar
         isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={toggleSidebar}
+        onToggleSidebar={handleToggleSidebar}
       />
 
       <Sidebar isCollapsed={isSidebarCollapsed} />
@@ -136,7 +154,7 @@ function App() {
         queue={queue}
         currentSongId={currentSongId}
         isPlaying={isPlaying}
-        onClose={() => setIsQueueOpen(false)}
+        onClose={handleCloseQueue}
         onPlaySong={handlePlaySong}
       />
 
@@ -144,7 +162,7 @@ function App() {
       <main
         className={`pt-20 px-4 md:px-6 pb-24 md:pb-8 transition-all duration-300 ease-in-out
           ${isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'}
-          ${isQueueOpen ? 'md:mr-80' : ''}
+          ${isQueueOpen ? 'md:mr-80' : 'md:mr-6'}
         `}
       >
         <div className="max-w-7xl mx-auto">
@@ -161,12 +179,8 @@ function App() {
 
       <MusicPlayer
         isQueueOpen={isQueueOpen}
-        onToggleQueue={() => setIsQueueOpen(!isQueueOpen)}
-        onQueueUpdate={(newQueue, newCurrentSongId, newIsPlaying) => {
-          setQueue(newQueue)
-          setCurrentSongId(newCurrentSongId)
-          setIsPlaying(newIsPlaying)
-        }}
+        onToggleQueue={handleToggleQueue}
+        onQueueUpdate={handleQueueUpdate}
       />
     </div>
   )

@@ -25,11 +25,12 @@ export function QueueSidebar({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  if (!isOpen) return null
+
   return (
     <div
       className={`fixed top-20 bottom-20 right-0 w-80 bg-zinc-900/98 backdrop-blur-xl border-l border-zinc-800 z-40
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        transition-transform duration-300 ease-in-out translate-x-0`}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-6 border-b border-zinc-800">
