@@ -211,7 +211,7 @@ export function AlbumSlideshow() {
       >
         {albums.map((album) => (
           <div
-            key={album.id}
+            key={`discover-${album.id}`}
             className="flex-shrink-0 w-48 md:w-56 h-80 rounded-2xl overflow-hidden group cursor-pointer relative shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col"
             style={{ backgroundColor: album.dominantColor }}
             onClick={() => {

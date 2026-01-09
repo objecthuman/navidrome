@@ -5,7 +5,7 @@ import type { SubsonicAlbum } from '../services/subsonic'
 
 const ALBUMS_PER_PAGE = 20
 
-export function RecentlyPlayed() {
+export function MostPlayed() {
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -21,7 +21,7 @@ export function RecentlyPlayed() {
 
     try {
       setLoading(true)
-      const data = await subsonicService.getAlbumList2('recent', ALBUMS_PER_PAGE, offset)
+      const data = await subsonicService.getAlbumList2('frequent', ALBUMS_PER_PAGE, offset)
 
       if (data.length === 0) {
         setHasMore(false)
@@ -34,7 +34,7 @@ export function RecentlyPlayed() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch recently played:', error)
+      console.error('Failed to fetch most played:', error)
       setHasMore(false)
     } finally {
       setLoading(false)
@@ -122,7 +122,7 @@ export function RecentlyPlayed() {
     return (
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl md:text-2xl font-bold">Recently Played</h2>
+          <h2 className="text-xl md:text-2xl font-bold">Most Played</h2>
         </div>
         <div className="flex gap-4 overflow-hidden">
           {[...Array(5)].map((_, i) => (
@@ -147,7 +147,7 @@ export function RecentlyPlayed() {
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">Recently Played</h2>
+        <h2 className="text-xl md:text-2xl font-bold">Most Played</h2>
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
@@ -184,7 +184,7 @@ export function RecentlyPlayed() {
       >
         {albums.map((album, index) => (
           <div
-            key={`recently-played-${album.id}`}
+            key={`most-played-${album.id}`}
             className="flex-shrink-0 w-44 md:w-52 group"
             style={{
               animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both`,

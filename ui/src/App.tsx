@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MobilePlayerBar } from './components/MobilePlayerBar'
 import { AlbumSlideshow } from './components/AlbumSlideshow'
+import { MostPlayed } from './components/MostPlayed'
 import { RecentlyPlayed } from './components/RecentlyPlayed'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
@@ -108,6 +109,9 @@ function App() {
         <div className="max-w-7xl mx-auto">
           {/* Album Slideshow */}
           <AlbumSlideshow />
+
+          {/* Most Played */}
+          <MostPlayed />
 
           {/* Recently Played */}
           <RecentlyPlayed />
