@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { MobilePlayerBar } from './components/MobilePlayerBar'
+import { AlbumSlideshow } from './components/AlbumSlideshow'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { authService } from './services/auth'
@@ -104,7 +105,11 @@ function App() {
         `}
       >
         <div className="max-w-7xl mx-auto">
-          {/* Placeholder for main content */}
+          {/* Album Slideshow */}
+          <AlbumSlideshow />
+
+          {/* Recently Played */}
+          <h2 className="text-xl md:text-2xl font-bold mb-4">Recently Played</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {[...Array(10)].map((_, i) => (
               <div
