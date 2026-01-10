@@ -36,6 +36,9 @@ export interface SubsonicSong {
   duration: number
   playCount?: number
   starred?: string
+  bitrate?: number
+  contentType?: string
+  suffix?: string
 }
 
 export interface SubsonicSearchResult {

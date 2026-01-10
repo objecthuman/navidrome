@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Play, Clock, Heart } from 'lucide-react'
+import { Play, Clock, Heart, Check, MoreVertical } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbumInfo, SubsonicAlbum } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
@@ -24,7 +24,9 @@ export function AlbumPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set())
+  const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set())
   const [dominantColor, setDominantColor] = useState<string>('#18181b')
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchAlbumData = async () => {
@@ -70,6 +72,22 @@ export function AlbumPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [albumId])
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openMenuId) {
+        setOpenMenuId(null)
+      }
+    }
+
+    if (openMenuId) {
+      document.addEventListener('click', handleClickOutside)
+      return () => {
+        document.removeEventListener('click', handleClickOutside)
+      }
+    }
+  }, [openMenuId])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
@@ -84,6 +102,16 @@ export function AlbumPage() {
       return `${hours} hr ${mins} min`
     }
     return `${mins} min`
+  }
+
+  const formatQuality = (song: any) => {
+    if (song.bitrate) {
+      return `${song.bitrate} kbps`
+    }
+    if (song.suffix) {
+      return song.suffix.toUpperCase()
+    }
+    return '-'
   }
 
   const handlePlayAll = useCallback(() => {
@@ -102,6 +130,35 @@ export function AlbumPage() {
       }
       return newSet
     })
+  }, [])
+
+  const toggleSongSelection = useCallback((songId: string) => {
+    setSelectedSongs((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(songId)) {
+        newSet.delete(songId)
+      } else {
+        newSet.add(songId)
+      }
+      return newSet
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    if (album?.song) {
+      const allSongIds = new Set(album.song.map((song) => song.id))
+      if (selectedSongs.size === album.song.length) {
+        // Deselect all if all are selected
+        setSelectedSongs(new Set())
+      } else {
+        // Select all
+        setSelectedSongs(allSongIds)
+      }
+    }
+  }, [album, selectedSongs.size])
+
+  const toggleMenu = useCallback((songId: string) => {
+    setOpenMenuId((prev) => (prev === songId ? null : songId))
   }, [])
 
   if (isLoading) {
@@ -221,64 +278,216 @@ export function AlbumPage() {
       {/* Track List */}
       <div className="px-4 md:px-6 py-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Tracks</h3>
-          <span className="text-sm text-zinc-500">{album.songCount} songs</span>
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold">Tracks</h3>
+            {selectedSongs.size > 0 && (
+              <span className="text-sm text-violet-400 font-medium">
+                {selectedSongs.size} selected
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleSelectAll}
+              className="text-sm text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer"
+            >
+              {selectedSongs.size === album?.song?.length ? 'Deselect All' : 'Select All'}
+            </button>
+            <span className="text-sm text-zinc-500">{album.songCount} songs</span>
+          </div>
         </div>
 
-        <div className="space-y-1">
-          {album.song?.map((song, index) => (
-            <div
-              key={song.id}
-              onClick={() => onPlaySong(song.id)}
-              className="flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-900/50 transition-colors cursor-pointer group"
-            >
-              {/* Track Number */}
-              <div className="w-8 text-center">
-                <span className="text-sm text-zinc-500 group-hover:hidden">{index + 1}</span>
-                <Play className="w-4 h-4 text-zinc-400 hidden group-hover:block" />
-              </div>
-
-              {/* Song Info */}
-              <div className="flex-1 min-w-0">
-                <h4 className="text-white truncate group-hover:text-violet-300 transition-colors">
-                  {song.title}
-                </h4>
-                {song.artist && song.artist !== album.artist && (
-                  <p
-                    className="text-sm text-zinc-500 truncate hover:text-violet-400 transition-colors cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/search?q=${encodeURIComponent(song.artist)}`)
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-800">
+                <th className="hidden md:table-cell w-10 px-3 py-2 text-left">
+                  <div
+                    className="w-4 h-4 rounded border border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer hover:border-zinc-500"
+                    onClick={toggleSelectAll}
+                    style={{
+                      borderColor: selectedSongs.size === album?.song?.length && selectedSongs.size > 0 ? '#8b5cf6' : '#52525b',
+                      backgroundColor: selectedSongs.size === album?.song?.length && selectedSongs.size > 0 ? '#8b5cf6' : 'transparent',
                     }}
                   >
-                    {song.artist}
-                  </p>
-                )}
-              </div>
+                    <Check
+                      className={`w-3 h-3 text-white transition-all duration-200 ${
+                        selectedSongs.size === album?.song?.length && selectedSongs.size > 0 ? 'scale-100' : 'scale-0'
+                      }`}
+                    />
+                  </div>
+                </th>
+                <th className="w-16 px-3 py-2 text-center">
+                  <span className="text-xs text-zinc-500 font-medium">#</span>
+                </th>
+                <th className="px-3 py-2 text-left">
+                  <span className="text-xs text-zinc-500 font-medium">Title</span>
+                </th>
+                <th className="hidden md:table-cell w-28 px-3 py-2 text-right">
+                  <span className="text-xs text-zinc-500 font-medium">Quality</span>
+                </th>
+                <th className="w-24 px-3 py-2 text-right">
+                  <span className="text-xs text-zinc-500 font-medium">Duration</span>
+                </th>
+                <th className="w-20 px-3 py-2 text-right">
+                  <span className="text-xs text-zinc-500 font-medium">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {album.song?.map((song, index) => {
+                const isSelected = selectedSongs.has(song.id)
+                return (
+                  <tr
+                    key={song.id}
+                    className={`transition-all duration-200 cursor-pointer group ${
+                      isSelected
+                        ? 'bg-violet-500/10'
+                        : 'hover:bg-zinc-900/50'
+                    }`}
+                    onClick={() => onPlaySong(song.id)}
+                  >
+                    {/* Checkbox */}
+                    <td className="hidden md:table-cell px-3 py-2">
+                      <div
+                        className="w-4 h-4 rounded border border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleSongSelection(song.id)
+                        }}
+                        style={{
+                          borderColor: isSelected ? '#8b5cf6' : '#52525b',
+                          backgroundColor: isSelected ? '#8b5cf6' : 'transparent',
+                        }}
+                      >
+                        <Check
+                          className={`w-3 h-3 text-white transition-all duration-200 ${
+                            isSelected ? 'scale-100' : 'scale-0'
+                          }`}
+                        />
+                      </div>
+                    </td>
 
-              {/* Duration */}
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-zinc-500">{formatTime(song.duration)}</span>
+                    {/* Track Number */}
+                    <td className="px-3 py-2 text-center">
+                      <span className="text-xs text-zinc-500 group-hover:hidden">{index + 1}</span>
+                      <Play className="w-3 h-3 text-zinc-400 hidden group-hover:block mx-auto" />
+                    </td>
 
-                {/* Like Button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    toggleLike(song.id)
-                  }}
-                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                    likedSongs.has(song.id)
-                      ? 'text-red-500 hover:bg-red-500/10'
-                      : 'text-zinc-400 hover:bg-zinc-800'
-                  }`}
-                  aria-label={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
-                  title={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
-                >
-                  <Heart className={`w-4 h-4 ${likedSongs.has(song.id) ? 'fill-current' : ''}`} />
-                </button>
-              </div>
-            </div>
-          ))}
+                    {/* Song Info */}
+                    <td className="px-3 py-2">
+                      <div className="min-w-0">
+                        <h4
+                          className={`text-sm truncate transition-colors ${
+                            isSelected ? 'text-violet-300' : 'text-white group-hover:text-violet-300'
+                          }`}
+                        >
+                          {song.title}
+                        </h4>
+                        {song.artist && song.artist !== album.artist && (
+                          <p
+                            className="text-xs text-zinc-500 truncate hover:text-violet-400 transition-colors cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/search?q=${encodeURIComponent(song.artist)}`)
+                            }}
+                          >
+                            {song.artist}
+                          </p>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Quality */}
+                    <td className="hidden md:table-cell px-3 py-2 text-right">
+                      <span className="text-xs text-zinc-500">{formatQuality(song)}</span>
+                    </td>
+
+                    {/* Duration */}
+                    <td className="px-3 py-2 text-right">
+                      <span className="text-xs text-zinc-500">{formatTime(song.duration)}</span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-2">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* Like Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleLike(song.id)
+                          }}
+                          className={`hidden md:p-1 md:rounded-full transition-all duration-200 cursor-pointer ${
+                            likedSongs.has(song.id)
+                              ? 'text-red-500 hover:bg-red-500/10'
+                              : 'text-zinc-400 hover:bg-zinc-800'
+                          }`}
+                          aria-label={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
+                          title={likedSongs.has(song.id) ? 'Unlike song' : 'Like song'}
+                        >
+                          <Heart className={`w-3 h-3 ${likedSongs.has(song.id) ? 'fill-current' : ''}`} />
+                        </button>
+
+                        {/* More Options Button */}
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleMenu(song.id)
+                            }}
+                            className="p-1 rounded-full transition-all duration-200 cursor-pointer text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                            aria-label="More options"
+                            title="More options"
+                          >
+                            <MoreVertical className="w-3 h-3" />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {openMenuId === song.id && (
+                            <div
+                              className="absolute right-0 top-full mt-1 w-40 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="py-1">
+                                <button
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  onClick={() => {
+                                    console.log('Add to playlist:', song.id)
+                                    setOpenMenuId(null)
+                                  }}
+                                >
+                                  Add to playlist
+                                </button>
+                                <button
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  onClick={() => {
+                                    console.log('Add to queue:', song.id)
+                                    setOpenMenuId(null)
+                                  }}
+                                >
+                                  Add to queue
+                                </button>
+                                <button
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  onClick={() => {
+                                    console.log('Download:', song.id)
+                                    setOpenMenuId(null)
+                                  }}
+                                >
+                                  Download
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
