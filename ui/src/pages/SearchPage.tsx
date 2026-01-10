@@ -84,6 +84,11 @@ export function SearchPage() {
     performSearch()
   }, [query])
 
+  // Scroll to top when search query changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [query])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)

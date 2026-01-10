@@ -67,6 +67,11 @@ export function ArtistPage() {
     fetchArtistData()
   }, [artistId])
 
+  // Scroll to top when artist changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [artistId])
+
 
   if (isLoading) {
     return (

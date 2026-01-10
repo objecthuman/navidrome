@@ -65,6 +65,11 @@ export function AlbumPage() {
     fetchAlbumData()
   }, [albumId])
 
+  // Scroll to top when album changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [albumId])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = Math.floor(seconds % 60)
