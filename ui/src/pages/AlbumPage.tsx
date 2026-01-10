@@ -418,7 +418,7 @@ export function AlbumPage() {
                             e.stopPropagation()
                             toggleLike(song.id)
                           }}
-                          className={`hidden md:p-1 md:rounded-full transition-all duration-200 cursor-pointer ${
+                          className={`hidden md:block p-1 rounded-full transition-all duration-200 cursor-pointer ${
                             likedSongs.has(song.id)
                               ? 'text-red-500 hover:bg-red-500/10'
                               : 'text-zinc-400 hover:bg-zinc-800'
@@ -450,6 +450,17 @@ export function AlbumPage() {
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="py-1">
+                                <button
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+                                  onClick={() => {
+                                    toggleLike(song.id)
+                                    setOpenMenuId(null)
+                                  }}
+                                >
+                                  <Heart className={`w-3 h-3 ${likedSongs.has(song.id) ? 'fill-current text-red-500' : ''}`} />
+                                  <span>{likedSongs.has(song.id) ? 'Remove from favourites' : 'Add to favourites'}</span>
+                                </button>
+                                <div className="border-t border-zinc-700 my-1"></div>
                                 <button
                                   className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
                                   onClick={() => {
