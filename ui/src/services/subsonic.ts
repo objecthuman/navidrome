@@ -15,6 +15,35 @@ export interface SubsonicAlbum {
   isDir?: boolean
 }
 
+export interface SubsonicArtist {
+  id: string
+  name: string
+  albumCount: number
+  coverArt?: string
+  starred?: string
+}
+
+export interface SubsonicSong {
+  id: string
+  parent: string
+  title: string
+  album: string
+  artist: string
+  track: number
+  year?: number
+  genre?: string
+  coverArt: string
+  duration: number
+  playCount?: number
+  starred?: string
+}
+
+export interface SubsonicSearchResult {
+  artist: SubsonicArtist[]
+  album: SubsonicAlbum[]
+  song: SubsonicSong[]
+}
+
 export interface SubsonicQueueEntry {
   id: string
   parent: string
@@ -154,6 +183,22 @@ class SubsonicService {
   }
 
   /**
+   * Get artist details
+   */
+  async getArtist(id: string): Promise<SubsonicArtist> {
+    const params = new URLSearchParams({
+      id,
+    })
+
+    const response = await this.request<{ artist: SubsonicArtist }>(
+      'getArtist.view',
+      params
+    )
+
+    return response.artist
+  }
+
+  /**
    * Get album information including notes and images
    */
   async getAlbumInfo(id: string): Promise<SubsonicAlbumInfo> {
@@ -238,6 +283,38 @@ class SubsonicService {
 
     await this.request('scrobble.view', params)
     console.log(`Scrobble ${submission ? 'submission' : 'now playing'} sent for song:`, id)
+  }
+
+  /**
+   * Search for artists, albums, and songs
+   * @param query - The search query
+   * @param artistCount - Max number of artists to return (default 50)
+   * @param albumCount - Max number of albums to return (default 50)
+   * @param songCount - Max number of songs to return (default 50)
+   */
+  async search3(
+    query: string,
+    artistCount: number = 50,
+    albumCount: number = 50,
+    songCount: number = 50
+  ): Promise<SubsonicSearchResult> {
+    const params = new URLSearchParams({
+      query,
+      artistCount: artistCount.toString(),
+      albumCount: albumCount.toString(),
+      songCount: songCount.toString(),
+    })
+
+    const response = await this.request<{ searchResult3: SubsonicSearchResult }>(
+      'search3.view',
+      params
+    )
+
+    return {
+      artist: response.searchResult3.artist || [],
+      album: response.searchResult3.album || [],
+      song: response.searchResult3.song || [],
+    }
   }
 }
 

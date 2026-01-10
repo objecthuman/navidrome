@@ -1,5 +1,6 @@
 import { Search, Plus, Activity, User, ChevronLeft, ChevronRight, Home, ArrowLeft, ArrowRight } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState, FormEvent, useEffect, useRef } from 'react'
 
 interface NavbarProps {
   isSidebarCollapsed: boolean
@@ -8,6 +9,9 @@ interface NavbarProps {
 
 export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState('')
+  const previousQueryRef = useRef<string | null>(null)
 
   const handleGoBack = () => {
     window.history.back()
@@ -15,6 +19,53 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
 
   const handleGoForward = () => {
     window.history.forward()
+  }
+
+  // Sync search input with URL query param only on mount or external navigation
+  useEffect(() => {
+    const currentQuery = searchParams.get('q') || ''
+
+    // Only sync if the query in URL is different from what we previously set
+    if (previousQueryRef.current !== currentQuery) {
+      setSearchQuery(currentQuery)
+      previousQueryRef.current = currentQuery
+    }
+  }, [searchParams])
+
+  // Debounced search navigation
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim() && searchQuery !== previousQueryRef.current) {
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+        previousQueryRef.current = searchQuery.trim()
+      } else if (!searchQuery.trim() && previousQueryRef.current) {
+        // User cleared the input, navigate to empty search page
+        navigate('/search')
+        previousQueryRef.current = ''
+      }
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, navigate])
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      const trimmedQuery = searchQuery.trim()
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+      previousQueryRef.current = trimmedQuery
+    }
+  }
+
+  const handleSearchIconClick = () => {
+    if (searchQuery.trim()) {
+      const trimmedQuery = searchQuery.trim()
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`)
+      previousQueryRef.current = trimmedQuery
+    } else {
+      navigate('/search')
+      previousQueryRef.current = ''
+    }
   }
 
   return (
@@ -46,10 +97,10 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
 
         {/* Search Bar - Center */}
         <div className="flex-1 max-w-xl mx-4 md:mx-8 flex items-center gap-2">
-          {/* Left Navigation Arrow */}
+          {/* Left Navigation Arrow - Desktop Only */}
           <button
             onClick={handleGoBack}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+            className="hidden md:flex p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             aria-label="Go back"
             title="Go back"
           >
@@ -57,19 +108,28 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
           </button>
 
           {/* Search Input */}
-          <div className="relative group flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-violet-400 transition-colors" />
+          <form onSubmit={handleSearch} className="relative group flex-1">
+            <button
+              type="button"
+              onClick={handleSearchIconClick}
+              className="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer"
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4 text-zinc-400 group-focus-within:text-violet-400 transition-colors" />
+            </button>
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search tracks, artists, albums..."
               className="w-full bg-zinc-800 border border-zinc-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-500"
             />
-          </div>
+          </form>
 
-          {/* Right Navigation Arrow */}
+          {/* Right Navigation Arrow - Desktop Only */}
           <button
             onClick={handleGoForward}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+            className="hidden md:flex p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             aria-label="Go forward"
             title="Go forward"
           >

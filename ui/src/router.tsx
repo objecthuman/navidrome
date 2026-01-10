@@ -4,6 +4,8 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { AlbumPage } from './pages/AlbumPage'
+import { ArtistPage } from './pages/ArtistPage'
+import { SearchPage } from './pages/SearchPage'
 import { authService } from './services/auth'
 
 // Create router configuration
@@ -23,6 +25,14 @@ export const router = createBrowserRouter([
       {
         path: 'album/:albumId',
         element: <AlbumPage />,
+      },
+      {
+        path: 'artist/:artistId',
+        element: <ArtistPage />,
+      },
+      {
+        path: 'search',
+        element: <SearchPage />,
       },
     ],
   },
