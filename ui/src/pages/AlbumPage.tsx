@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Play, Clock, Heart } from 'lucide-react'
+import { Play, Clock, Heart } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbumInfo, SubsonicAlbum } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
+import { Vibrant } from 'node-vibrant/browser'
 
 interface Song {
   id: string
@@ -23,6 +24,7 @@ export function AlbumPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set())
+  const [dominantColor, setDominantColor] = useState<string>('#18181b')
 
   useEffect(() => {
     const fetchAlbumData = async () => {
@@ -40,6 +42,18 @@ export function AlbumPage() {
 
         setAlbumInfo(infoResponse)
         setAlbum(albumResponse)
+
+        // Extract dominant color from cover art using node-vibrant
+        if (infoResponse.mediumImageUrl) {
+          try {
+            const palette = await Vibrant.from(infoResponse.mediumImageUrl).getPalette()
+            const dominantColor = palette.Vibrant?.hex || palette.DarkVibrant?.hex || palette.Muted?.hex || '#18181b'
+            setDominantColor(dominantColor)
+          } catch (err) {
+            console.error('Failed to extract color:', err)
+            setDominantColor('#18181b')
+          }
+        }
       } catch (err) {
         console.error('Failed to fetch album data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load album')
@@ -73,10 +87,6 @@ export function AlbumPage() {
     }
   }, [album, onPlaySong])
 
-  const handleBack = useCallback(() => {
-    navigate('/home')
-  }, [navigate])
-
   const toggleLike = useCallback((songId: string) => {
     setLikedSongs((prev) => {
       const newSet = new Set(prev)
@@ -99,40 +109,24 @@ export function AlbumPage() {
 
   if (error || !album) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center">
-        <div className="text-red-400 mb-4">{error || 'Album not found'}</div>
-        <button
-          onClick={handleBack}
-          className="px-4 py-2 bg-violet-500 hover:bg-violet-600 rounded-lg transition-colors cursor-pointer"
-        >
-          Go Back
-        </button>
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+        <div className="text-red-400">{error || 'Album not found'}</div>
       </div>
     )
   }
 
   return (
     <div className="bg-zinc-950 text-white pb-24 md:pb-8">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="flex items-center gap-4 px-4 md:px-6 py-4">
-          <button
-            onClick={handleBack}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
-            aria-label="Go back"
-            title="Go back"
-          >
-            <ArrowLeft className="w-5 h-5 text-zinc-400" />
-          </button>
-          <h1 className="text-lg font-semibold truncate">{album.name}</h1>
-        </div>
-      </div>
-
       {/* Album Info */}
-      <div className="px-4 md:px-6 py-8">
+      <div
+        className="px-4 md:px-6 py-8"
+        style={{
+          background: `linear-gradient(to bottom, ${dominantColor} 0%, ${dominantColor}40 40%, transparent 100%)`,
+        }}
+      >
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Cover Art */}
-          <div className="flex-shrink-0 w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800">
+          <div className="w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800 flex-shrink-0">
             {albumInfo?.mediumImageUrl ? (
               <img
                 src={albumInfo.mediumImageUrl}
@@ -232,7 +226,7 @@ export function AlbumPage() {
 
               {/* Song Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-white truncate group-hover:text-violet-300 transition-colors">
+                <h4 className="text-white truncate group-hover:text-violet-300 transition-colors">
                   {song.title}
                 </h4>
                 {song.artist && song.artist !== album.artist && (

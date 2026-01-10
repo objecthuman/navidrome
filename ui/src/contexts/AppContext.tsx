@@ -1,4 +1,5 @@
-import { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext} from 'react'
+import type { ReactNode } from 'react'
 import type { NavidromeQueueItem } from '../services/navidrome'
 
 interface AppContextType {
@@ -14,6 +15,7 @@ interface AppContextType {
   onQueueUpdate: (queue: NavidromeQueueItem[], currentSongId: string, isPlaying: boolean) => void
   onToggleQueue: () => void
   onClearQueue: () => void
+  onNavigateToAlbum: (albumId: string) => void
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined)

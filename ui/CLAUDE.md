@@ -12,6 +12,7 @@ A modern, mobile-first web music player interface for Navidrome music server. Bu
 - **React 19.2.0** - UI library
 - **TypeScript 5.9.3** - Type-safe JavaScript
 - **Vite 7.2.4** - Build tool and dev server
+- **React Router DOM 6.28+** - Client-side routing
 
 ### Styling
 - **Tailwind CSS 4.1.18** - Utility-first CSS framework (using `@tailwindcss/vite` plugin)
@@ -42,22 +43,31 @@ ui/
 │   ├── components/        # Reusable UI components
 │   │   ├── Navbar.tsx           # Fixed navigation bar
 │   │   ├── Sidebar.tsx          # Collapsible sidebar navigation
-│   │   ├── MusicPlayer.tsx      # Fixed bottom music player
+│   │   ├── MusicPlayer.tsx      # Music player wrapper (mobile/desktop)
+│   │   ├── MobileMusicPlayer.tsx   # Mobile-optimized music player
+│   │   ├── DesktopMusicPlayer.tsx  # Desktop music player with controls
+│   │   ├── QueueSidebar.tsx     # Slide-out queue panel
 │   │   ├── AlbumSlideshow.tsx   # Discover section with colored cards
 │   │   ├── MostPlayed.tsx       # Most played albums slideshow
 │   │   └── RecentlyPlayed.tsx    # Recently played albums slideshow
+│   ├── contexts/          # React Context for global state
+│   │   └── AppContext.tsx    # Shared app state (queue, playback, etc.)
 │   ├── config/            # Configuration files
 │   │   └── api.ts         # API configuration (environment variables)
 │   ├── pages/             # Page-level components
-│   │   ├── LoginPage.tsx  # Login form
-│   │   └── SignupPage.tsx # Signup form
+│   │   ├── LoginPage.tsx   # Login form
+│   │   ├── SignupPage.tsx  # Signup form
+│   │   ├── HomePage.tsx    # Home page with album carousels
+│   │   └── AlbumPage.tsx   # Album detail page with tracklist
 │   ├── services/          # Business logic & API calls
 │   │   ├── auth.ts        # Authentication service
+│   │   ├── audioPlayer.ts # Audio playback (Howler.js wrapper)
 │   │   ├── navidrome.ts   # Navidrome API service (/api/*)
 │   │   └── subsonic.ts    # Subsonic API service (/rest/*)
-│   ├── App.tsx            # Main app component with routing
+│   ├── router.tsx         # React Router v6 configuration
+│   ├── App.tsx            # Main app layout component
 │   ├── main.tsx           # Application entry point
-│   ├── index.css          # Global styles (Tailwind imports)
+│   ├── index.css          # Global styles (Tailwind + animations)
 │   └── vite-env.d.ts      # TypeScript definitions for Vite env vars
 ├── .env                   # Environment variables (gitignored)
 ├── .env.example           # Environment variable template
@@ -70,6 +80,26 @@ ui/
 ├── tsconfig.node.json     # Node-specific TypeScript config
 └── vite.config.ts         # Vite build configuration
 ```
+
+---
+
+## New Files & Components
+
+### Routing & Context
+- **`src/router.tsx`** - React Router configuration with protected/public routes
+- **`src/contexts/AppContext.tsx`** - Global app state (queue, playback, navigation)
+
+### Pages
+- **`src/pages/HomePage.tsx`** - Home page with album carousels (MostPlayed, RecentlyPlayed, AlbumSlideshow)
+- **`src/pages/AlbumPage.tsx`** - Album detail page with tracklist, metadata, and like buttons
+
+### Components
+- **`src/components/QueueSidebar.tsx`** - Right sidebar showing current queue with clear button
+- **`src/components/MobileMusicPlayer.tsx`** - Mobile-optimized bottom music player bar
+- **`src/components/DesktopMusicPlayer.tsx`** - Desktop music player with full controls
+
+### Services
+- **`src/services/audioPlayer.ts`** - Howler.js wrapper for audio playback, queue management, scrobbling
 
 ---
 
@@ -141,26 +171,39 @@ export function ComponentName({ props }: Props) {
 
 ## Component Architecture
 
-### Page Routing
-Simple state-based routing (no router library):
-```typescript
-type Page = 'login' | 'signup' | 'home'
-const [currentPage, setCurrentPage] = useState<Page>('login')
-```
+### Routing (React Router v6)
+The app uses React Router for URL-based routing configured in `src/router.tsx`.
+
+**Route Structure:**
+- `/` → Redirects based on auth
+- `/login` → Standalone login page
+- `/signup` → Standalone signup page
+- `/home` → Home page (inside App layout)
+- `/album/:albumId` → Album detail page (inside App layout)
+
+**Protected Routes:**
+- Routes inside App layout (`/home`, `/album/*`) require authentication
+- Auth pages render standalone without App layout
 
 ### Component Hierarchy
 ```
-App (main container + routing)
-├── LoginPage (when currentPage === 'login')
-├── SignupPage (when currentPage === 'signup')
-└── HomePage (when currentPage === 'home')
-    ├── Navbar (fixed top)
-    ├── Sidebar (collapsible, below navbar)
-    ├── Main Content (responsive margin for sidebar)
-    └── MobilePlayerBar (fixed bottom, mobile only)
+App (main layout wrapper - persistent)
+├── Navbar (fixed top)
+├── Sidebar (collapsible)
+├── QueueSidebar (slide-out panel)
+├── MusicPlayer (wrapper)
+│   ├── MobileMusicPlayer (mobile only)
+│   └── DesktopMusicPlayer (desktop only)
+└── <Outlet /> (renders child routes)
+    ├── HomePage
+    │   ├── AlbumSlideshow
+    │   ├── MostPlayed
+    │   └── RecentlyPlayed
+    └── AlbumPage
 ```
 
 ### Data Flow
+- **Context API** (`AppContext`): Global state (queue, currentSongId, isPlaying, etc.)
 - **Props down, events up**: Parent passes data via props, child calls callback functions
 - **Authentication**: Auth service manages localStorage, components consume via authService methods
 
@@ -306,37 +349,48 @@ npm run lint
    - Signup page with password confirmation
    - JWT-based authentication
    - localStorage persistence
-   - Auto-redirect if already logged in
+   - Auto-redirect based on auth status
 
-2. **Navigation**
-   - Fixed navbar with search bar
-   - Collapsible sidebar with smooth animations
-   - Mobile-friendly overlay for sidebar
-   - Action icons (add music, activity, user)
+2. **Navigation** (React Router v6)
+   - URL-based routing with browser history support
+   - Bookmarkable and shareable album URLs
+   - Routes: `/`, `/login`, `/signup`, `/home`, `/album/:albumId`
+   - Protected routes wrapped in App layout
 
-3. **Layout**
-   - Dark theme throughout
-   - Responsive grid layout
-   - Mobile player bar (placeholder)
-   - Smooth transitions
+3. **Music Player**
+   - **Desktop**: Play/pause, next/previous, progress bar, volume, shuffle, repeat
+   - **Mobile**: Compact bottom bar with essential controls
+   - Now playing display with cover art
+   - Like button for current song
 
-4. **UI Components**
-   - Gradient buttons with hover effects
-   - Input fields with icons
-   - Error message displays
-   - Loading states
+4. **Audio Playback** (Howler.js)
+   - Stream audio from Navidrome server
+   - Play/pause/seek/volume controls
+   - Queue-based auto-advance
+   - Shuffle and repeat support (off/all/one)
+   - Scrobbling (now playing + final submission)
 
-### To Be Implemented
-- Music player controls (play/pause/next/prev)
-- Audio playback using Howler.js
-- Playlist management
-- Album/Artist/Genre pages
-- Search functionality
-- Favorites system
-- Library management
-- Volume controls
-- Progress bar
-- Shuffle/repeat
+5. **Queue Management**
+   - Queue sidebar with song list
+   - Visual playing indicator (animated equalizer)
+   - Clear queue functionality
+   - Click any song to play
+
+6. **Album Pages**
+   - Album details (cover, title, artist, metadata)
+   - Album description from Last.fm
+   - Full tracklist with durations
+   - Like buttons on each song
+   - Click track to play
+
+7. **Keyboard Shortcuts**
+   - Spacebar: Toggle play/pause
+
+8. **UI/UX**
+   - Dark theme
+   - Responsive design
+   - Smooth animations
+   - Loading/error states
 
 ---
 

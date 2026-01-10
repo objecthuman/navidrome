@@ -2,57 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbum } from '../services/subsonic'
+import { useApp } from '../contexts/AppContext'
+import { Vibrant } from 'node-vibrant/browser'
 
 interface AlbumWithColor extends SubsonicAlbum {
   dominantColor: string
 }
 
-// Extract dominant color from image
-const extractDominantColor = (imgElement: HTMLImageElement): string => {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return '#18181b'
-
-  // Scale down for performance
-  const size = 50
-  canvas.width = size
-  canvas.height = size
-  ctx.drawImage(imgElement, 0, 0, size, size)
-
-  const imageData = ctx.getImageData(0, 0, size, size)
-  const data = imageData.data
-
-  let r = 0,
-    g = 0,
-    b = 0
-  let count = 0
-
-  for (let i = 0; i < data.length; i += 4) {
-    // Skip transparent pixels
-    if (data[i + 3] < 128) continue
-
-    r += data[i]
-    g += data[i + 1]
-    b += data[i + 2]
-    count++
-  }
-
-  if (count === 0) return '#18181b'
-
-  r = Math.floor(r / count)
-  g = Math.floor(g / count)
-  b = Math.floor(b / count)
-
-  // Convert to hex with darker tint for background
-  const darkenFactor = 0.15
-  const finalR = Math.floor(r * darkenFactor)
-  const finalG = Math.floor(g * darkenFactor)
-  const finalB = Math.floor(b * darkenFactor)
-
-  return `rgb(${finalR}, ${finalG}, ${finalB})`
-}
-
 export function AlbumSlideshow() {
+  const { onNavigateToAlbum } = useApp()
   const [albums, setAlbums] = useState<AlbumWithColor[]>([])
   const [loading, setLoading] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
@@ -66,21 +24,18 @@ export function AlbumSlideshow() {
         setLoading(true)
         const data = await subsonicService.getAlbumList2('random', 20, 0)
 
-        // Extract colors for each album
+        // Extract colors for each album using node-vibrant
         const albumsWithColors = await Promise.all(
           data.map(async (album) => {
-            return new Promise<AlbumWithColor>((resolve) => {
-              const img = new Image()
-              img.crossOrigin = 'anonymous'
-              img.onload = () => {
-                const color = extractDominantColor(img)
-                resolve({ ...album, dominantColor: color })
-              }
-              img.onerror = () => {
-                resolve({ ...album, dominantColor: '#18181b' })
-              }
-              img.src = subsonicService.getCoverArtUrl(album.coverArt, 100)
-            })
+            try {
+              const imageUrl = subsonicService.getCoverArtUrl(album.coverArt, 100)
+              const palette = await Vibrant.from(imageUrl).getPalette()
+              const dominantColor = palette.Vibrant?.hex || palette.DarkVibrant?.hex || palette.Muted?.hex || '#18181b'
+              return { ...album, dominantColor }
+            } catch (err) {
+              console.error('Failed to extract color for album:', album.name, err)
+              return { ...album, dominantColor: '#18181b' }
+            }
           })
         )
 
@@ -216,10 +171,7 @@ export function AlbumSlideshow() {
             key={`discover-${album.id}`}
             className="flex-shrink-0 w-48 md:w-56 h-80 rounded-2xl overflow-hidden group cursor-pointer relative shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col"
             style={{ backgroundColor: album.dominantColor }}
-            onClick={() => {
-              // TODO: Navigate to album detail page
-              console.log('Album clicked:', album)
-            }}
+            onClick={() => onNavigateToAlbum(album.id)}
           >
             {/* Gradient overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-black/80 z-0"></div>
@@ -258,6 +210,11 @@ export function AlbumSlideshow() {
                 )}
               </div>
               <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // TODO: Play all songs from this album
+                  console.log('Play album:', album.id)
+                }}
                 className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0 cursor-pointer"
                 aria-label="Play album"
                 title="Play album"
