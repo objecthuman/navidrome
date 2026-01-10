@@ -1,32 +1,34 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { User, Lock } from 'lucide-react'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Lock } from "lucide-react";
 
 export function SignupPage() {
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
+      setError("Passwords do not match");
+      return;
     }
 
     // TODO: Implement actual signup logic
-    console.log('Signup:', { username, password })
-    navigate('/home')
-  }
+    console.log("Signup:", { username, password });
+    navigate("/home");
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
-          <h1 className="text-2xl font-bold text-center mb-8">Create Account</h1>
+          <h1 className="text-2xl font-bold text-center mb-8">
+            Create Account
+          </h1>
 
           {error && (
             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -37,7 +39,10 @@ export function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-zinc-300 mb-2"
+              >
                 Username
               </label>
               <div className="relative">
@@ -56,7 +61,10 @@ export function SignupPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-zinc-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -75,7 +83,10 @@ export function SignupPage() {
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-zinc-300 mb-2"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -105,9 +116,9 @@ export function SignupPage() {
           {/* Switch to Login */}
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-400">
-              Already have an account?{' '}
+              Already have an account?{" "}
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate("/login")}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
                 title="Sign in to your account"
               >
@@ -118,5 +129,5 @@ export function SignupPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

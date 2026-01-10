@@ -1,22 +1,22 @@
-import { Heart, Disc, Mic, ListMusic, Library } from 'lucide-react'
+import { Heart, Disc, Mic, ListMusic, Library } from "lucide-react";
 
 interface SidebarProps {
-  isCollapsed: boolean
+  isCollapsed: boolean;
 }
 
 interface NavItem {
-  icon: typeof Heart
-  label: string
-  count: string | null
+  icon: typeof Heart;
+  label: string;
+  count: string | null;
 }
 
 const navItems: NavItem[] = [
-  { icon: Heart, label: 'Favorites', count: null },
-  { icon: Disc, label: 'Albums', count: '124' },
-  { icon: Mic, label: 'Artists', count: '48' },
-  { icon: ListMusic, label: 'Genres', count: '12' },
-  { icon: Library, label: 'Libraries', count: '3' },
-]
+  { icon: Heart, label: "Favorites", count: null },
+  { icon: Disc, label: "Albums", count: "124" },
+  { icon: Mic, label: "Artists", count: "48" },
+  { icon: ListMusic, label: "Genres", count: "12" },
+  { icon: Library, label: "Libraries", count: "3" },
+];
 
 export function Sidebar({ isCollapsed }: SidebarProps) {
   return (
@@ -24,19 +24,19 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-[60px] bottom-0 z-40 bg-zinc-900/95 backdrop-blur-sm border-r border-zinc-800 transition-all duration-300 ease-in-out overflow-hidden
-          ${isCollapsed ? 'w-0 md:w-16' : 'w-64'}
+          ${isCollapsed ? "w-0 md:w-16" : "w-64"}
         `}
       >
-        <div className={`p-4 ${isCollapsed ? 'md:p-2' : ''}`}>
+        <div className={`p-4 ${isCollapsed ? "md:p-2" : ""}`}>
           <nav className="space-y-1">
             {navItems.map((item) => {
-              const Icon = item.icon
+              const Icon = item.icon;
               return (
                 <a
                   key={item.label}
                   href="#"
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-zinc-800 transition-colors group
-                    ${isCollapsed ? 'md:justify-center' : ''}
+                    ${isCollapsed ? "md:justify-center" : ""}
                   `}
                 >
                   <Icon className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors flex-shrink-0" />
@@ -53,7 +53,7 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                     </>
                   )}
                 </a>
-              )
+              );
             })}
           </nav>
 
@@ -73,7 +73,9 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
                       <p className="text-sm font-medium text-zinc-200 truncate">
                         Recent Track {i}
                       </p>
-                      <p className="text-xs text-zinc-500 truncate">Artist Name</p>
+                      <p className="text-xs text-zinc-500 truncate">
+                        Artist Name
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -89,10 +91,10 @@ export function Sidebar({ isCollapsed }: SidebarProps) {
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => {
             // This will be handled by parent component state
-            document.dispatchEvent(new CustomEvent('close-mobile-sidebar'))
+            document.dispatchEvent(new CustomEvent("close-mobile-sidebar"));
           }}
         ></div>
       )}
     </>
-  )
+  );
 }

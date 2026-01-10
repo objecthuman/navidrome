@@ -1,26 +1,26 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { User, Lock } from 'lucide-react'
-import { authService } from '../services/auth'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Lock } from "lucide-react";
+import { authService } from "../services/auth";
 
 export function LoginPage() {
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setErrorMessage(null)
+    e.preventDefault();
+    setErrorMessage(null);
 
     try {
-      await authService.login({ username, password })
-      navigate('/home')
+      await authService.login({ username, password });
+      navigate("/home");
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Login failed')
-      console.error('Login error:', error)
+      setErrorMessage(error instanceof Error ? error.message : "Login failed");
+      console.error("Login error:", error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-4">
@@ -38,7 +38,10 @@ export function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-zinc-300 mb-2"
+              >
                 Username
               </label>
               <div className="relative">
@@ -57,7 +60,10 @@ export function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-zinc-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-zinc-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -86,9 +92,9 @@ export function LoginPage() {
           {/* Signup Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-400">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <button
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate("/signup")}
                 className="text-violet-400 hover:text-violet-300 font-medium transition-colors cursor-pointer"
               >
                 Sign up
@@ -98,5 +104,5 @@ export function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,15 +1,15 @@
-import { X, Play, Pause, Trash2 } from 'lucide-react'
-import { subsonicService } from '../services/subsonic'
-import type { NavidromeQueueItem } from '../services/navidrome'
+import { X, Play, Pause, Trash2 } from "lucide-react";
+import { subsonicService } from "../services/subsonic";
+import type { NavidromeQueueItem } from "../services/navidrome";
 
 interface QueueSidebarProps {
-  isOpen: boolean
-  queue: NavidromeQueueItem[]
-  currentSongId?: string
-  isPlaying: boolean
-  onClose: () => void
-  onPlaySong: (songId: string) => void
-  onClearQueue: () => void
+  isOpen: boolean;
+  queue: NavidromeQueueItem[];
+  currentSongId?: string;
+  isPlaying: boolean;
+  onClose: () => void;
+  onPlaySong: (songId: string) => void;
+  onClearQueue: () => void;
 }
 
 export function QueueSidebar({
@@ -22,12 +22,12 @@ export function QueueSidebar({
   onClearQueue,
 }: QueueSidebarProps) {
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div
@@ -63,7 +63,8 @@ export function QueueSidebar({
       {queue.length > 0 && (
         <div className="px-6 py-3 border-b border-zinc-800">
           <p className="text-sm text-zinc-400">
-            <span className="font-medium text-white">{queue.length}</span> songs in queue
+            <span className="font-medium text-white">{queue.length}</span> songs
+            in queue
           </p>
         </div>
       )}
@@ -73,12 +74,26 @@ export function QueueSidebar({
         {queue.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              <svg
+                className="w-8 h-8 text-zinc-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Queue is empty</h3>
-            <p className="text-sm text-zinc-500">Add songs to your queue to see them here</p>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Queue is empty
+            </h3>
+            <p className="text-sm text-zinc-500">
+              Add songs to your queue to see them here
+            </p>
           </div>
         ) : (
           <div className="p-2">
@@ -87,34 +102,51 @@ export function QueueSidebar({
                 key={`${song.id}-${index}`}
                 onClick={() => onPlaySong(song.id)}
                 className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all duration-200 group
-                  ${song.id === currentSongId
-                    ? 'bg-violet-500/20 border border-violet-500/50'
-                    : 'hover:bg-zinc-800/50 border border-transparent'
+                  ${
+                    song.id === currentSongId
+                      ? "bg-violet-500/20 border border-violet-500/50"
+                      : "hover:bg-zinc-800/50 border border-transparent"
                   }`}
               >
                 {/* Song Number / Playing Indicator */}
                 <div className="flex-shrink-0 w-8 text-center">
                   <button
                     onClick={(e) => {
-                      e.stopPropagation()
+                      e.stopPropagation();
                       if (song.id === currentSongId && isPlaying) {
                         // Pause the current song
-                        window.dispatchEvent(new CustomEvent('toggle-play'))
+                        window.dispatchEvent(new CustomEvent("toggle-play"));
                       } else {
                         // Play this song
-                        onPlaySong(song.id)
+                        onPlaySong(song.id);
                       }
                     }}
                     className="flex items-center justify-center w-full h-full hover:bg-zinc-700/50 rounded-lg transition-colors cursor-pointer"
-                    aria-label={song.id === currentSongId && isPlaying ? 'Pause' : 'Play'}
-                    title={song.id === currentSongId && isPlaying ? 'Pause' : 'Play'}
+                    aria-label={
+                      song.id === currentSongId && isPlaying ? "Pause" : "Play"
+                    }
+                    title={
+                      song.id === currentSongId && isPlaying ? "Pause" : "Play"
+                    }
                   >
                     {song.id === currentSongId && isPlaying ? (
                       <div className="flex items-center gap-0.5 h-4">
-                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-1" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-2" style={{ animationDelay: '150ms' }}></span>
-                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-3" style={{ animationDelay: '300ms' }}></span>
-                        <span className="w-1 bg-violet-400 rounded-full animate-equalizer-2" style={{ animationDelay: '450ms' }}></span>
+                        <span
+                          className="w-1 bg-violet-400 rounded-full animate-equalizer-1"
+                          style={{ animationDelay: "0ms" }}
+                        ></span>
+                        <span
+                          className="w-1 bg-violet-400 rounded-full animate-equalizer-2"
+                          style={{ animationDelay: "150ms" }}
+                        ></span>
+                        <span
+                          className="w-1 bg-violet-400 rounded-full animate-equalizer-3"
+                          style={{ animationDelay: "300ms" }}
+                        ></span>
+                        <span
+                          className="w-1 bg-violet-400 rounded-full animate-equalizer-2"
+                          style={{ animationDelay: "450ms" }}
+                        ></span>
                       </div>
                     ) : (
                       <Play className="w-4 h-4 text-zinc-500 hover:text-violet-400 transition-colors" />
@@ -133,18 +165,26 @@ export function QueueSidebar({
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.stopPropagation();
                         if (song.id === currentSongId && isPlaying) {
                           // Pause the current song
-                          window.dispatchEvent(new CustomEvent('toggle-play'))
+                          window.dispatchEvent(new CustomEvent("toggle-play"));
                         } else {
                           // Play this song
-                          onPlaySong(song.id)
+                          onPlaySong(song.id);
                         }
                       }}
                       className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300 cursor-pointer"
-                      aria-label={song.id === currentSongId && isPlaying ? 'Pause song' : 'Play song'}
-                      title={song.id === currentSongId && isPlaying ? 'Pause song' : 'Play song'}
+                      aria-label={
+                        song.id === currentSongId && isPlaying
+                          ? "Pause song"
+                          : "Play song"
+                      }
+                      title={
+                        song.id === currentSongId && isPlaying
+                          ? "Pause song"
+                          : "Play song"
+                      }
                     >
                       {song.id === currentSongId && isPlaying ? (
                         <Pause className="w-4 h-4 text-white" />
@@ -157,15 +197,21 @@ export function QueueSidebar({
 
                 {/* Song Info */}
                 <div className="flex-1 min-w-0">
-                  <h4 className={`font-medium truncate mb-0.5 ${
-                    song.id === currentSongId
-                      ? 'text-violet-400'
-                      : 'text-white group-hover:text-violet-300'
-                  } transition-colors`}>
+                  <h4
+                    className={`font-medium truncate mb-0.5 ${
+                      song.id === currentSongId
+                        ? "text-violet-400"
+                        : "text-white group-hover:text-violet-300"
+                    } transition-colors`}
+                  >
                     {song.title}
                   </h4>
-                  <p className="text-sm text-zinc-400 truncate">{song.artist}</p>
-                  <p className="text-xs text-zinc-500 truncate mt-0.5">{song.album}</p>
+                  <p className="text-sm text-zinc-400 truncate">
+                    {song.artist}
+                  </p>
+                  <p className="text-xs text-zinc-500 truncate mt-0.5">
+                    {song.album}
+                  </p>
                 </div>
 
                 {/* Duration */}
@@ -178,5 +224,5 @@ export function QueueSidebar({
         )}
       </div>
     </div>
-  )
+  );
 }

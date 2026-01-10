@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -31,7 +40,8 @@ body {
 
 /* Equalizer animations for music player */
 @keyframes equalizer-1 {
-  0%, 100% {
+  0%,
+  100% {
     height: 4px;
   }
   50% {
@@ -40,7 +50,8 @@ body {
 }
 
 @keyframes equalizer-2 {
-  0%, 100% {
+  0%,
+  100% {
     height: 4px;
   }
   50% {
@@ -49,7 +60,8 @@ body {
 }
 
 @keyframes equalizer-3 {
-  0%, 100% {
+  0%,
+  100% {
     height: 4px;
   }
   50% {

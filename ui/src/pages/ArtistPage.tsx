@@ -1,92 +1,102 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Play } from 'lucide-react'
-import { subsonicService } from '../services/subsonic'
-import type { SubsonicAlbum, SubsonicArtistInfo } from '../services/subsonic'
-import { useApp } from '../contexts/AppContext'
-import { Vibrant } from 'node-vibrant/browser'
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { Play } from "lucide-react";
+import { subsonicService } from "../services/subsonic";
+import type { SubsonicAlbum, SubsonicArtistInfo } from "../services/subsonic";
+import { useApp } from "../contexts/AppContext";
+import { Vibrant } from "node-vibrant/browser";
 
 export function ArtistPage() {
-  const { artistId } = useParams<{ artistId: string }>()
-  const navigate = useNavigate()
-  const { onNavigateToAlbum } = useApp()
-  const [artist, setArtist] = useState<any>(null)
-  const [artistInfo, setArtistInfo] = useState<SubsonicArtistInfo | null>(null)
-  const [dominantColor, setDominantColor] = useState<string>('#18181b')
-  const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { artistId } = useParams<{ artistId: string }>();
+  const navigate = useNavigate();
+  const { onNavigateToAlbum } = useApp();
+  const [artist, setArtist] = useState<any>(null);
+  const [artistInfo, setArtistInfo] = useState<SubsonicArtistInfo | null>(null);
+  const [dominantColor, setDominantColor] = useState<string>("#18181b");
+  const [albums, setAlbums] = useState<SubsonicAlbum[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArtistData = async () => {
-      if (!artistId) return
+      if (!artistId) return;
 
       try {
-        setIsLoading(true)
-        setError(null)
+        setIsLoading(true);
+        setError(null);
 
         // Fetch artist details using getArtist method
-        const artistData = await subsonicService.getArtist(artistId)
-        setArtist(artistData)
+        const artistData = await subsonicService.getArtist(artistId);
+        setArtist(artistData);
 
         // Extract dominant color from artist cover art
         if (artistData.coverArt) {
           try {
-            const palette = await Vibrant.from(subsonicService.getCoverArtUrl(artistData.coverArt, 300)).getPalette()
-            const dominantColor = palette.Vibrant?.hex || palette.DarkVibrant?.hex || palette.Muted?.hex || '#18181b'
-            setDominantColor(dominantColor)
+            const palette = await Vibrant.from(
+              subsonicService.getCoverArtUrl(artistData.coverArt, 300),
+            ).getPalette();
+            const dominantColor =
+              palette.Vibrant?.hex ||
+              palette.DarkVibrant?.hex ||
+              palette.Muted?.hex ||
+              "#18181b";
+            setDominantColor(dominantColor);
           } catch (err) {
-            console.error('Failed to extract color:', err)
-            setDominantColor('#18181b')
+            console.error("Failed to extract color:", err);
+            setDominantColor("#18181b");
           }
         }
 
         // Fetch artist info (biography, similar artists, etc.)
         try {
-          const infoData = await subsonicService.getArtistInfo(artistId)
-          setArtistInfo(infoData)
+          const infoData = await subsonicService.getArtistInfo(artistId);
+          setArtistInfo(infoData);
         } catch (infoErr) {
-          console.warn('Failed to fetch artist info:', infoErr)
+          console.warn("Failed to fetch artist info:", infoErr);
           // Continue without artist info
         }
 
         // Fetch albums by this artist using search3
-        const response = await subsonicService.search3(artistData.name || '', 0, 100, 0)
-        const artistAlbums = response.album.filter((album: SubsonicAlbum) =>
-          album.artistId === artistId
-        )
-        setAlbums(artistAlbums.slice(0, 20))
+        const response = await subsonicService.search3(
+          artistData.name || "",
+          0,
+          100,
+          0,
+        );
+        const artistAlbums = response.album.filter(
+          (album: SubsonicAlbum) => album.artistId === artistId,
+        );
+        setAlbums(artistAlbums.slice(0, 20));
       } catch (err) {
-        console.error('Failed to fetch artist data:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load artist')
+        console.error("Failed to fetch artist data:", err);
+        setError(err instanceof Error ? err.message : "Failed to load artist");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchArtistData()
-  }, [artistId])
+    fetchArtistData();
+  }, [artistId]);
 
   // Scroll to top when artist changes
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [artistId])
-
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [artistId]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
         <div className="text-zinc-400">Loading artist...</div>
       </div>
-    )
+    );
   }
 
   if (error || !artist) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
-        <div className="text-red-400">{error || 'Artist not found'}</div>
+        <div className="text-red-400">{error || "Artist not found"}</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -109,7 +119,9 @@ export function ArtistPage() {
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
-                <span className="text-6xl font-bold text-white/30">{artist.name?.charAt(0)}</span>
+                <span className="text-6xl font-bold text-white/30">
+                  {artist.name?.charAt(0)}
+                </span>
               </div>
             )}
           </div>
@@ -118,7 +130,9 @@ export function ArtistPage() {
           <div className="flex-1 pb-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{artist.name}</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                  {artist.name}
+                </h2>
 
                 {/* Metadata */}
                 <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
@@ -173,7 +187,7 @@ export function ArtistPage() {
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.stopPropagation();
                         // TODO: Play album
                       }}
                       className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform transition-transform cursor-pointer"
@@ -210,23 +224,30 @@ export function ArtistPage() {
                 <div className="w-full aspect-square rounded bg-gradient-to-br from-violet-600 to-fuchsia-600 mb-2 flex items-center justify-center overflow-hidden">
                   {similarArtist.coverArt ? (
                     <img
-                      src={subsonicService.getCoverArtUrl(similarArtist.coverArt, 200)}
+                      src={subsonicService.getCoverArtUrl(
+                        similarArtist.coverArt,
+                        200,
+                      )}
                       alt={similarArtist.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-2xl font-bold text-white/30">{similarArtist.name.charAt(0)}</span>
+                    <span className="text-2xl font-bold text-white/30">
+                      {similarArtist.name.charAt(0)}
+                    </span>
                   )}
                 </div>
                 <h4 className="text-sm font-medium text-white truncate group-hover:text-violet-300 transition-colors">
                   {similarArtist.name}
                 </h4>
-                <p className="text-xs text-zinc-500">{similarArtist.albumCount || 0} albums</p>
+                <p className="text-xs text-zinc-500">
+                  {similarArtist.albumCount || 0} albums
+                </p>
               </div>
             ))}
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }

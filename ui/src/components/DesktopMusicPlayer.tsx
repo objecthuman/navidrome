@@ -1,50 +1,64 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Volume1, Shuffle, Repeat, Repeat1, Mic, ListMusic, Heart } from 'lucide-react'
-import type { NavidromeQueueItem } from '../services/navidrome'
-import { subsonicService } from '../services/subsonic'
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+  Volume1,
+  Shuffle,
+  Repeat,
+  Repeat1,
+  Mic,
+  ListMusic,
+  Heart,
+} from "lucide-react";
+import type { NavidromeQueueItem } from "../services/navidrome";
+import { subsonicService } from "../services/subsonic";
 
 interface DesktopMusicPlayerProps {
-  className?: string
-  currentTime: number
-  duration: number
-  isPlaying: boolean
-  isMuted: boolean
-  isShuffle: boolean
-  repeatMode: 'off' | 'all' | 'one'
-  isLiked: boolean
-  queue: NavidromeQueueItem[]
-  currentSongId?: string
-  isQueueOpen: boolean
-  onTogglePlay: () => void
-  onToggleMute: () => void
-  onToggleShuffle: () => void
-  onToggleLike: () => void
-  onCycleRepeat: () => void
-  onProgressChange: (value: number) => void
-  onVolumeChange: (value: number) => void
-  onPlaySong: (songId: string) => void
-  onToggleQueue: () => void
-  onNext: () => void
-  onPrevious: () => void
-  volume: number
+  className?: string;
+  currentTime: number;
+  duration: number;
+  isPlaying: boolean;
+  isMuted: boolean;
+  isShuffle: boolean;
+  repeatMode: "off" | "all" | "one";
+  isLiked: boolean;
+  queue: NavidromeQueueItem[];
+  currentSongId?: string;
+  isQueueOpen: boolean;
+  onTogglePlay: () => void;
+  onToggleMute: () => void;
+  onToggleShuffle: () => void;
+  onToggleLike: () => void;
+  onCycleRepeat: () => void;
+  onProgressChange: (value: number) => void;
+  onVolumeChange: (value: number) => void;
+  onPlaySong: (songId: string) => void;
+  onToggleQueue: () => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  volume: number;
   currentSong?: {
-    id: string
-    title: string
-    artist: string
-    album: string
-    coverArt: string
-  }
+    id: string;
+    title: string;
+    artist: string;
+    album: string;
+    coverArt: string;
+  };
 }
 
 interface Song {
-  id: string
-  title: string
-  artist: string
-  album: string
-  coverArt: string
+  id: string;
+  title: string;
+  artist: string;
+  album: string;
+  coverArt: string;
 }
 
 export function DesktopMusicPlayer({
-  className = '',
+  className = "",
   currentTime,
   duration,
   isPlaying,
@@ -69,16 +83,16 @@ export function DesktopMusicPlayer({
   volume,
   currentSong,
 }: DesktopMusicPlayerProps) {
-
   // Find current song from queue if not provided
-  const displayedSong = currentSong || queue.find(item => item.id === currentSongId)
-  const hasCurrentSong = displayedSong && displayedSong.id !== ''
+  const displayedSong =
+    currentSong || queue.find((item) => item.id === currentSongId);
+  const hasCurrentSong = displayedSong && displayedSong.id !== "";
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <>
@@ -92,7 +106,10 @@ export function DesktopMusicPlayer({
             <div className="w-14 h-14 rounded-lg overflow-hidden bg-zinc-800 shadow-lg">
               {displayedSong ? (
                 <img
-                  src={subsonicService.getCoverArtUrl(displayedSong.coverArt, 200)}
+                  src={subsonicService.getCoverArtUrl(
+                    displayedSong.coverArt,
+                    200,
+                  )}
                   alt={displayedSong.album}
                   className="w-full h-full object-cover"
                 />
@@ -107,17 +124,22 @@ export function DesktopMusicPlayer({
             <div>
               <h4
                 className="font-semibold text-sm text-white truncate max-w-[150px] sm:max-w-[200px] hover:text-violet-400 transition-colors cursor-pointer"
-                onClick={() => displayedSong && console.log('Song clicked:', displayedSong)}
+                onClick={() =>
+                  displayedSong && console.log("Song clicked:", displayedSong)
+                }
                 title="View song details"
               >
-                {displayedSong?.title || 'No song playing'}
+                {displayedSong?.title || "No song playing"}
               </h4>
               <p
                 className="text-xs text-zinc-400 truncate max-w-[150px] sm:max-w-[200px] hover:text-violet-400 transition-colors cursor-pointer"
-                onClick={() => displayedSong && console.log('Artist clicked:', displayedSong.artist)}
+                onClick={() =>
+                  displayedSong &&
+                  console.log("Artist clicked:", displayedSong.artist)
+                }
                 title="View artist details"
               >
-                {displayedSong?.artist || ''}
+                {displayedSong?.artist || ""}
               </p>
             </div>
 
@@ -125,12 +147,12 @@ export function DesktopMusicPlayer({
             <button
               onClick={onToggleLike}
               className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                isLiked ? 'text-red-500' : 'text-zinc-400 hover:bg-zinc-800'
+                isLiked ? "text-red-500" : "text-zinc-400 hover:bg-zinc-800"
               }`}
-              aria-label={isLiked ? 'Unlike' : 'Like'}
-              title={isLiked ? 'Unlike' : 'Like'}
+              aria-label={isLiked ? "Unlike" : "Like"}
+              title={isLiked ? "Unlike" : "Like"}
             >
-              <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
             </button>
           </div>
 
@@ -142,7 +164,9 @@ export function DesktopMusicPlayer({
               <button
                 onClick={onToggleShuffle}
                 className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                  isShuffle ? 'bg-violet-500 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+                  isShuffle
+                    ? "bg-violet-500 text-white"
+                    : "hover:bg-zinc-800 text-zinc-400"
                 }`}
                 aria-label="Shuffle"
                 title="Shuffle"
@@ -166,8 +190,8 @@ export function DesktopMusicPlayer({
                 onClick={onTogglePlay}
                 disabled={!hasCurrentSong}
                 className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-                title={isPlaying ? 'Pause' : 'Play'}
+                aria-label={isPlaying ? "Pause" : "Play"}
+                title={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? (
                   <Pause className="w-4 h-4 text-white fill-white" />
@@ -191,12 +215,14 @@ export function DesktopMusicPlayer({
               <button
                 onClick={onCycleRepeat}
                 className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                  repeatMode !== 'off' ? 'bg-violet-500 text-white' : 'hover:bg-zinc-800 text-zinc-400'
+                  repeatMode !== "off"
+                    ? "bg-violet-500 text-white"
+                    : "hover:bg-zinc-800 text-zinc-400"
                 }`}
                 aria-label="Repeat"
-                title={`Repeat ${repeatMode === 'one' ? 'one' : repeatMode === 'all' ? 'all' : 'off'}`}
+                title={`Repeat ${repeatMode === "one" ? "one" : repeatMode === "all" ? "all" : "off"}`}
               >
-                {repeatMode === 'one' ? (
+                {repeatMode === "one" ? (
                   <Repeat1 className="w-4 h-4" />
                 ) : (
                   <Repeat className="w-4 h-4" />
@@ -206,7 +232,9 @@ export function DesktopMusicPlayer({
 
             {/* Progress Bar with Times */}
             <div className="flex items-center gap-2 w-48 sm:w-64 md:w-80 lg:w-96 xl:w-[450px]">
-              <span className="text-xs text-zinc-500 flex-shrink-0">{formatTime(currentTime)}</span>
+              <span className="text-xs text-zinc-500 flex-shrink-0">
+                {formatTime(currentTime)}
+              </span>
               <input
                 type="range"
                 min="0"
@@ -220,7 +248,9 @@ export function DesktopMusicPlayer({
                   [&::-webkit-slider-thumb]:cursor-pointer
                   [&::-webkit-slider-thumb]:hover:bg-violet-400"
               />
-              <span className="text-xs text-zinc-500 flex-shrink-0">{formatTime(duration)}</span>
+              <span className="text-xs text-zinc-500 flex-shrink-0">
+                {formatTime(duration)}
+              </span>
             </div>
           </div>
 
@@ -239,7 +269,7 @@ export function DesktopMusicPlayer({
             <button
               onClick={onToggleQueue}
               className={`p-1.5 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer ${
-                isQueueOpen ? 'bg-violet-500 text-white' : 'text-zinc-400'
+                isQueueOpen ? "bg-violet-500 text-white" : "text-zinc-400"
               }`}
               aria-label="Queue"
               title="Toggle queue"
@@ -252,8 +282,8 @@ export function DesktopMusicPlayer({
               <button
                 onClick={onToggleMute}
                 className="p-1.5 hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 cursor-pointer flex-shrink-0"
-                aria-label={isMuted ? 'Unmute' : 'Mute'}
-                title={isMuted ? 'Unmute' : 'Mute'}
+                aria-label={isMuted ? "Unmute" : "Mute"}
+                title={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-4 h-4" />
@@ -273,10 +303,10 @@ export function DesktopMusicPlayer({
                   max="100"
                   value={isMuted ? 0 : volume}
                   onChange={(e) => {
-                    const newVolume = parseFloat(e.target.value)
-                    onVolumeChange(newVolume)
+                    const newVolume = parseFloat(e.target.value);
+                    onVolumeChange(newVolume);
                     if (newVolume > 0 && isMuted) {
-                      onToggleMute()
+                      onToggleMute();
                     }
                   }}
                   className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer
@@ -293,5 +323,5 @@ export function DesktopMusicPlayer({
         </div>
       </div>
     </>
-  )
+  );
 }

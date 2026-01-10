@@ -1,72 +1,82 @@
-import { Search, Plus, Activity, User, ChevronLeft, ChevronRight, Home, ArrowLeft, ArrowRight } from 'lucide-react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useState, FormEvent, useEffect, useRef } from 'react'
+import {
+  Search,
+  Plus,
+  Activity,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, FormEvent, useEffect, useRef } from "react";
 
 interface NavbarProps {
-  isSidebarCollapsed: boolean
-  onToggleSidebar: () => void
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
 }
 
 export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [searchQuery, setSearchQuery] = useState('')
-  const previousQueryRef = useRef<string | null>(null)
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState("");
+  const previousQueryRef = useRef<string | null>(null);
 
   const handleGoBack = () => {
-    window.history.back()
-  }
+    window.history.back();
+  };
 
   const handleGoForward = () => {
-    window.history.forward()
-  }
+    window.history.forward();
+  };
 
   // Sync search input with URL query param only on mount or external navigation
   useEffect(() => {
-    const currentQuery = searchParams.get('q') || ''
+    const currentQuery = searchParams.get("q") || "";
 
     // Only sync if the query in URL is different from what we previously set
     if (previousQueryRef.current !== currentQuery) {
-      setSearchQuery(currentQuery)
-      previousQueryRef.current = currentQuery
+      setSearchQuery(currentQuery);
+      previousQueryRef.current = currentQuery;
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   // Debounced search navigation
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim() && searchQuery !== previousQueryRef.current) {
-        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-        previousQueryRef.current = searchQuery.trim()
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        previousQueryRef.current = searchQuery.trim();
       } else if (!searchQuery.trim() && previousQueryRef.current) {
         // User cleared the input, navigate to empty search page
-        navigate('/search')
-        previousQueryRef.current = ''
+        navigate("/search");
+        previousQueryRef.current = "";
       }
-    }, 500)
+    }, 500);
 
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery, navigate])
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, navigate]);
 
   const handleSearch = (e: FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      const trimmedQuery = searchQuery.trim()
-      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`)
-      previousQueryRef.current = trimmedQuery
+      const trimmedQuery = searchQuery.trim();
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+      previousQueryRef.current = trimmedQuery;
     }
-  }
+  };
 
   const handleSearchIconClick = () => {
     if (searchQuery.trim()) {
-      const trimmedQuery = searchQuery.trim()
-      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`)
-      previousQueryRef.current = trimmedQuery
+      const trimmedQuery = searchQuery.trim();
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+      previousQueryRef.current = trimmedQuery;
     } else {
-      navigate('/search')
-      previousQueryRef.current = ''
+      navigate("/search");
+      previousQueryRef.current = "";
     }
-  }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-800">
@@ -86,7 +96,7 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
             )}
           </button>
           <button
-            onClick={() => navigate('/home')}
+            onClick={() => navigate("/home")}
             className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             aria-label="Go to home"
             title="Go to home"
@@ -166,5 +176,5 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
         </div>
       </div>
     </nav>
-  )
+  );
 }

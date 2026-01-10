@@ -5,9 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "preview": "vite preview",
+    "test:watch": "vitest",
+    "test": "vitest --watch=false",
+    "test:coverage": "vitest run --coverage --watch=false",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
+    "prettier": "prettier --write ./src",
+    "check-formatting": "prettier -c ./src",
+    "postinstall": "bin/update-workbox.sh"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

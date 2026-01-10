@@ -1,113 +1,113 @@
-import config from '../config/api'
-import { authService } from './auth'
+import config from "../config/api";
+import { authService } from "./auth";
 
 export interface SubsonicAlbum {
-  id: string
-  name: string
-  artist: string
-  artistId: string
-  coverArt: string
-  songCount: number
-  duration: number
-  playCount?: number
-  year?: number
-  genre?: string
-  isDir?: boolean
+  id: string;
+  name: string;
+  artist: string;
+  artistId: string;
+  coverArt: string;
+  songCount: number;
+  duration: number;
+  playCount?: number;
+  year?: number;
+  genre?: string;
+  isDir?: boolean;
 }
 
 export interface SubsonicArtist {
-  id: string
-  name: string
-  albumCount: number
-  coverArt?: string
-  starred?: string
+  id: string;
+  name: string;
+  albumCount: number;
+  coverArt?: string;
+  starred?: string;
 }
 
 export interface SubsonicSong {
-  id: string
-  parent: string
-  title: string
-  album: string
-  artist: string
-  track: number
-  year?: number
-  genre?: string
-  coverArt: string
-  duration: number
-  playCount?: number
-  starred?: string
-  bitrate?: number
-  contentType?: string
-  suffix?: string
+  id: string;
+  parent: string;
+  title: string;
+  album: string;
+  artist: string;
+  track: number;
+  year?: number;
+  genre?: string;
+  coverArt: string;
+  duration: number;
+  playCount?: number;
+  starred?: string;
+  bitrate?: number;
+  contentType?: string;
+  suffix?: string;
 }
 
 export interface SubsonicSearchResult {
-  artist: SubsonicArtist[]
-  album: SubsonicAlbum[]
-  song: SubsonicSong[]
+  artist: SubsonicArtist[];
+  album: SubsonicAlbum[];
+  song: SubsonicSong[];
 }
 
 export interface SubsonicQueueEntry {
-  id: string
-  parent: string
-  title: string
-  album: string
-  artist: string
-  isDir: boolean
-  coverArt: string
-  created: string
-  duration: number
-  track: number
-  type: string
+  id: string;
+  parent: string;
+  title: string;
+  album: string;
+  artist: string;
+  isDir: boolean;
+  coverArt: string;
+  created: string;
+  duration: number;
+  track: number;
+  type: string;
 }
 
 export interface SubsonicPlayQueue {
-  entry: SubsonicQueueEntry[]
-  current: number
-  position: number
-  username: string
-  changed: string
-  changedBy: string
+  entry: SubsonicQueueEntry[];
+  current: number;
+  position: number;
+  username: string;
+  changed: string;
+  changedBy: string;
 }
 
 export interface SubsonicAlbumInfo {
-  notes: string
-  lastFmUrl: string
-  smallImageUrl: string
-  mediumImageUrl: string
-  largeImageUrl: string
+  notes: string;
+  lastFmUrl: string;
+  smallImageUrl: string;
+  mediumImageUrl: string;
+  largeImageUrl: string;
 }
 
 export interface SubsonicArtistInfo {
-  biography: string
-  lastFmUrl: string
-  musicBrainzId: string
-  smallImageUrl: string
-  mediumImageUrl: string
-  largeImageUrl: string
-  similarArtist: SubsonicArtist[]
+  biography: string;
+  lastFmUrl: string;
+  musicBrainzId: string;
+  smallImageUrl: string;
+  mediumImageUrl: string;
+  largeImageUrl: string;
+  similarArtist: SubsonicArtist[];
 }
 
 export interface SubsonicResponse<T> {
-  'subsonic-response': {
-    status: 'ok' | 'failed'
-    version: string
+  "subsonic-response": {
+    status: "ok" | "failed";
+    version: string;
     error?: {
-      code: number
-      message: string
-    }
-    [key: string]: T | any
-  }
+      code: number;
+      message: string;
+    };
+    [key: string]: T | any;
+  };
 }
 
-const SUBSONIC_API_VERSION = '1.16.1'
-const CLIENT_NAME = 'navidrome-ui'
+const SUBSONIC_API_VERSION = "1.16.1";
+const CLIENT_NAME = "navidrome-ui";
 
 class SubsonicService {
   private getAuthParams(): URLSearchParams {
-    const user = authService.getUser()
+    const user = authService.getUser();
     if (!user) {
-      throw new Error('User not authenticated')
+      throw new Error("User not authenticated");
     }
 
     const params = new URLSearchParams({
@@ -116,42 +116,45 @@ class SubsonicService {
       s: user.subsonicSalt,
       v: SUBSONIC_API_VERSION,
       c: CLIENT_NAME,
-      f: 'json',
-    })
+      f: "json",
+    });
 
-    return params
+    return params;
   }
 
-  private async request<T>(endpoint: string, params?: URLSearchParams): Promise<T> {
-    const authParams = this.getAuthParams()
-    const url = new URL(`${config.apiURL}/rest/${endpoint}`)
+  private async request<T>(
+    endpoint: string,
+    params?: URLSearchParams,
+  ): Promise<T> {
+    const authParams = this.getAuthParams();
+    const url = new URL(`${config.apiURL}/rest/${endpoint}`);
 
     // Add auth params
     authParams.forEach((value, key) => {
-      url.searchParams.append(key, value)
-    })
+      url.searchParams.append(key, value);
+    });
 
     // Add additional params
     if (params) {
       params.forEach((value, key) => {
-        url.searchParams.append(key, value)
-      })
+        url.searchParams.append(key, value);
+      });
     }
 
-    const response = await fetch(url.toString())
+    const response = await fetch(url.toString());
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: SubsonicResponse<T> = await response.json()
-    const subsonicResponse = data['subsonic-response']
+    const data: SubsonicResponse<T> = await response.json();
+    const subsonicResponse = data["subsonic-response"];
 
-    if (subsonicResponse.status === 'failed') {
-      throw new Error(subsonicResponse.error?.message || 'API request failed')
+    if (subsonicResponse.status === "failed") {
+      throw new Error(subsonicResponse.error?.message || "API request failed");
     }
 
-    return subsonicResponse as T
+    return subsonicResponse as T;
   }
 
   /**
@@ -161,22 +164,28 @@ class SubsonicService {
    * @param offset - List offset for pagination
    */
   async getAlbumList2(
-    type: 'random' | 'newest' | 'frequent' | 'recent' | 'starred' | 'alphabeticalByName' | 'alphabeticalByArtist' = 'random',
+    type:
+      | "random"
+      | "newest"
+      | "frequent"
+      | "recent"
+      | "starred"
+      | "alphabeticalByName"
+      | "alphabeticalByArtist" = "random",
     size: number = 20,
-    offset: number = 0
+    offset: number = 0,
   ): Promise<SubsonicAlbum[]> {
     const params = new URLSearchParams({
       type,
       size: size.toString(),
       offset: offset.toString(),
-    })
+    });
 
-    const response = await this.request<{ albumList2: { album: SubsonicAlbum[] } }>(
-      'getAlbumList2.view',
-      params
-    )
+    const response = await this.request<{
+      albumList2: { album: SubsonicAlbum[] };
+    }>("getAlbumList2.view", params);
 
-    return response.albumList2.album
+    return response.albumList2.album;
   }
 
   /**
@@ -185,14 +194,13 @@ class SubsonicService {
   async getAlbum(id: string): Promise<SubsonicAlbum & { song: any[] }> {
     const params = new URLSearchParams({
       id,
-    })
+    });
 
-    const response = await this.request<{ album: SubsonicAlbum & { song: any[] } }>(
-      'getAlbum.view',
-      params
-    )
+    const response = await this.request<{
+      album: SubsonicAlbum & { song: any[] };
+    }>("getAlbum.view", params);
 
-    return response.album
+    return response.album;
   }
 
   /**
@@ -201,14 +209,14 @@ class SubsonicService {
   async getArtist(id: string): Promise<SubsonicArtist> {
     const params = new URLSearchParams({
       id,
-    })
+    });
 
     const response = await this.request<{ artist: SubsonicArtist }>(
-      'getArtist.view',
-      params
-    )
+      "getArtist.view",
+      params,
+    );
 
-    return response.artist
+    return response.artist;
   }
 
   /**
@@ -217,16 +225,16 @@ class SubsonicService {
   async getArtistInfo(id: string): Promise<SubsonicArtistInfo> {
     const params = new URLSearchParams({
       id,
-      count: '20',
-      includeNotPresent: 'true',
-    })
+      count: "20",
+      includeNotPresent: "true",
+    });
 
     const response = await this.request<{ artistInfo2: SubsonicArtistInfo }>(
-      'getArtistInfo2.view',
-      params
-    )
+      "getArtistInfo2.view",
+      params,
+    );
 
-    return response.artistInfo2
+    return response.artistInfo2;
   }
 
   /**
@@ -235,54 +243,54 @@ class SubsonicService {
   async getAlbumInfo(id: string): Promise<SubsonicAlbumInfo> {
     const params = new URLSearchParams({
       id,
-    })
+    });
 
     const response = await this.request<{ albumInfo: SubsonicAlbumInfo }>(
-      'getAlbumInfo.view',
-      params
-    )
+      "getAlbumInfo.view",
+      params,
+    );
 
-    return response.albumInfo
+    return response.albumInfo;
   }
 
   /**
    * Get cover art URL
    */
   getCoverArtUrl(coverArtId: string, size?: number): string {
-    const authParams = this.getAuthParams()
-    const url = new URL(`${config.apiURL}/rest/getCoverArt.view`)
+    const authParams = this.getAuthParams();
+    const url = new URL(`${config.apiURL}/rest/getCoverArt.view`);
 
     authParams.forEach((value, key) => {
-      url.searchParams.append(key, value)
-    })
+      url.searchParams.append(key, value);
+    });
 
-    url.searchParams.append('id', coverArtId)
+    url.searchParams.append("id", coverArtId);
 
     if (size) {
-      url.searchParams.append('size', size.toString())
+      url.searchParams.append("size", size.toString());
     }
 
-    return url.toString()
+    return url.toString();
   }
 
   /**
    * Get stream URL for a song
    */
   getStreamUrl(songId: string, maxBitRate?: number): string {
-    const authParams = this.getAuthParams()
-    const url = new URL(`${config.apiURL}/rest/stream.view`)
+    const authParams = this.getAuthParams();
+    const url = new URL(`${config.apiURL}/rest/stream.view`);
 
     authParams.forEach((value, key) => {
-      url.searchParams.append(key, value)
-    })
+      url.searchParams.append(key, value);
+    });
 
-    url.searchParams.append('id', songId)
+    url.searchParams.append("id", songId);
 
     if (maxBitRate) {
-      url.searchParams.append('maxBitRate', maxBitRate.toString())
+      url.searchParams.append("maxBitRate", maxBitRate.toString());
     }
 
-    return url.toString()
+    return url.toString();
   }
 
   /**
@@ -290,10 +298,10 @@ class SubsonicService {
    */
   async getPlayQueue(): Promise<SubsonicPlayQueue> {
     const response = await this.request<{ playQueue: SubsonicPlayQueue }>(
-      'getPlayQueue.view'
-    )
+      "getPlayQueue.view",
+    );
 
-    return response.playQueue
+    return response.playQueue;
   }
 
   /**
@@ -302,18 +310,25 @@ class SubsonicService {
    * @param submission - true if song was fully played, false for "now playing" notification (defaults to true per API)
    * @param time - Optional time (in milliseconds since 1 Jan 1970) at which the song was listened to
    */
-  async scrobble(id: string, submission: boolean = true, time?: number): Promise<void> {
+  async scrobble(
+    id: string,
+    submission: boolean = true,
+    time?: number,
+  ): Promise<void> {
     const params = new URLSearchParams({
       id,
       submission: submission.toString(),
-    })
+    });
 
     if (time !== undefined) {
-      params.append('time', time.toString())
+      params.append("time", time.toString());
     }
 
-    await this.request('scrobble.view', params)
-    console.log(`Scrobble ${submission ? 'submission' : 'now playing'} sent for song:`, id)
+    await this.request("scrobble.view", params);
+    console.log(
+      `Scrobble ${submission ? "submission" : "now playing"} sent for song:`,
+      id,
+    );
   }
 
   /**
@@ -327,26 +342,25 @@ class SubsonicService {
     query: string,
     artistCount: number = 50,
     albumCount: number = 50,
-    songCount: number = 50
+    songCount: number = 50,
   ): Promise<SubsonicSearchResult> {
     const params = new URLSearchParams({
       query,
       artistCount: artistCount.toString(),
       albumCount: albumCount.toString(),
       songCount: songCount.toString(),
-    })
+    });
 
-    const response = await this.request<{ searchResult3: SubsonicSearchResult }>(
-      'search3.view',
-      params
-    )
+    const response = await this.request<{
+      searchResult3: SubsonicSearchResult;
+    }>("search3.view", params);
 
     return {
       artist: response.searchResult3.artist || [],
       album: response.searchResult3.album || [],
       song: response.searchResult3.song || [],
-    }
+    };
   }
 }
 
-export const subsonicService = new SubsonicService()
+export const subsonicService = new SubsonicService();
