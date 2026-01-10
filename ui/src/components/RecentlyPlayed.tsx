@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Play, Music } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbum } from '../services/subsonic'
 
@@ -10,6 +11,7 @@ interface RecentlyPlayedProps {
 }
 
 export function RecentlyPlayed({ onAlbumClick }: RecentlyPlayedProps) {
+  const navigate = useNavigate()
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -255,7 +257,17 @@ export function RecentlyPlayed({ onAlbumClick }: RecentlyPlayedProps) {
                   group-hover:text-violet-400 transition-colors duration-300">
                   {album.name}
                 </h3>
-                <p className="text-xs text-zinc-400 truncate group-hover:text-zinc-300 transition-colors duration-300">
+                <p
+                  className="text-xs text-zinc-400 truncate group-hover:text-violet-300 transition-colors duration-300 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (album.artistId) {
+                      navigate(`/artist/${album.artistId}`)
+                    } else {
+                      navigate(`/search?q=${encodeURIComponent(album.artist)}`)
+                    }
+                  }}
+                >
                   {album.artist}
                 </p>
                 {/* Always render metadata line for consistent card height */}

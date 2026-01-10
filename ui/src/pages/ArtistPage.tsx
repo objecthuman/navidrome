@@ -4,6 +4,7 @@ import { Play } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbum, SubsonicArtistInfo } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
+import { Vibrant } from 'node-vibrant/browser'
 
 export function ArtistPage() {
   const { artistId } = useParams<{ artistId: string }>()
@@ -11,6 +12,7 @@ export function ArtistPage() {
   const { onNavigateToAlbum } = useApp()
   const [artist, setArtist] = useState<any>(null)
   const [artistInfo, setArtistInfo] = useState<SubsonicArtistInfo | null>(null)
+  const [dominantColor, setDominantColor] = useState<string>('#18181b')
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,6 +28,18 @@ export function ArtistPage() {
         // Fetch artist details using getArtist method
         const artistData = await subsonicService.getArtist(artistId)
         setArtist(artistData)
+
+        // Extract dominant color from artist cover art
+        if (artistData.coverArt) {
+          try {
+            const palette = await Vibrant.from(subsonicService.getCoverArtUrl(artistData.coverArt, 300)).getPalette()
+            const dominantColor = palette.Vibrant?.hex || palette.DarkVibrant?.hex || palette.Muted?.hex || '#18181b'
+            setDominantColor(dominantColor)
+          } catch (err) {
+            console.error('Failed to extract color:', err)
+            setDominantColor('#18181b')
+          }
+        }
 
         // Fetch artist info (biography, similar artists, etc.)
         try {
@@ -53,9 +67,6 @@ export function ArtistPage() {
     fetchArtistData()
   }, [artistId])
 
-  const handleBack = useCallback(() => {
-    navigate('/home')
-  }, [navigate])
 
   if (isLoading) {
     return (
@@ -76,7 +87,12 @@ export function ArtistPage() {
   return (
     <div className="bg-zinc-950 text-white pb-32 md:pb-24">
       {/* Artist Info */}
-      <div className="px-4 md:px-6 py-8">
+      <div
+        className="px-4 md:px-6 py-8"
+        style={{
+          background: `linear-gradient(to bottom, ${dominantColor} 0%, ${dominantColor}40 40%, transparent 100%)`,
+        }}
+      >
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Cover Art */}
           <div className="w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800 flex-shrink-0">

@@ -145,7 +145,16 @@ export function AlbumPage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{album.name}</h2>
-                <p className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3">
+                <p
+                  className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3"
+                  onClick={() => {
+                    if (album.artistId) {
+                      navigate(`/artist/${album.artistId}`)
+                    } else {
+                      navigate(`/search?q=${encodeURIComponent(album.artist)}`)
+                    }
+                  }}
+                >
                   {album.artist}
                 </p>
 
@@ -230,7 +239,15 @@ export function AlbumPage() {
                   {song.title}
                 </h4>
                 {song.artist && song.artist !== album.artist && (
-                  <p className="text-sm text-zinc-500 truncate">{song.artist}</p>
+                  <p
+                    className="text-sm text-zinc-500 truncate hover:text-violet-400 transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/search?q=${encodeURIComponent(song.artist)}`)
+                    }}
+                  >
+                    {song.artist}
+                  </p>
                 )}
               </div>
 

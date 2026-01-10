@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { subsonicService } from '../services/subsonic'
 import type { SubsonicAlbum } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
@@ -11,6 +12,7 @@ interface AlbumWithColor extends SubsonicAlbum {
 
 export function AlbumSlideshow() {
   const { onNavigateToAlbum } = useApp()
+  const navigate = useNavigate()
   const [albums, setAlbums] = useState<AlbumWithColor[]>([])
   const [loading, setLoading] = useState(true)
   const [isDragging, setIsDragging] = useState(false)
@@ -202,7 +204,17 @@ export function AlbumSlideshow() {
             {/* Artist Name - Bottom */}
             <div className="relative z-10 px-4 pb-5 pt-3 shrink-0 flex items-end justify-between">
               <div className="flex-1 min-w-0 pr-2">
-                <p className="text-sm md:text-base text-white/90 font-medium drop-shadow-md truncate">
+                <p
+                  className="text-sm md:text-base text-white/90 font-medium drop-shadow-md truncate cursor-pointer hover:text-white transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (album.artistId) {
+                      navigate(`/artist/${album.artistId}`)
+                    } else {
+                      navigate(`/search?q=${encodeURIComponent(album.artist)}`)
+                    }
+                  }}
+                >
                   {album.artist}
                 </p>
                 {album.year && (
