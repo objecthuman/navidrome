@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Play } from 'lucide-react'
 import { subsonicService } from '../services/subsonic'
-import type { SubsonicAlbum } from '../services/subsonic'
+import type { SubsonicAlbum, SubsonicArtistInfo } from '../services/subsonic'
 import { useApp } from '../contexts/AppContext'
 
 export function ArtistPage() {
@@ -10,6 +10,7 @@ export function ArtistPage() {
   const navigate = useNavigate()
   const { onNavigateToAlbum } = useApp()
   const [artist, setArtist] = useState<any>(null)
+  const [artistInfo, setArtistInfo] = useState<SubsonicArtistInfo | null>(null)
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +27,16 @@ export function ArtistPage() {
         const artistData = await subsonicService.getArtist(artistId)
         setArtist(artistData)
 
-        // Fetch albums by this artist using search2 or getArtist
+        // Fetch artist info (biography, similar artists, etc.)
+        try {
+          const infoData = await subsonicService.getArtistInfo(artistId)
+          setArtistInfo(infoData)
+        } catch (infoErr) {
+          console.warn('Failed to fetch artist info:', infoErr)
+          // Continue without artist info
+        }
+
+        // Fetch albums by this artist using search3
         const response = await subsonicService.search3(artistData.name || '', 0, 100, 0)
         const artistAlbums = response.album.filter((album: SubsonicAlbum) =>
           album.artistId === artistId
@@ -65,13 +75,6 @@ export function ArtistPage() {
 
   return (
     <div className="bg-zinc-950 text-white pb-32 md:pb-24">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-zinc-900/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="flex items-center gap-4 px-4 md:px-6 py-4">
-          <h1 className="text-lg font-semibold truncate">{artist.name}</h1>
-        </div>
-      </div>
-
       {/* Artist Info */}
       <div className="px-4 md:px-6 py-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -105,6 +108,29 @@ export function ArtistPage() {
           </div>
         </div>
       </div>
+
+      {/* Artist Biography */}
+      {artistInfo?.biography && (
+        <div className="px-4 md:px-6 py-6 border-b border-zinc-800">
+          <h3 className="text-lg font-semibold mb-3">About this artist</h3>
+          <div
+            className="prose prose-invert max-w-none text-zinc-400 text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: artistInfo.biography,
+            }}
+          />
+          {artistInfo.lastFmUrl && (
+            <a
+              href={artistInfo.lastFmUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-violet-400 hover:text-violet-300 text-sm transition-colors"
+            >
+              Read more on Last.fm →
+            </a>
+          )}
+        </div>
+      )}
 
       {/* Albums */}
       {albums.length > 0 && (
@@ -143,6 +169,38 @@ export function ArtistPage() {
                   </h4>
                   <p className="text-sm text-zinc-500 truncate">{album.year}</p>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Similar Artists */}
+      {artistInfo?.similarArtist && artistInfo.similarArtist.length > 0 && (
+        <div className="px-4 md:px-6 py-6">
+          <h3 className="text-xl font-bold mb-4">Similar Artists</h3>
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            {artistInfo.similarArtist.slice(0, 3).map((similarArtist) => (
+              <div
+                key={similarArtist.id}
+                onClick={() => navigate(`/artist/${similarArtist.id}`)}
+                className="bg-zinc-900 rounded-lg p-3 hover:bg-zinc-800 transition-colors cursor-pointer group"
+              >
+                <div className="w-full aspect-square rounded bg-gradient-to-br from-violet-600 to-fuchsia-600 mb-2 flex items-center justify-center overflow-hidden">
+                  {similarArtist.coverArt ? (
+                    <img
+                      src={subsonicService.getCoverArtUrl(similarArtist.coverArt, 200)}
+                      alt={similarArtist.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-bold text-white/30">{similarArtist.name.charAt(0)}</span>
+                  )}
+                </div>
+                <h4 className="text-sm font-medium text-white truncate group-hover:text-violet-300 transition-colors">
+                  {similarArtist.name}
+                </h4>
+                <p className="text-xs text-zinc-500">{similarArtist.albumCount || 0} albums</p>
               </div>
             ))}
           </div>

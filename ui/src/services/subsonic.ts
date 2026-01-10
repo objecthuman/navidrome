@@ -75,6 +75,16 @@ export interface SubsonicAlbumInfo {
   largeImageUrl: string
 }
 
+export interface SubsonicArtistInfo {
+  biography: string
+  lastFmUrl: string
+  musicBrainzId: string
+  smallImageUrl: string
+  mediumImageUrl: string
+  largeImageUrl: string
+  similarArtist: SubsonicArtist[]
+}
+
 export interface SubsonicResponse<T> {
   'subsonic-response': {
     status: 'ok' | 'failed'
@@ -196,6 +206,24 @@ class SubsonicService {
     )
 
     return response.artist
+  }
+
+  /**
+   * Get artist information including biography and images
+   */
+  async getArtistInfo(id: string): Promise<SubsonicArtistInfo> {
+    const params = new URLSearchParams({
+      id,
+      count: '20',
+      includeNotPresent: 'true',
+    })
+
+    const response = await this.request<{ artistInfo2: SubsonicArtistInfo }>(
+      'getArtistInfo2.view',
+      params
+    )
+
+    return response.artistInfo2
   }
 
   /**
