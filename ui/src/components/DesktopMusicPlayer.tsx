@@ -49,13 +49,6 @@ interface DesktopMusicPlayerProps {
   };
 }
 
-interface Song {
-  id: string;
-  title: string;
-  artist: string;
-  album: string;
-  coverArt: string;
-}
 
 export function DesktopMusicPlayer({
   className = "",

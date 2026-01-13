@@ -79,9 +79,10 @@ class NavidromeService {
 
   /**
    * Get songs by album ID using Navidrome API
+   * Returns songs in the same format as queue items
    * @param albumId - The album ID to fetch songs for
    */
-  async getSongsByAlbum(albumId: string): Promise<NavidromeSong[]> {
+  async getSongsByAlbum(albumId: string): Promise<NavidromeQueueItem[]> {
     const params = new URLSearchParams({
       _end: "-1",
       _order: "ASC",
@@ -101,8 +102,12 @@ class NavidromeService {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: NavidromeSong[] = await response.json();
-    return data;
+    const data = await response.json();
+
+    // The API returns a queue object with an items array
+    const items: NavidromeQueueItem[] = data?.items || [];
+
+    return items;
   }
 
   /**

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { subsonicService } from "../services/subsonic";
 import type { SubsonicAlbum } from "../services/subsonic";
 import { useApp } from "../contexts/AppContext";
+import { usePlayAlbum } from "../hooks/usePlayAlbum";
 import { Vibrant } from "node-vibrant/browser";
 
 interface AlbumWithColor extends SubsonicAlbum {
@@ -12,6 +13,7 @@ interface AlbumWithColor extends SubsonicAlbum {
 
 export function AlbumSlideshow() {
   const { onNavigateToAlbum } = useApp();
+  const { playAlbum } = usePlayAlbum();
   const navigate = useNavigate();
   const [albums, setAlbums] = useState<AlbumWithColor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,8 +239,7 @@ export function AlbumSlideshow() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // TODO: Play all songs from this album
-                  console.log("Play album:", album.id);
+                  playAlbum(album.id);
                 }}
                 className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0 cursor-pointer"
                 aria-label="Play album"

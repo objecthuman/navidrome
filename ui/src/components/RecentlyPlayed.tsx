@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Play, Music } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { subsonicService } from "../services/subsonic";
 import type { SubsonicAlbum } from "../services/subsonic";
+import { usePlayAlbum } from "../hooks/usePlayAlbum";
 
 const ALBUMS_PER_PAGE = 20;
 
@@ -11,6 +12,7 @@ interface RecentlyPlayedProps {
 }
 
 export function RecentlyPlayed({ onAlbumClick }: RecentlyPlayedProps) {
+  const { playAlbum } = usePlayAlbum();
   const navigate = useNavigate();
   const [albums, setAlbums] = useState<SubsonicAlbum[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ export function RecentlyPlayed({ onAlbumClick }: RecentlyPlayedProps) {
         offset,
       );
 
-      if (data.length === 0) {
+      if (!data || data.length === 0) {
         setHasMore(false);
       } else {
         setAlbums((prev) => {
@@ -240,6 +242,10 @@ export function RecentlyPlayed({ onAlbumClick }: RecentlyPlayedProps) {
                   flex items-center justify-center"
                 >
                   <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playAlbum(album.id);
+                    }}
                     className="p-4 bg-violet-500/90 backdrop-blur hover:bg-violet-500
                       rounded-full shadow-lg shadow-violet-500/50
                       transform scale-0 group-hover:scale-100

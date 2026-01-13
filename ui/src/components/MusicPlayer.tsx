@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { MobileMusicPlayer } from "./MobileMusicPlayer";
 import { DesktopMusicPlayer } from "./DesktopMusicPlayer";
-import { subsonicService } from "../services/subsonic";
 import { audioPlayer } from "../services/audioPlayer";
 import type { NavidromeQueueItem } from "../services/navidrome";
 
@@ -76,10 +75,9 @@ export function MusicPlayer({
           duration: song.duration,
         });
         setDuration(song.duration);
-        onQueueUpdate(queue, songId, true);
       }
     });
-  }, [queue, onQueueUpdate]);
+  }, [queue]);
 
   // Update queue info in audio player when queue or shuffle/repeat changes
   useEffect(() => {

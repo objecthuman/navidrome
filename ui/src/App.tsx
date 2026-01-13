@@ -89,8 +89,17 @@ function App() {
   }, []);
 
   const handleNavigateToAlbum = useCallback(
-    (albumId: string) => {
-      navigate(`/album/${albumId}`);
+    async (albumId: string) => {
+      try {
+        // Fetch songs from Navidrome API
+        const songs = await navidromeService.getSongsByAlbum(albumId);
+        console.log("Fetched songs for album:", albumId, songs);
+      } catch (error) {
+        console.error("Failed to fetch album songs:", error);
+      } finally {
+        // Navigate to the album page
+        navigate(`/album/${albumId}`);
+      }
     },
     [navigate],
   );
@@ -117,6 +126,12 @@ function App() {
       setQueue(newQueue);
       setCurrentSongId(newCurrentSongId);
       setIsPlaying(newIsPlaying);
+
+      // If we should be playing, tell the audio player to play the new song
+      if (newIsPlaying && newCurrentSongId) {
+        audioPlayer.preload(newCurrentSongId);
+        audioPlayer.play(newCurrentSongId);
+      }
     },
     [],
   );

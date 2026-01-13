@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Play, Clock, Heart, Check, MoreVertical } from "lucide-react";
 import { subsonicService } from "../services/subsonic";
+import { navidromeService } from "../services/navidrome";
 import type { SubsonicAlbumInfo, SubsonicAlbum } from "../services/subsonic";
 import { useApp } from "../contexts/AppContext";
 import { Vibrant } from "node-vibrant/browser";
@@ -39,13 +40,17 @@ export function AlbumPage() {
         setError(null);
 
         // Fetch both album info and album details in parallel
-        const [infoResponse, albumResponse] = await Promise.all([
-          subsonicService.getAlbumInfo(albumId),
-          subsonicService.getAlbum(albumId),
-        ]);
+        const [infoResponse, albumResponse, songsResponse] =
+          await Promise.all([
+            subsonicService.getAlbumInfo(albumId),
+            subsonicService.getAlbum(albumId),
+            navidromeService.getSongsByAlbum(albumId),
+          ]);
 
         setAlbumInfo(infoResponse);
         setAlbum(albumResponse);
+
+        console.log("Songs from Navidrome API:", songsResponse);
 
         // Extract dominant color from cover art using node-vibrant
         if (infoResponse.mediumImageUrl) {
