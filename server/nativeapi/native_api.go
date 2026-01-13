@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/deluan/rest"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -48,7 +49,6 @@ func (api *Router) routes() http.Handler {
 		r.Use(server.JWTRefresher)
 		r.Use(server.UpdateLastAccessMiddleware(api.ds))
 		api.R(r, "/user", model.User{}, true)
-		api.R(r, "/song", model.MediaFile{}, false)
 		api.R(r, "/album", model.Album{}, false)
 		api.R(r, "/artist", model.Artist{}, false)
 		api.R(r, "/genre", model.Genre{}, false)
@@ -62,6 +62,7 @@ func (api *Router) routes() http.Handler {
 
 		api.addPlaylistRoute(r)
 		api.addPlaylistTrackRoute(r)
+		api.addSongRoute(r)
 		api.addSongPlaylistsRoute(r)
 		api.addQueueRoute(r)
 		api.addMissingFilesRoute(r)
@@ -161,6 +162,17 @@ func (api *Router) addSongPlaylistsRoute(r chi.Router) {
 	})
 }
 
+func (api *Router) addSongRoute(r chi.Router) {
+	r.Route("/song", func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			getSongs(api.ds)(w, r)
+		})
+		r.With(server.URLParamsMiddleware).Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+			getSong(api.ds)(w, r)
+		})
+	})
+}
+
 func (api *Router) addQueueRoute(r chi.Router) {
 	r.Route("/queue", func(r chi.Router) {
 		r.Get("/", getQueue(api.ds))
@@ -232,6 +244,90 @@ func (api *Router) addInsightsRoute(r chi.Router) {
 			_, _ = w.Write([]byte(`{"id":"insights_status", "lastRun":"disabled", "success":false}`))
 		}
 	})
+}
+
+// Song handlers
+func getSongs(ds model.DataStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Only accept album_id parameter
+		albumID := r.URL.Query().Get("album_id")
+		if albumID == "" {
+			http.Error(w, "album_id parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		// Get user from context
+		user, ok := request.UserFrom(ctx)
+		if !ok {
+			http.Error(w, "user not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		repo := ds.MediaFile(ctx)
+
+		// Get all songs from the album, sorted by disc/track number
+		songs, err := repo.GetAll(model.QueryOptions{
+			Filters: squirrel.Eq{"album_id": albumID},
+			Sort:    "disc_number, track_number, title",
+			Order:   "asc",
+		})
+		if err != nil {
+			log.Error(ctx, "Error retrieving songs", "album_id", albumID, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Create and save the queue to database
+		queue := &model.PlayQueue{
+			UserID:    user.ID,
+			Current:   0,       // Start from first song
+			Position:  0,       // No playback position
+			ChangedBy: "album", // Mark as created from album
+			Items:     songs,
+		}
+
+		if err := ds.PlayQueue(ctx).Store(queue); err != nil {
+			log.Error(ctx, "Error saving queue", "album_id", albumID, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(queue); err != nil {
+			log.Error(ctx, "Error encoding response", err)
+		}
+	}
+}
+
+func getSong(ds model.DataStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		id := chi.URLParam(r, "id")
+		if id == "" {
+			http.Error(w, "id parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		repo := ds.MediaFile(ctx)
+		song, err := repo.Get(id)
+		if err != nil {
+			if err == model.ErrNotFound {
+				http.Error(w, "song not found", http.StatusNotFound)
+				return
+			}
+			log.Error(ctx, "Error retrieving song", "id", id, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(song); err != nil {
+			log.Error(ctx, "Error encoding response", err)
+		}
+	}
 }
 
 // Middleware to ensure only admin users can access endpoints
