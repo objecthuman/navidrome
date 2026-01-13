@@ -95,4 +95,15 @@ export const authService = {
   getUser(): LoginResponse | null {
     return this.getAuthData();
   },
+
+  /**
+   * Update the token in localStorage (used for token refresh)
+   */
+  updateToken(newToken: string): void {
+    const data = this.getAuthData();
+    if (data) {
+      data.token = newToken;
+      this.saveAuthData(data);
+    }
+  },
 };

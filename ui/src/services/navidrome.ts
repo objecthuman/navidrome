@@ -56,6 +56,28 @@ class NavidromeService {
   }
 
   /**
+   * Wrapper for fetch that handles token refresh from response headers
+   */
+  private async fetchWithTokenRefresh(
+    url: string,
+    options?: RequestInit,
+  ): Promise<Response> {
+    const response = await fetch(url, options);
+
+    // Check for updated token in response header
+    const newToken = response.headers.get("x-nd-authorization");
+    if (newToken) {
+      // Extract token from "Bearer <token>" format if present
+      const token = newToken.startsWith("Bearer ")
+        ? newToken.slice(7)
+        : newToken;
+      authService.updateToken(token);
+    }
+
+    return response;
+  }
+
+  /**
    * Get songs by album ID using Navidrome API
    * @param albumId - The album ID to fetch songs for
    */
@@ -71,7 +93,7 @@ class NavidromeService {
     const url = new URL(`${config.apiURL}/api/song`);
     url.search = params.toString();
 
-    const response = await fetch(url.toString(), {
+    const response = await this.fetchWithTokenRefresh(url.toString(), {
       headers: this.getHeaders(),
     });
 
@@ -114,7 +136,7 @@ class NavidromeService {
   async getQueue(): Promise<NavidromeQueue> {
     const url = `${config.apiURL}/api/queue`;
 
-    const response = await fetch(url, {
+    const response = await this.fetchWithTokenRefresh(url, {
       headers: this.getHeaders(),
     });
 
@@ -132,7 +154,7 @@ class NavidromeService {
   async clearQueue(): Promise<void> {
     const url = `${config.apiURL}/api/queue`;
 
-    const response = await fetch(url, {
+    const response = await this.fetchWithTokenRefresh(url, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
