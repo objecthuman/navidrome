@@ -1,5 +1,5 @@
 export const config = {
-  apiURL: import.meta.env.VITE_NAVIDROME_API_URL || "http://localhost:4533",
+  apiURL: window.location.origin
 };
 
 export default config;

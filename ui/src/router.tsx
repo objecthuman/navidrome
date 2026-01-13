@@ -9,44 +9,49 @@ import { SearchPage } from "./pages/SearchPage";
 import { authService } from "./services/auth";
 
 // Create router configuration
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+      children: [
+        {
+          index: true,
+          element: (
+            <Navigate
+              to={authService.isAuthenticated() ? "/home" : "/login"}
+              replace
+            />
+          ),
+        },
+        {
+          path: "home",
+          element: <HomePage />,
+        },
+        {
+          path: "album/:albumId",
+          element: <AlbumPage />,
+        },
+        {
+          path: "artist/:artistId",
+          element: <ArtistPage />,
+        },
+        {
+          path: "search",
+          element: <SearchPage />,
+        },
+      ],
+    },
+    {
+      path: "/login",
+      element: <LoginPage />,
+    },
+    {
+      path: "/signup",
+      element: <SignupPage />,
+    },
+  ],
   {
-    path: "/",
-    element: <App />,
-    children: [
-      {
-        index: true,
-        element: (
-          <Navigate
-            to={authService.isAuthenticated() ? "/home" : "/login"}
-            replace
-          />
-        ),
-      },
-      {
-        path: "home",
-        element: <HomePage />,
-      },
-      {
-        path: "album/:albumId",
-        element: <AlbumPage />,
-      },
-      {
-        path: "artist/:artistId",
-        element: <ArtistPage />,
-      },
-      {
-        path: "search",
-        element: <SearchPage />,
-      },
-    ],
+    basename: "/app",
   },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/signup",
-    element: <SignupPage />,
-  },
-]);
+);
