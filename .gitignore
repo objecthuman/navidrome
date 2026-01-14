@@ -25,7 +25,6 @@ docker-compose.yml
 !contrib/docker-compose.yml
 binaries
 navidrome-*
-AGENTS.md
 .github/prompts
 .github/instructions
 .github/git-commit-instructions.md
