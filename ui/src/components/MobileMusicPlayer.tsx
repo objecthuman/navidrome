@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Play, Pause, Heart } from "lucide-react";
+import { Button } from "./ui/8bit/button";
 
 interface Song {
   id: string;
@@ -88,7 +89,7 @@ export function MobileMusicPlayer({
   const progressPercent = (currentTime / duration) * 100;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-zinc-800 z-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-zinc-900 border-t-4 border-foreground/30 dark:border-ring/30 z-50">
       {/* Background Progress Bar */}
       <div
         className="absolute bottom-0 left-0 top-0 transition-all duration-300 ease-out"
@@ -103,43 +104,45 @@ export function MobileMusicPlayer({
         {/* Left - Like Button & Play/Pause */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Like Button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onToggleLike}
-            className={`p-2 rounded-full transition-colors cursor-pointer ${
-              isLiked ? "text-red-500" : "text-zinc-400 hover:bg-zinc-800/50"
-            }`}
+            className={isLiked ? "text-red-500" : "text-zinc-400"}
             aria-label={isLiked ? "Unlike" : "Like"}
             title={isLiked ? "Unlike" : "Like"}
           >
             <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
-          </button>
+          </Button>
 
           {/* Play/Pause Button */}
-          <button
+          <Button
+            variant="default"
+            size="icon"
             onClick={onTogglePlay}
-            className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0 cursor-pointer"
+            className="bg-violet-500 hover:bg-violet-600 flex-shrink-0"
             aria-label={isPlaying ? "Pause" : "Play"}
             title={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-5 h-5 text-white fill-white" />
+              <Pause className="w-5 h-5 fill-white" />
             ) : (
-              <Play className="w-5 h-5 text-white fill-white" />
+              <Play className="w-5 h-5 fill-white" />
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Center - Song Info */}
         <div className="flex-1 min-w-0 mx-2 cursor-pointer" onClick={onExpand}>
-          <p className="text-xs text-zinc-400 truncate">{currentSong.artist}</p>
-          <h4 className="font-semibold text-sm text-white truncate">
+          <p className="text-xs text-zinc-400 truncate retro">{currentSong.artist}</p>
+          <h4 className="font-semibold text-sm text-white truncate retro">
             {currentSong.title}
           </h4>
         </div>
 
         {/* Right - Cover Art */}
         <div
-          className="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 shadow-lg cursor-pointer"
+          className="w-12 h-12 border-2 border-foreground/30 dark:border-ring/30 overflow-hidden bg-zinc-800 cursor-pointer"
           onClick={onExpand}
         >
           <img

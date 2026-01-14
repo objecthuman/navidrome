@@ -175,7 +175,7 @@ function App() {
 
   return (
     <AppProvider value={contextValue}>
-      <div className="min-h-screen bg-zinc-950 text-white">
+      <div className="min-h-screen bg-zinc-950 text-white retro">
         <Navbar
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={handleToggleSidebar}

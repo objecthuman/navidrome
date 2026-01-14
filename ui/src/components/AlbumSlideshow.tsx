@@ -6,6 +6,7 @@ import type { SubsonicAlbum } from "../services/subsonic";
 import { useApp } from "../contexts/AppContext";
 import { usePlayAlbum } from "../hooks/usePlayAlbum";
 import { Vibrant } from "node-vibrant/browser";
+import { Button } from "./ui/8bit/button";
 
 interface AlbumWithColor extends SubsonicAlbum {
   dominantColor: string;
@@ -121,13 +122,13 @@ export function AlbumSlideshow() {
     return (
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl md:text-2xl font-bold">Discover</h2>
+          <h2 className="text-xl md:text-2xl font-bold retro">Discover</h2>
         </div>
         <div className="flex gap-4 overflow-hidden">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-48 md:w-56 h-80 bg-zinc-900 rounded-2xl overflow-hidden animate-pulse"
+              className="flex-shrink-0 w-48 md:w-56 h-80 bg-zinc-900 border-4 border-foreground/20 dark:border-ring/20 overflow-hidden animate-pulse"
             >
               <div className="aspect-square bg-zinc-800"></div>
             </div>
@@ -144,24 +145,26 @@ export function AlbumSlideshow() {
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">Discover</h2>
+        <h2 className="text-xl md:text-2xl font-bold retro">Discover</h2>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={() => scroll("left")}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors cursor-pointer"
             aria-label="Scroll left"
             title="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={() => scroll("right")}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full transition-colors cursor-pointer"
             aria-label="Scroll right"
             title="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -184,7 +187,7 @@ export function AlbumSlideshow() {
         {albums.map((album) => (
           <div
             key={`discover-${album.id}`}
-            className="flex-shrink-0 w-48 md:w-56 h-80 rounded-2xl overflow-hidden group cursor-pointer relative shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col"
+            className="flex-shrink-0 w-48 md:w-56 h-80 group cursor-pointer relative border-4 border-foreground dark:border-ring flex flex-col"
             style={{ backgroundColor: album.dominantColor }}
             onClick={() => onNavigateToAlbum(album.id)}
           >
@@ -193,7 +196,7 @@ export function AlbumSlideshow() {
 
             {/* Album Name - Top */}
             <div className="relative z-10 pt-5 px-4 shrink-0">
-              <h3 className="font-bold text-base md:text-lg text-white drop-shadow-lg line-clamp-2 leading-tight">
+              <h3 className="font-bold text-base md:text-lg text-white drop-shadow-lg line-clamp-2 leading-tight retro">
                 {album.name}
               </h3>
             </div>
@@ -206,7 +209,7 @@ export function AlbumSlideshow() {
               <img
                 src={subsonicService.getCoverArtUrl(album.coverArt, 400)}
                 alt={album.name}
-                className="w-full h-36 md:h-40 object-cover rounded-xl shadow-2xl transform group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-36 md:h-40 object-cover border-2 border-foreground/50 dark:border-ring/50 transform group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
               />
             </div>
@@ -218,7 +221,7 @@ export function AlbumSlideshow() {
             <div className="relative z-10 px-4 pb-5 pt-3 shrink-0 flex items-end justify-between">
               <div className="flex-1 min-w-0 pr-2">
                 <p
-                  className="text-sm md:text-base text-white/90 font-medium drop-shadow-md truncate cursor-pointer hover:text-white transition-colors"
+                  className="text-sm md:text-base text-white/90 font-medium drop-shadow-md truncate cursor-pointer hover:text-white transition-colors retro"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (album.artistId) {
@@ -231,22 +234,24 @@ export function AlbumSlideshow() {
                   {album.artist}
                 </p>
                 {album.year && (
-                  <p className="text-xs text-white/70 drop-shadow-md">
+                  <p className="text-xs text-white/70 drop-shadow-md retro">
                     {album.year}
                   </p>
                 )}
               </div>
-              <button
+              <Button
+                variant="default"
+                size="icon-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   playAlbum(album.id);
                 }}
-                className="p-3 bg-violet-500 hover:bg-violet-600 rounded-full shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0 cursor-pointer"
+                className="transform scale-0 group-hover:scale-100 transition-transform duration-300 shrink-0 bg-violet-500 hover:bg-violet-600"
                 aria-label="Play album"
                 title="Play album"
               >
-                <Play className="w-5 h-5 text-white fill-white" />
-              </button>
+                <Play className="w-4 h-4 fill-white" />
+              </Button>
             </div>
           </div>
         ))}

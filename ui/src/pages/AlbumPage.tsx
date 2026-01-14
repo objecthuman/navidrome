@@ -6,6 +6,7 @@ import { navidromeService } from "../services/navidrome";
 import type { SubsonicAlbumInfo, SubsonicAlbum } from "../services/subsonic";
 import { useApp } from "../contexts/AppContext";
 import { Vibrant } from "node-vibrant/browser";
+import { Button } from "../components/ui/8bit/button";
 
 interface Song {
   id: string;
@@ -176,32 +177,32 @@ export function AlbumPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
-        <div className="text-zinc-400">Loading album...</div>
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center retro">
+        <div className="text-zinc-400 retro">Loading album...</div>
       </div>
     );
   }
 
   if (error || !album) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
-        <div className="text-red-400">{error || "Album not found"}</div>
+      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center retro">
+        <div className="text-red-400 retro">{error || "Album not found"}</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-zinc-950 text-white pb-24 md:pb-8">
+    <div className="bg-zinc-950 text-white pb-24 md:pb-8 retro">
       {/* Album Info */}
       <div
-        className="px-4 md:px-6 py-8"
+        className="px-4 md:px-6 py-8 border-b-4 border-foreground/30 dark:border-ring/30"
         style={{
           background: `linear-gradient(to bottom, ${dominantColor} 0%, ${dominantColor}40 40%, transparent 100%)`,
         }}
       >
         <div className="flex flex-col md:flex-row gap-6 items-start">
           {/* Cover Art */}
-          <div className="w-48 h-48 md:w-56 md:h-56 rounded-xl overflow-hidden shadow-2xl bg-zinc-800 flex-shrink-0">
+          <div className="w-48 h-48 md:w-56 md:h-56 border-4 border-foreground/50 dark:border-ring/50 overflow-hidden shadow-2xl bg-zinc-800 flex-shrink-0">
             {albumInfo?.mediumImageUrl ? (
               <img
                 src={albumInfo.mediumImageUrl}
@@ -210,7 +211,7 @@ export function AlbumPage() {
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
-                <span className="text-6xl font-bold text-white/30">
+                <span className="text-6xl font-bold text-white/30 retro">
                   {album.name.charAt(0)}
                 </span>
               </div>
@@ -221,11 +222,11 @@ export function AlbumPage() {
           <div className="flex-1 pb-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 retro">
                   {album.name}
                 </h2>
                 <p
-                  className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3"
+                  className="text-lg text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer mb-3 retro"
                   onClick={() => {
                     if (album.artistId) {
                       navigate(`/artist/${album.artistId}`);
@@ -238,16 +239,16 @@ export function AlbumPage() {
                 </p>
 
                 {/* Metadata */}
-                <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500 retro">
                   {album.year && <span>{album.year}</span>}
-                  {album.year && <span>•</span>}
+                  {album.year && <span className="border border-foreground/30 dark:border-ring/30 w-1 h-1"></span>}
                   <span>{album.songCount} songs</span>
-                  <span>•</span>
+                  <span className="border border-foreground/30 dark:border-ring/30 w-1 h-1"></span>
                   <span>{formatDuration(album.duration)}</span>
                   {album.genre && (
                     <>
-                      <span>•</span>
-                      <span className="px-2 py-0.5 bg-zinc-800 rounded-full text-zinc-400">
+                      <span className="border border-foreground/30 dark:border-ring/30 w-1 h-1"></span>
+                      <span className="px-2 py-0.5 border-2 border-foreground/30 dark:border-ring/30 text-zinc-400">
                         {album.genre}
                       </span>
                     </>
@@ -256,14 +257,16 @@ export function AlbumPage() {
               </div>
 
               {/* Play Button */}
-              <button
+              <Button
+                variant="default"
+                size="icon"
                 onClick={handlePlayAll}
-                className="flex-shrink-0 p-4 bg-violet-500 hover:bg-violet-600 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl cursor-pointer"
+                className="flex-shrink-0 bg-violet-500 hover:bg-violet-600"
                 aria-label="Play album"
                 title="Play album"
               >
-                <Play className="w-6 h-6 text-white fill-white" />
-              </button>
+                <Play className="w-6 h-6 fill-white" />
+              </Button>
             </div>
           </div>
         </div>
@@ -271,10 +274,10 @@ export function AlbumPage() {
 
       {/* Album Description */}
       {albumInfo?.notes && (
-        <div className="px-4 md:px-6 py-6 border-b border-zinc-800">
-          <h3 className="text-lg font-semibold mb-3">About this album</h3>
+        <div className="px-4 md:px-6 py-6 border-b-4 border-foreground/20 dark:border-ring/20">
+          <h3 className="text-lg font-semibold mb-3 retro">About this album</h3>
           <div
-            className="prose prose-invert max-w-none text-zinc-400 text-sm leading-relaxed"
+            className="prose prose-invert max-w-none text-zinc-400 text-sm leading-relaxed retro"
             dangerouslySetInnerHTML={{
               __html: albumInfo.notes.replace(
                 /<a href="https:\/\/www\.last\.fm[^"]*"[^>]*>Read more on Last\.fm[^<]*<\/a>/gi,
@@ -287,7 +290,7 @@ export function AlbumPage() {
               href={albumInfo.lastFmUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block mt-3 text-violet-400 hover:text-violet-300 text-sm transition-colors"
+              className="inline-block mt-3 text-violet-400 hover:text-violet-300 text-sm transition-colors retro"
             >
               Read more on Last.fm →
             </a>
@@ -299,23 +302,24 @@ export function AlbumPage() {
       <div className="px-4 md:px-6 py-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold">Tracks</h3>
+            <h3 className="text-lg font-semibold retro">Tracks</h3>
             {selectedSongs.size > 0 && (
-              <span className="text-sm text-violet-400 font-medium">
+              <span className="text-sm text-violet-400 font-medium retro">
                 {selectedSongs.size} selected
               </span>
             )}
           </div>
           <div className="flex items-center gap-3">
-            <button
+            <Button
+              variant="link"
               onClick={toggleSelectAll}
-              className="text-sm text-zinc-400 hover:text-violet-400 transition-colors cursor-pointer"
+              className="text-sm retro"
             >
               {selectedSongs.size === album?.song?.length
                 ? "Deselect All"
                 : "Select All"}
-            </button>
-            <span className="text-sm text-zinc-500">
+            </Button>
+            <span className="text-sm text-zinc-500 retro">
               {album.songCount} songs
             </span>
           </div>
@@ -325,10 +329,10 @@ export function AlbumPage() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-zinc-800">
+              <tr className="border-b-2 border-foreground/20 dark:border-ring/20">
                 <th className="hidden md:table-cell w-10 px-3 py-2 text-left">
                   <div
-                    className="w-4 h-4 rounded border border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer hover:border-zinc-500"
+                    className="w-4 h-4 border-2 border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer hover:border-zinc-500"
                     onClick={toggleSelectAll}
                     style={{
                       borderColor:
@@ -354,25 +358,25 @@ export function AlbumPage() {
                   </div>
                 </th>
                 <th className="w-16 px-3 py-2 text-center">
-                  <span className="text-xs text-zinc-500 font-medium">#</span>
+                  <span className="text-xs text-zinc-500 font-medium retro">#</span>
                 </th>
                 <th className="px-3 py-2 text-left">
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-zinc-500 font-medium retro">
                     Title
                   </span>
                 </th>
                 <th className="hidden md:table-cell w-28 px-3 py-2 text-right">
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-zinc-500 font-medium retro">
                     Quality
                   </span>
                 </th>
                 <th className="w-24 px-3 py-2 text-right">
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-zinc-500 font-medium retro">
                     Duration
                   </span>
                 </th>
                 <th className="w-20 px-3 py-2 text-right">
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-zinc-500 font-medium retro">
                     Actions
                   </span>
                 </th>
@@ -392,7 +396,7 @@ export function AlbumPage() {
                     {/* Checkbox */}
                     <td className="hidden md:table-cell px-3 py-2">
                       <div
-                        className="w-4 h-4 rounded border border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer"
+                        className="w-4 h-4 border-2 border-zinc-600 transition-all duration-200 flex items-center justify-center cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleSongSelection(song.id);
@@ -414,7 +418,7 @@ export function AlbumPage() {
 
                     {/* Track Number */}
                     <td className="px-3 py-2 text-center">
-                      <span className="text-xs text-zinc-500 group-hover:hidden">
+                      <span className="text-xs text-zinc-500 group-hover-hidden retro">
                         {index + 1}
                       </span>
                       <Play className="w-3 h-3 text-zinc-400 hidden group-hover:block mx-auto" />
@@ -424,7 +428,7 @@ export function AlbumPage() {
                     <td className="px-3 py-2">
                       <div className="min-w-0">
                         <h4
-                          className={`text-sm truncate transition-colors ${
+                          className={`text-sm truncate transition-colors retro ${
                             isSelected
                               ? "text-violet-300"
                               : "text-white group-hover:text-violet-300"
@@ -434,7 +438,7 @@ export function AlbumPage() {
                         </h4>
                         {song.artist && song.artist !== album.artist && (
                           <p
-                            className="text-xs text-zinc-500 truncate hover:text-violet-400 transition-colors cursor-pointer"
+                            className="text-xs text-zinc-500 truncate hover:text-violet-400 transition-colors cursor-pointer retro"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(
@@ -450,14 +454,14 @@ export function AlbumPage() {
 
                     {/* Quality */}
                     <td className="hidden md:table-cell px-3 py-2 text-right">
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-zinc-500 retro">
                         {formatQuality(song)}
                       </span>
                     </td>
 
                     {/* Duration */}
                     <td className="px-3 py-2 text-right">
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-zinc-500 retro">
                         {formatTime(song.duration)}
                       </span>
                     </td>
@@ -466,15 +470,17 @@ export function AlbumPage() {
                     <td className="px-3 py-2">
                       <div className="flex items-center justify-end gap-2">
                         {/* Like Button */}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleLike(song.id);
                           }}
-                          className={`hidden md:block p-1 rounded-full transition-all duration-200 cursor-pointer ${
+                          className={`hidden md:block ${
                             likedSongs.has(song.id)
-                              ? "text-red-500 hover:bg-red-500/10"
-                              : "text-zinc-400 hover:bg-zinc-800"
+                              ? "text-red-500"
+                              : "text-zinc-400"
                           }`}
                           aria-label={
                             likedSongs.has(song.id)
@@ -490,31 +496,33 @@ export function AlbumPage() {
                           <Heart
                             className={`w-3 h-3 ${likedSongs.has(song.id) ? "fill-current" : ""}`}
                           />
-                        </button>
+                        </Button>
 
                         {/* More Options Button */}
                         <div className="relative">
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleMenu(song.id);
                             }}
-                            className="p-1 rounded-full transition-all duration-200 cursor-pointer text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                            className="text-zinc-400 hover:text-zinc-200 opacity-100 md:opacity-0 md:group-hover:opacity-100"
                             aria-label="More options"
                             title="More options"
                           >
                             <MoreVertical className="w-3 h-3" />
-                          </button>
+                          </Button>
 
                           {/* Dropdown Menu */}
                           {openMenuId === song.id && (
                             <div
-                              className="absolute right-0 top-full mt-1 w-40 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50"
+                              className="absolute right-0 top-full mt-1 w-40 bg-zinc-800 border-4 border-foreground/50 dark:border-ring/50 shadow-xl z-50"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <div className="py-1">
                                 <button
-                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer flex items-center gap-2 retro"
                                   onClick={() => {
                                     toggleLike(song.id);
                                     setOpenMenuId(null);
@@ -529,9 +537,9 @@ export function AlbumPage() {
                                       : "Add to favourites"}
                                   </span>
                                 </button>
-                                <div className="border-t border-zinc-700 my-1"></div>
+                                <div className="border-t-2 border-foreground/20 dark:border-ring/20 my-1"></div>
                                 <button
-                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer retro"
                                   onClick={() => {
                                     console.log("Add to playlist:", song.id);
                                     setOpenMenuId(null);
@@ -540,7 +548,7 @@ export function AlbumPage() {
                                   Add to playlist
                                 </button>
                                 <button
-                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer retro"
                                   onClick={() => {
                                     console.log("Add to queue:", song.id);
                                     setOpenMenuId(null);
@@ -549,7 +557,7 @@ export function AlbumPage() {
                                   Add to queue
                                 </button>
                                 <button
-                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer"
+                                  className="w-full px-4 py-2 text-left text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors cursor-pointer retro"
                                   onClick={() => {
                                     console.log("Download:", song.id);
                                     setOpenMenuId(null);

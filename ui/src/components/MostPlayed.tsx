@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { subsonicService } from "../services/subsonic";
 import type { SubsonicAlbum } from "../services/subsonic";
 import { usePlayAlbum } from "../hooks/usePlayAlbum";
+import { Button } from "./ui/8bit/button";
 
 const ALBUMS_PER_PAGE = 20;
 
@@ -142,17 +143,17 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
     return (
       <div className="w-full mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl md:text-2xl font-bold">Most Played</h2>
+          <h2 className="text-xl md:text-2xl font-bold retro">Most Played</h2>
         </div>
         <div className="flex gap-4 overflow-hidden">
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="flex-shrink-0 w-44 md:w-52 bg-zinc-900/50 backdrop-blur rounded-2xl p-3 animate-pulse"
+              className="flex-shrink-0 w-44 md:w-52 bg-zinc-900/50 backdrop-blur border-4 border-foreground/20 dark:border-ring/20 p-3 animate-pulse"
             >
-              <div className="aspect-square bg-zinc-800 rounded-xl mb-3"></div>
-              <div className="h-4 bg-zinc-800 rounded mb-2"></div>
-              <div className="h-3 bg-zinc-800 rounded w-3/4"></div>
+              <div className="aspect-square bg-zinc-800 border-2 border-foreground/10 dark:border-ring/10 mb-3"></div>
+              <div className="h-4 bg-zinc-800 rounded-none mb-2"></div>
+              <div className="h-3 bg-zinc-800 rounded-none w-3/4"></div>
             </div>
           ))}
         </div>
@@ -167,24 +168,26 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold">Most Played</h2>
+        <h2 className="text-xl md:text-2xl font-bold retro">Most Played</h2>
         <div className="flex gap-2">
-          <button
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={() => scroll("left")}
-            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
             aria-label="Scroll left"
             title="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={() => scroll("right")}
-            className="p-2 bg-zinc-800/80 backdrop-blur hover:bg-zinc-700 rounded-full transition-all duration-300 hover:scale-110 cursor-pointer"
             aria-label="Scroll right"
             title="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -213,11 +216,10 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
             }}
           >
             <div
-              className="relative bg-gradient-to-br from-zinc-900 to-zinc-800/80 backdrop-blur rounded-2xl p-3
+              className="relative bg-gradient-to-br from-zinc-900 to-zinc-800/80 backdrop-blur border-4 border-foreground/30 dark:border-ring/30 p-3
                 transition-all duration-500 ease-out
                 hover:shadow-2xl hover:shadow-violet-500/10
                 hover:-translate-y-2
-                border border-zinc-800/50 hover:border-violet-500/30
                 cursor-pointer"
               onClick={() => {
                 if (onAlbumClick) {
@@ -226,7 +228,7 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
               }}
             >
               {/* Album Cover */}
-              <div className="relative aspect-square mb-3 rounded-xl overflow-hidden bg-zinc-800">
+              <div className="relative aspect-square mb-3 border-2 border-foreground/20 dark:border-ring/20 overflow-hidden bg-zinc-800">
                 <img
                   src={subsonicService.getCoverArtUrl(album.coverArt, 300)}
                   alt={album.name}
@@ -241,22 +243,20 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
                   opacity-0 group-hover:opacity-100 transition-opacity duration-300
                   flex items-center justify-center"
                 >
-                  <button
+                  <Button
+                    variant="default"
+                    size="icon-lg"
                     onClick={(e) => {
                       e.stopPropagation();
                       playAlbum(album.id);
                     }}
-                    className="p-4 bg-violet-500/90 backdrop-blur hover:bg-violet-500
-                      rounded-full shadow-lg shadow-violet-500/50
-                      transform scale-0 group-hover:scale-100
-                      transition-all duration-500 ease-out
-                      hover:scale-110 hover:shadow-violet-500/70
-                      group-active:scale-95 cursor-pointer"
+                    className="transform scale-0 group-hover:scale-100
+                      transition-all duration-500 ease-out bg-violet-500/90 hover:bg-violet-500"
                     aria-label="Play album"
                     title="Play album"
                   >
-                    <Play className="w-6 h-6 text-white fill-white" />
-                  </button>
+                    <Play className="w-6 h-6 fill-white" />
+                  </Button>
                 </div>
 
                 {/* Decorative music icon on hover */}
@@ -270,13 +270,13 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
               {/* Album Info */}
               <div className="space-y-1">
                 <h3
-                  className="font-semibold text-sm text-white truncate pr-2
+                  className="font-semibold text-sm text-white truncate pr-2 retro
                   group-hover:text-violet-400 transition-colors duration-300"
                 >
                   {album.name}
                 </h3>
                 <p
-                  className="text-xs text-zinc-400 truncate group-hover:text-violet-300 transition-colors duration-300 cursor-pointer"
+                  className="text-xs text-zinc-400 truncate group-hover:text-violet-300 transition-colors duration-300 cursor-pointer retro"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (album.artistId) {
@@ -292,16 +292,16 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
                 <div className="flex items-center gap-1 mt-1 min-h-[1.25rem]">
                   {album.year ? (
                     <>
-                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
+                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 retro">
                         {album.year}
                       </span>
-                      <span className="w-1 h-1 rounded-full bg-zinc-600 group-hover:bg-violet-500 transition-colors duration-300"></span>
-                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
+                      <span className="w-1 h-1 border border-foreground/50 dark:border-ring/50 bg-transparent group-hover:bg-violet-500 transition-colors duration-300"></span>
+                      <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 retro">
                         {album.songCount ?? 0} tracks
                       </span>
                     </>
                   ) : (
-                    <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300">
+                    <span className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors duration-300 retro">
                       {album.songCount ?? 0} tracks
                     </span>
                   )}
@@ -310,7 +310,7 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
 
               {/* Subtle glow effect */}
               <div
-                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/0 to-fuchsia-500/0
+                className="absolute inset-0 bg-gradient-to-br from-violet-500/0 to-fuchsia-500/0
                 group-hover:from-violet-500/5 group-hover:to-fuchsia-500/5
                 transition-all duration-700 ease-out
                 pointer-events-none -z-10 blur-xl"
@@ -324,11 +324,11 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
           [...Array(5)].map((_, i) => (
             <div
               key={`loading-${i}`}
-              className="flex-shrink-0 w-44 md:w-52 bg-zinc-900/50 backdrop-blur rounded-2xl p-3 animate-pulse"
+              className="flex-shrink-0 w-44 md:w-52 bg-zinc-900/50 backdrop-blur border-4 border-foreground/20 dark:border-ring/20 p-3 animate-pulse"
             >
-              <div className="aspect-square bg-zinc-800 rounded-xl mb-3"></div>
-              <div className="h-4 bg-zinc-800 rounded mb-2"></div>
-              <div className="h-3 bg-zinc-800 rounded w-3/4"></div>
+              <div className="aspect-square bg-zinc-800 border-2 border-foreground/10 dark:border-ring/10 mb-3"></div>
+              <div className="h-4 bg-zinc-800 rounded-none mb-2"></div>
+              <div className="h-3 bg-zinc-800 rounded-none w-3/4"></div>
             </div>
           ))}
 
@@ -340,10 +340,10 @@ export function MostPlayed({ onAlbumClick }: MostPlayedProps) {
 
       {/* End message */}
       {!hasMore && albums.length > 0 && (
-        <div className="text-center text-zinc-500 text-sm mt-2 flex items-center justify-center gap-2">
-          <span className="w-8 h-px bg-zinc-700"></span>
+        <div className="text-center text-zinc-500 text-sm mt-2 flex items-center justify-center gap-2 retro">
+          <span className="w-8 h-px bg-foreground/20 dark:bg-ring/20"></span>
           <span>You've reached the end</span>
-          <span className="w-8 h-px bg-zinc-700"></span>
+          <span className="w-8 h-px bg-foreground/20 dark:bg-ring/20"></span>
         </div>
       )}
 

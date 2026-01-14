@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, FormEvent, useEffect, useRef } from "react";
+import { Button } from "./ui/8bit/button";
+import { Input } from "./ui/8bit/input";
 
 interface NavbarProps {
   isSidebarCollapsed: boolean;
@@ -83,96 +85,108 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
         {/* Sidebar Toggle & Home Button - Left */}
         <div className="flex items-center gap-1">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onToggleSidebar}
-            className="p-1 hover:bg-zinc-800 rounded transition-colors cursor-pointer"
             aria-label="Toggle sidebar"
             title="Toggle sidebar"
           >
             {isSidebarCollapsed ? (
-              <ChevronRight className="w-5 h-5 text-zinc-300" />
+              <ChevronRight className="w-5 h-5" />
             ) : (
-              <ChevronLeft className="w-5 h-5 text-zinc-300" />
+              <ChevronLeft className="w-5 h-5" />
             )}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => navigate("/home")}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             aria-label="Go to home"
             title="Go to home"
           >
-            <Home className="w-5 h-5 text-zinc-300" />
-          </button>
+            <Home className="w-5 h-5" />
+          </Button>
         </div>
 
         {/* Search Bar - Center */}
         <div className="flex-1 max-w-xl mx-4 md:mx-8 flex items-center gap-2">
           {/* Left Navigation Arrow - Desktop Only */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleGoBack}
-            className="hidden md:flex p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+            className="hidden md:flex"
             aria-label="Go back"
             title="Go back"
           >
-            <ArrowLeft className="w-4 h-4 text-zinc-400 hover:text-zinc-300" />
-          </button>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
 
           {/* Search Input */}
           <form onSubmit={handleSearch} className="relative group flex-1">
             <button
               type="button"
               onClick={handleSearchIconClick}
-              className="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer"
+              className="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer z-10"
               aria-label="Search"
             >
               <Search className="w-4 h-4 text-zinc-400 group-focus-within:text-violet-400 transition-colors" />
             </button>
-            <input
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search tracks, artists, albums..."
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-zinc-500"
+              className="pl-10 pr-4 text-sm bg-zinc-800"
             />
           </form>
 
           {/* Right Navigation Arrow - Desktop Only */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleGoForward}
-            className="hidden md:flex p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
+            className="hidden md:flex"
             aria-label="Go forward"
             title="Go forward"
           >
-            <ArrowRight className="w-4 h-4 text-zinc-400 hover:text-zinc-300" />
-          </button>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Action Icons - Right */}
         <div className="flex items-center gap-1 md:gap-2">
-          <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative group"
             aria-label="Add music to server"
             title="Add music to server"
           >
-            <Plus className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
-          </button>
+            <Plus className="w-5 h-5 group-hover:text-violet-400 transition-colors" />
+          </Button>
 
-          <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative group"
             aria-label="Current activity"
             title="Current activity"
           >
-            <Activity className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
+            <Activity className="w-5 h-5 group-hover:text-violet-400 transition-colors" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-violet-500 rounded-full"></span>
-          </button>
+          </Button>
 
-          <button
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors relative group cursor-pointer"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative group"
             aria-label="User profile"
             title="User profile"
           >
-            <User className="w-5 h-5 text-zinc-300 group-hover:text-violet-400 transition-colors" />
-          </button>
+            <User className="w-5 h-5 group-hover:text-violet-400 transition-colors" />
+          </Button>
         </div>
       </div>
     </nav>
