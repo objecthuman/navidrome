@@ -52,6 +52,6 @@ export const router = createBrowserRouter(
     },
   ],
   {
-    basename: "/app",
+    basename: "/",
   },
 );

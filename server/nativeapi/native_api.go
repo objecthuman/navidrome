@@ -258,6 +258,9 @@ func getSongs(ds model.DataStore) http.HandlerFunc {
 			return
 		}
 
+		// Optional song_id to start from
+		songID := r.URL.Query().Get("song_id")
+
 		// Get user from context
 		user, ok := request.UserFrom(ctx)
 		if !ok {
@@ -279,10 +282,21 @@ func getSongs(ds model.DataStore) http.HandlerFunc {
 			return
 		}
 
+		// Find the current song index if song_id is provided
+		current := 0
+		if songID != "" {
+			for i, song := range songs {
+				if song.ID == songID {
+					current = i
+					break
+				}
+			}
+		}
+
 		// Create and save the queue to database
 		queue := &model.PlayQueue{
 			UserID:    user.ID,
-			Current:   0,       // Start from first song
+			Current:   current, // Start from specified song or first song
 			Position:  0,       // No playback position
 			ChangedBy: "album", // Mark as created from album
 			Items:     songs,
