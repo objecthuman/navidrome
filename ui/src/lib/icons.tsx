@@ -2,138 +2,92 @@
  * Pixel Icons wrapper
  * Uses HackerNoon pixel icon library via CSS classes (font-based)
  *
+ * Available icons from: https://github.com/hackernoon/pixel-icon-library
+ *
  * Usage:
- *   <IconName style={{ fontSize: 24, color: 'red' }} />
  *   <IconName className="w-5 h-5" />
- *   Renders: <span class="hn hn-icon-name" style="..."><i></i></span>
+ *   <IconName style={{ fontSize: 24, color: 'red' }} />
+ * Renders: <span class="hn hn-icon-name"><i></i></span>
  */
 
-export function Play(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-play"><i {...props} /></span>;
-}
+// Base available icons from library
+const createIcon = (iconName: string) => {
+  return function Icon(props: React.HTMLAttributes<HTMLSpanElement>) {
+    return <span className={`hn hn-${iconName}`}><i {...props} /></span>;
+  };
+};
 
-export function Pause(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-pause"><i {...props} /></span>;
-}
+// Media Control Icons
+export const Play = createIcon("play");
+export const Pause = createIcon("pause");
 
-export function Check(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-check"><i {...props} /></span>;
-}
+// Navigation Icons
+export const ChevronLeft = createIcon("angle-left");
+export const ChevronRight = createIcon("angle-right");
+export const ArrowLeft = createIcon("arrow-left");
+export const ArrowRight = createIcon("arrow-right");
 
-export function ChevronLeft(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-chevron-left"><i {...props} /></span>;
-}
+// Volume Icons
+export const Volume = createIcon("sound-on");
+export const VolumeX = createIcon("sound-mute");
+export const Volume1 = createIcon("sound-on");
+export const Volume2 = createIcon("sound-on");
 
-export function ChevronRight(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-chevron-right"><i {...props} /></span>;
-}
+// Action Icons
+export const Search = createIcon("search");
+export const Plus = createIcon("plus");
+export const X = createIcon("times");
+export const Check = createIcon("check");
 
-export function Clock(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-clock"><i {...props} /></span>;
-}
+// User & Account Icons
+export const User = createIcon("user");
+export const Lock = createIcon("lock");
+export const LockOpen = createIcon("lock-open");
 
-export function Disc(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-disc"><i {...props} /></span>;
-}
+// Content Icons
+export const Home = createIcon("home");
+export const Heart = createIcon("heart");
+export const Music = createIcon("music");
+export const Folder = createIcon("folder");
+export const FolderOpen = createIcon("folder-open");
+export const Library = createIcon("folder");
+export const Disc = createIcon("file-import");
 
-export function Heart(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-heart"><i {...props} /></span>;
-}
+// List & Layout Icons
+export const ListMusic = createIcon("playlist");
+export const CheckList = createIcon("check-list");
+export const BulletList = createIcon("bullet-list");
+export const NumberedList = createIcon("numbered-list");
 
-export function Library(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-library"><i {...props} /></span>;
-}
+// Time Icons
+export const Clock = createIcon("clock");
 
-export function ListMusic(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-list-music"><i {...props} /></span>;
-}
+// Media Control Extra
+export const Shuffle = createIcon("shuffle");
+export const SkipBack = createIcon("angle-left");
+export const SkipForward = createIcon("angle-right");
 
-export function Lock(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-lock"><i {...props} /></span>;
-}
+// Note: Repeat icon not available, using refresh as alternative
+export const Repeat = createIcon("refresh");
+export const Repeat1 = createIcon("refresh");
 
-export function Mic(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-mic"><i {...props} /></span>;
-}
+// Note: Chevron up/down only, using angles
+export const ChevronUp = createIcon("angle-up");
+export const ChevronDown = createIcon("angle-down");
 
-export function MoreVertical(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-more-vertical"><i {...props} /></span>;
-}
+// Note: More vertical not available, using ellipses
+export const MoreVertical = createIcon("ellipses-vertical");
+export const MoreHorizontal = createIcon("ellipses-horizontal");
 
-export function Music(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-music"><i {...props} /></span>;
-}
+// Note: Mic not available, using headphones
+export const Mic = createIcon("headphones");
 
-export function Trash(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-trash"><i {...props} /></span>;
-}
+// Note: Activity not available, using analytics
+export const Activity = createIcon("analytics");
 
-export const Trash2 = Trash;
+// Trash icons
+export const Trash = createIcon("trash");
+export const TrashAlt = createIcon("trash-alt");
+export const Trash2 = TrashAlt;
 
-export function User(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-user"><i {...props} /></span>;
-}
-
-export function X(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-x"><i {...props} /></span>;
-}
-
-export function Search(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-search"><i {...props} /></span>;
-}
-
-export function Plus(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-plus"><i {...props} /></span>;
-}
-
-export function Activity(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-activity"><i {...props} /></span>;
-}
-
-export function Home(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-home"><i {...props} /></span>;
-}
-
-export function ArrowLeft(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-arrow-left"><i {...props} /></span>;
-}
-
-export function ArrowRight(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-arrow-right"><i {...props} /></span>;
-}
-
-export function SkipBack(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-skip-back"><i {...props} /></span>;
-}
-
-export function SkipForward(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-skip-forward"><i {...props} /></span>;
-}
-
-export function Volume2(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-volume-2"><i {...props} /></span>;
-}
-
-export function Volume1(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-volume-1"><i {...props} /></span>;
-}
-
-export function VolumeX(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-volume-x"><i {...props} /></span>;
-}
-
-export function Volume(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-volume"><i {...props} /></span>;
-}
-
-export function Shuffle(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-shuffle"><i {...props} /></span>;
-}
-
-export function Repeat(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-repeat"><i {...props} /></span>;
-}
-
-export function Repeat1(props: React.HTMLAttributes<HTMLSpanElement>) {
-  return <span className="hn hn-repeat-1"><i {...props} /></span>;
-}
+// All icons exported directly, no aliases needed

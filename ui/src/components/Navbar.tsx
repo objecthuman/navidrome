@@ -106,8 +106,6 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
             title="Go to home"
           >
             <Home className="w-5 h-5" />
-            <i className="hn hn-github"></i>
-
           </Button>
         </div>
 
