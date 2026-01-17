@@ -1,4 +1,4 @@
-import { X, Play, Pause, Trash2 } from "lucide-react";
+import { X, Play, Pause, Trash2 } from "../lib/icons";
 import { subsonicService } from "../services/subsonic";
 import type { NavidromeQueueItem } from "../services/navidrome";
 import { Button } from "./ui/8bit/button";

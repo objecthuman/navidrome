@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Lock } from "lucide-react";
+import { User, Lock } from "../lib/icons";
 
 export function SignupPage() {
   const navigate = useNavigate();

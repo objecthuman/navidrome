@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Play, Music } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Music } from "../lib/icons";
 import { useNavigate } from "react-router-dom";
 import { subsonicService } from "../services/subsonic";
 import type { SubsonicAlbum } from "../services/subsonic";
