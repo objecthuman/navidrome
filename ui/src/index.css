@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import '@hackernoon/pixel-icon-library/fonts/iconfont.css';
+
 
 :root {
   font-family:

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Lock } from "lucide-react";
+import { User, Lock } from "../lib/icons";
 import { authService } from "../services/auth";
 import { Button } from "../components/ui/8bit/button";
 import { Input } from "../components/ui/8bit/input";

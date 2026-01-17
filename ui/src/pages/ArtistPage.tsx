@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Play } from "lucide-react";
+import { Play } from "../lib/icons";
 import { subsonicService } from "../services/subsonic";
 import type { SubsonicAlbum, SubsonicArtistInfo } from "../services/subsonic";
 import { useApp } from "../contexts/AppContext";

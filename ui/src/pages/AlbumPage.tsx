@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Play, Clock, Heart, Check, MoreVertical } from "lucide-react";
+import { Play, Clock, Heart, Check, MoreVertical } from "../lib/icons";
 import { subsonicService } from "../services/subsonic";
 import { navidromeService } from "../services/navidrome";
 import type { SubsonicAlbumInfo, SubsonicAlbum } from "../services/subsonic";

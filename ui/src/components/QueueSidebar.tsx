@@ -1,6 +1,7 @@
-import { X, Play, Pause, Trash2 } from "lucide-react";
+import { X, Play, Pause, Trash2 } from "../lib/icons";
 import { subsonicService } from "../services/subsonic";
 import type { NavidromeQueueItem } from "../services/navidrome";
+import { Button } from "./ui/8bit/button";
 
 interface QueueSidebarProps {
   isOpen: boolean;
@@ -39,23 +40,25 @@ export function QueueSidebar({
         <h2 className="text-xl font-bold text-white">Queue</h2>
         <div className="flex items-center gap-2">
           {queue.length > 0 && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClearQueue}
-              className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
               aria-label="Clear queue"
               title="Clear queue"
             >
               <Trash2 className="w-5 h-5 text-zinc-400 hover:text-red-400 transition-colors" />
-            </button>
+            </Button>
           )}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-full transition-colors cursor-pointer"
             aria-label="Close queue"
             title="Close queue"
           >
             <X className="w-5 h-5 text-zinc-400" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -163,18 +166,18 @@ export function QueueSidebar({
                   />
                   {/* Play button overlay on hover */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <button
+                    <Button
+                      variant="default"
+                      size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (song.id === currentSongId && isPlaying) {
-                          // Pause the current song
                           window.dispatchEvent(new CustomEvent("toggle-play"));
                         } else {
-                          // Play this song
                           onPlaySong(song.id);
                         }
                       }}
-                      className="p-2 bg-violet-500 hover:bg-violet-600 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300 cursor-pointer"
+                      className="transform scale-0 group-hover:scale-100 transition-transform duration-300"
                       aria-label={
                         song.id === currentSongId && isPlaying
                           ? "Pause song"
@@ -191,7 +194,7 @@ export function QueueSidebar({
                       ) : (
                         <Play className="w-4 h-4 text-white fill-white" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 

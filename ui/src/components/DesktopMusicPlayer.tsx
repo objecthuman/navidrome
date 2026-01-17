@@ -12,7 +12,7 @@ import {
   Mic,
   ListMusic,
   Heart,
-} from "lucide-react";
+} from "../lib/icons";
 import type { NavidromeQueueItem } from "../services/navidrome";
 import { subsonicService } from "../services/subsonic";
 import { Button } from "./ui/8bit/button";

@@ -8,7 +8,7 @@ import {
   Home,
   ArrowLeft,
   ArrowRight,
-} from "lucide-react";
+} from "../lib/icons";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { Button } from "./ui/8bit/button";
@@ -106,6 +106,8 @@ export function Navbar({ isSidebarCollapsed, onToggleSidebar }: NavbarProps) {
             title="Go to home"
           >
             <Home className="w-5 h-5" />
+            <i className="hn hn-github"></i>
+
           </Button>
         </div>
 
