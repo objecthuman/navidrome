@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, Heart } from "../lib/icons";
+import { Play, Pause, Heart } from "lucide-react";
 import { Button } from "./ui/8bit/button";
 
 interface Song {

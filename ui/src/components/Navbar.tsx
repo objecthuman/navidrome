@@ -8,7 +8,7 @@ import {
   Home,
   ArrowLeft,
   ArrowRight,
-} from "../lib/icons";
+} from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, FormEvent, useEffect, useRef } from "react";
 import { Button } from "./ui/8bit/button";

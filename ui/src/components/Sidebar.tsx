@@ -1,4 +1,4 @@
-import { Heart, Disc, Mic, ListMusic, Library } from "../lib/icons";
+import { Heart, Disc, Mic, ListMusic, Library } from "lucide-react";
 import { Button } from "./ui/8bit/button";
 
 interface SidebarProps {
