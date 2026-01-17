@@ -18,7 +18,6 @@
     "check-formatting": "prettier -c ./src"
   },
   "dependencies": {
-    "@2hoch1/pixel-icon-library-react": "^1.1.1",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "class-variance-authority": "^0.7.1",
