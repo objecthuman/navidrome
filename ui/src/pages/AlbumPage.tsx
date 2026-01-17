@@ -265,7 +265,7 @@ export function AlbumPage() {
                 aria-label="Play album"
                 title="Play album"
               >
-                <Play className="w-6 h-6 fill-white" />
+                <Play  />
               </Button>
             </div>
           </div>
